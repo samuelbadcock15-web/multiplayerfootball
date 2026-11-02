@@ -113,112 +113,6 @@
     #countdown-pill { margin-top: 6px; font-weight: bold; color: #ffda66; font-size: 0.95rem; }
     #match-clock-hud { margin-top: 4px; font-weight: bold; color: #00f0ff; font-size: 0.95rem; }
     #audience-pill { margin-top: 4px; font-weight: bold; color: #39ff14; }
-
-    /* LIVE IN-GAME CHAT HUD */
-    #live-hud-chat {
-      position: absolute; bottom: 20px; left: 20px; width: 340px; height: 190px;
-      background: rgba(10, 3, 20, 0.75); border: 1.5px solid #00f0ff;
-      border-radius: 10px; display: flex; flex-direction: column; z-index: 25;
-      backdrop-filter: blur(4px); pointer-events: auto;
-    }
-    #live-hud-chat-header {
-      padding: 5px 8px; font-size: 0.72rem; font-family: monospace; font-weight: bold;
-      color: #ffda66; border-bottom: 1px solid #331555; display: flex; justify-content: space-between;
-    }
-    #live-hud-chat-stream {
-      flex: 1; overflow-y: auto; padding: 6px; display: flex; flex-direction: column; gap: 4px; font-size: 0.74rem;
-    }
-
-    /* HOST MODERATION TRAY */
-    #mod-tray {
-      margin-top: 14px;
-      background: #0a0314;
-      border: 1.5px solid #a29bfe;
-      border-radius: 10px;
-      padding: 10px;
-      color: #fff;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      text-align: left;
-      cursor: default;
-    }
-    #mod-tray-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-size: 0.78rem;
-      font-weight: bold;
-      color: #ffda66;
-      border-bottom: 1px solid #331555;
-      padding-bottom: 6px;
-      margin-bottom: 6px;
-      font-family: monospace;
-    }
-    #mod-chat-stream {
-      height: 110px;
-      overflow-y: auto;
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-      font-size: 0.76rem;
-      padding-right: 4px;
-    }
-    .mod-chat-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      gap: 6px;
-      background: rgba(255, 255, 255, 0.04);
-      padding: 3px 6px;
-      border-radius: 4px;
-    }
-    .mod-chat-row.is-shadowbanned {
-      opacity: 0.5;
-      background: rgba(214, 48, 49, 0.15);
-      border-left: 2px solid #ff7675;
-    }
-    .author-clickable {
-      cursor: pointer;
-      text-decoration: underline;
-      font-weight: bold;
-    }
-    .author-clickable:hover {
-      color: #fffa65 !important;
-    }
-    .mod-btn-action {
-      background: #2b1154;
-      border: 1px solid #d4af37;
-      color: #ffda66;
-      font-size: 0.65rem;
-      font-family: monospace;
-      padding: 2px 5px;
-      border-radius: 4px;
-      cursor: pointer;
-      flex-shrink: 0;
-    }
-    .mod-btn-action:hover { background: #6c5ce7; }
-    .mod-controls-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-top: 6px;
-      padding-top: 6px;
-      border-top: 1px solid #331555;
-    }
-    .btn-emergency-mute {
-      background: #27ae60;
-      border: 1px solid #2ecc71;
-      color: #fff;
-      font-family: monospace;
-      font-size: 0.72rem;
-      padding: 4px 8px;
-      border-radius: 6px;
-      cursor: pointer;
-      font-weight: bold;
-    }
-    .btn-emergency-mute.muted-state {
-      background: #d63031;
-      border-color: #ff7675;
-    }
   </style>
 </head>
 <body>
@@ -240,16 +134,6 @@
     <div id="countdown-pill">BROADCAST STARTS IN: <span id="timer-val" style="color:#ff7675;">10s</span></div>
     <div id="match-clock-hud">SHOW CLOCK: <span id="game-clock-val" style="color:#ffda66;">20:00</span></div>
     <div id="audience-pill">AUDIENCE WATCHING: <span id="audience-count" style="color:#39ff14;">1</span></div>
-  </div>
-
-  <div id="live-hud-chat">
-    <div id="live-hud-chat-header">
-      <span>AUDIENCE STREAM</span>
-      <span style="color:#39ff14;">● ON AIR</span>
-    </div>
-    <div id="live-hud-chat-stream">
-      <div style="color:#888; font-style:italic;">Listening to studio chatter...</div>
-    </div>
   </div>
 
   <div id="blocker">
@@ -284,20 +168,6 @@
           <button id="btn-kick-p2" class="btn-producer" style="background: #c0392b; border-color: #e74c3c; font-size: 0.75rem; padding: 6px 12px;" onclick="event.stopPropagation(); ejectContestant('goody-contestant-2');">
             Kick Contestant 2
           </button>
-        </div>
-      </div>
-
-      <div id="mod-tray" onclick="event.stopPropagation();">
-        <div id="mod-tray-header">
-          <span>AUDIENCE CHAT MODERATOR</span>
-          <span id="mod-spectator-count" style="color:#39ff14;">0 SPECTATORS</span>
-        </div>
-        <div id="mod-chat-stream">
-          <div style="color:#888; font-style:italic;">No spectator messages yet.</div>
-        </div>
-        <div class="mod-controls-row">
-          <span style="font-size:0.72rem; color:#aaa;">Tripwire: <strong style="color:#39ff14;">ACTIVE</strong></span>
-          <button id="btn-toggle-all-chat" class="btn-emergency-mute" onclick="event.stopPropagation(); toggleGlobalAudienceChat()">CHAT: UNLOCKED</button>
         </div>
       </div>
 
@@ -1126,79 +996,6 @@
       if (isHostAuthorized) blockerEl.style.display = 'flex';
     });
 
-    const shadowbannedTokens = new Set();
-    const shadowbannedHardwareIds = new Set();
-    let isAudienceChatGlobalMuted = false;
-
-    const profanityTripwireRegex = /\b(fuck|shit|bitch|cunt|nigger|nigga|faggot|retard|whore|slut|pussy|dick|bastard|asshole)\b/i;
-
-    function isSenderShadowbanned(token, hardwareId) {
-      if (token && shadowbannedTokens.has(token)) return true;
-      if (hardwareId && shadowbannedHardwareIds.has(hardwareId)) return true;
-      return false;
-    }
-
-    function shadowbanSpectator(token, hardwareId, name) {
-      if (token) shadowbannedTokens.add(token);
-      if (hardwareId) shadowbannedHardwareIds.add(hardwareId);
-      addModeratorLog(`[SYSTEM] Shadowbanned ${name || 'Spectator'}. Messages dropped.`);
-    }
-
-    const modChatStream = document.getElementById('mod-chat-stream');
-    const liveHudChatStream = document.getElementById('live-hud-chat-stream');
-    const modSpectatorCount = document.getElementById('mod-spectator-count');
-    const btnToggleAllChat = document.getElementById('btn-toggle-all-chat');
-
-    function addModeratorLog(text) {
-      [modChatStream, liveHudChatStream].forEach(stream => {
-        const row = document.createElement('div');
-        row.style.color = '#ff7675';
-        row.style.fontSize = '0.70rem';
-        row.style.fontFamily = 'monospace';
-        row.textContent = text;
-        stream.appendChild(row);
-        stream.scrollTop = stream.scrollHeight;
-      });
-    }
-
-    function showSpectatorActionMenu(senderToken, senderHw, authorName, peerId) {
-      const choice = prompt(
-        `Moderation options for ${authorName}:\nType "MUTE" to shadowban/mute.\nType "KICK" to eject from studio.\nOr click Cancel.`,
-        "MUTE"
-      );
-      if (!choice) return;
-
-      const act = choice.trim().toUpperCase();
-      if (act === "MUTE") {
-        shadowbanSpectator(senderToken, senderHw, authorName);
-      } else if (act === "KICK") {
-        ejectSpectatorPeer(peerId, authorName);
-      }
-    }
-
-    function ejectSpectatorPeer(peerId, authorName) {
-      connectedDataConns.forEach(c => {
-        if (c.peer === peerId && c.open) {
-          c.send({ type: "HOST_EJECTED_SPECTATOR", message: "You were kicked by the studio director." });
-          setTimeout(() => { try { c.close(); } catch(e){} }, 200);
-        }
-      });
-      addModeratorLog(`[SYSTEM] Ejected spectator ${authorName}.`);
-    }
-
-    function toggleGlobalAudienceChat() {
-      isAudienceChatGlobalMuted = !isAudienceChatGlobalMuted;
-      if (isAudienceChatGlobalMuted) {
-        btnToggleAllChat.textContent = "CHAT: MUTED (ALL)";
-        btnToggleAllChat.className = "btn-emergency-mute muted-state";
-        addModeratorLog("[HOST] Audience chatroom locked.");
-      } else {
-        btnToggleAllChat.textContent = "CHAT: UNLOCKED";
-        btnToggleAllChat.className = "btn-emergency-mute";
-        addModeratorLog("[HOST] Audience chatroom unlocked.");
-      }
-    }
-
     let studioPeer = null;
     let connectedDataConns = [];
     const connectedAudiencePeers = new Set();
@@ -1367,75 +1164,6 @@
           });
 
           conn.on('data', (data) => {
-            if (data.type === "AUDIENCE_CHAT_MESSAGE") {
-              const senderToken = data.sessionToken;
-              const senderHw = data.hardwareId;
-              const authorName = data.author || "Guest";
-              const rawText = data.text || "";
-
-              const alreadyBanned = isSenderShadowbanned(senderToken, senderHw);
-              const tripsFilter = profanityTripwireRegex.test(rawText);
-
-              if (tripsFilter && !alreadyBanned) {
-                shadowbanSpectator(senderToken, senderHw, authorName);
-              }
-
-              const isShadowbanned = alreadyBanned || tripsFilter;
-
-              [modChatStream, liveHudChatStream].forEach(stream => {
-                const chatRow = document.createElement('div');
-                chatRow.className = `mod-chat-row ${isShadowbanned ? 'is-shadowbanned' : ''}`;
-
-                const textSpan = document.createElement('span');
-                const authorEl = document.createElement('span');
-                authorEl.className = 'author-clickable';
-                authorEl.style.color = isShadowbanned ? '#ff7675' : '#00f0ff';
-                authorEl.textContent = `${authorName}: `;
-                authorEl.title = "Click to Mute or Kick user";
-                authorEl.onclick = (e) => {
-                  e.stopPropagation();
-                  showSpectatorActionMenu(senderToken, senderHw, authorName, conn.peer);
-                };
-
-                textSpan.appendChild(authorEl);
-                textSpan.appendChild(document.createTextNode(rawText));
-                if (isShadowbanned) {
-                  const bTag = document.createElement('em');
-                  bTag.style.color = '#ff7675';
-                  bTag.textContent = ' [SHADOWBANNED]';
-                  textSpan.appendChild(bTag);
-                }
-                chatRow.appendChild(textSpan);
-
-                if (!isShadowbanned) {
-                  const banBtn = document.createElement('button');
-                  banBtn.className = 'mod-btn-action';
-                  banBtn.textContent = 'Mod';
-                  banBtn.onclick = (e) => {
-                    e.stopPropagation();
-                    showSpectatorActionMenu(senderToken, senderHw, authorName, conn.peer);
-                  };
-                  chatRow.appendChild(banBtn);
-                }
-
-                stream.appendChild(chatRow);
-                stream.scrollTop = stream.scrollHeight;
-              });
-
-              if (!isShadowbanned && !isAudienceChatGlobalMuted) {
-                connectedDataConns.forEach(c => {
-                  if (c.open && c.metadata && c.metadata.role === 'AUDIENCE') {
-                    c.send({
-                      type: "AUDIENCE_CHAT_BROADCAST",
-                      author: authorName,
-                      text: rawText
-                    });
-                  }
-                });
-              }
-              return;
-            }
-
             if (data.type === "SPECTATOR_MOVE") {
               connectedDataConns.forEach(c => {
                 if (c.open && c.metadata && c.metadata.role === 'AUDIENCE' && c.peer !== conn.peer) {
@@ -1537,7 +1265,6 @@
     function broadcastAudienceCount() {
       audienceCount = Math.max(1, connectedAudiencePeers.size + 1);
       audienceCountEl.textContent = audienceCount;
-      if (modSpectatorCount) modSpectatorCount.textContent = `${connectedAudiencePeers.size} SPECTATORS`;
 
       connectedDataConns.forEach(c => {
         if (c.open) c.send({ type: "AUDIENCE_COUNT", count: audienceCount });
