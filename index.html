@@ -615,18 +615,12 @@
 
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-
   <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/PointerLockControls.js"></script>
-
   <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
 
-
-
   <script>
-
-<script>
-    // Obfuscated Director PIN (3776) with Rate-Limiting Lockout
-    const SECURE_SIG = [135, 132, 137, 130];
+    // Master Director PIN (3776) with Rate-Limiting Lockout
+    const MASTER_DIRECTOR_PIN = "3776";
     let isHostAuthorized = false;
     let failedAttempts = parseInt(sessionStorage.getItem("host_pin_fails") || "0", 10);
     let lockoutUntil = parseInt(sessionStorage.getItem("host_pin_lockout") || "0", 10);
@@ -663,9 +657,8 @@
         return;
       }
 
-      // Mathematical verification: ASCII + 80
-      const isValid = entered.length === SECURE_SIG.length &&
-        Array.from(entered).every((char, i) => (char.charCodeAt(0) + 80) === SECURE_SIG[i]);
+      // Direct comparison against your Master PIN
+      const isValid = (entered === MASTER_DIRECTOR_PIN);
 
       if (isValid) {
         sessionStorage.removeItem("host_pin_fails");
