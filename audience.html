@@ -37,22 +37,23 @@
     }
 
     #stream-wrapper {
-      width: 100%; max-width: 600px; flex: 1; display: flex;
-      flex-direction: column; padding: 8px; gap: 6px; display: none;
+      width: 100%; max-width: 600px; height: 100%; display: none;
+      flex-direction: column; padding: 8px; gap: 6px;
     }
     .header-bar {
       display: flex; justify-content: space-between; align-items: center;
       background: #140728; padding: 6px 12px; border-radius: 8px;
-      font-family: monospace; font-size: 0.78rem; border: 1px solid #331555;
+      font-family: monospace; font-size: 0.78rem; border: 1px solid #331555; flex-shrink: 0;
     }
     #stage-viewport {
-      width: 100%; aspect-ratio: 16 / 9; background: #000;
-      border: 2px solid #ffda66; border-radius: 10px; overflow: hidden; position: relative;
+      width: 100%; width: 100%; aspect-ratio: 16 / 9; background: #000;
+      border: 2px solid #ffda66; border-radius: 10px; overflow: hidden;
+      position: relative; flex-shrink: 0;
     }
-    #studio-feed { width: 100%; height: 100%; object-fit: cover; }
+    #studio-feed { display: block; width: 100%; height: 100%; object-fit: cover; }
    
     #chat-box {
-      flex: 1; min-height: 180px; background: rgba(14, 5, 28, 0.92);
+      flex: 1; min-height: 120px; background: rgba(14, 5, 28, 0.92);
       border: 1.5px solid #a29bfe; border-radius: 10px; display: flex;
       flex-direction: column; overflow: hidden;
     }
@@ -64,7 +65,7 @@
     .chat-user { font-weight: bold; color: #00f0ff; font-family: monospace; }
     .chat-user.is-self { color: #39ff14; }
     .chat-input-bar {
-      display: flex; padding: 6px; background: #0b0318; border-top: 1px solid #331555; gap: 6px;
+      display: flex; padding: 6px; background: #0b0318; border-top: 1px solid #331555; gap: 6px; flex-shrink: 0;
     }
     #chat-input {
       flex: 1; background: #070212; border: 1px solid #a29bfe; border-radius: 6px;
@@ -98,7 +99,7 @@
     </div>
 
     <div id="stage-viewport">
-      <video id="studio-feed" autoplay playsinline></video>
+      <video id="studio-feed" autoplay playsinline muted></video>
     </div>
 
     <div id="chat-box">
@@ -116,6 +117,7 @@
   <script>
     let peer = null;
     let dataConn = null;
+    let activeCall = null;
     let spectatorName = "Spectator";
 
     let sessionToken = localStorage.getItem("goody_aud_token");
@@ -141,22 +143,11 @@
     const hardwareId = generateHardwareId();
 
     const baseProfanities = ["fuck", "shit", "bitch", "cunt", "nigger", "nigga", "faggot", "retard", "whore", "slut", "pussy", "dick", "bastard", "asshole"];
-
     function normalizeText(str) {
-      return str
-        .toLowerCase()
-        .replace(/[@4]/g, 'a')
-        .replace(/[1!|]/g, 'i')
-        .replace(/[0]/g, 'o')
-        .replace(/[3]/g, 'e')
-        .replace(/[$5]/g, 's')
-        .replace(/[+]/g, 't')
-        .replace(/[^a-z0-9]/g, '');
+      return str.toLowerCase().replace(/[@4]/g, 'a').replace(/[1!|]/g, 'i').replace(/[0]/g, 'o').replace(/[3]/g, 'e').replace(/[$5]/g, 's').replace(/[+]/g, 't').replace(/[^a-z0-9]/g, '');
     }
-
     function checkProfanityEvasion(text) {
-      const normalized = normalizeText(text);
-      return baseProfanities.some(bad => normalized.includes(bad));
+      return baseProfanities.some(bad => normalizeText(text).includes(bad));
     }
 
     const joinGate = document.getElementById('join-gate');
@@ -196,74 +187,59 @@
     }
 
     function connectToStudio(code) {
-  peer = new Peer();
+      peer = new Peer();
 
-  peer.on('open', () => {
-    const targetStudioId = "goody-studio-" + code;
-    console.log("Attempting to connect to studio:", targetStudioId);
+      peer.on('open', () => {
+        const targetStudioId = "goody-studio-" + code;
 
-    // 1. Establish Data Connection
-    dataConn = peer.connect(targetStudioId, {
-      metadata: { role: 'AUDIENCE', sessionToken: sessionToken, name: spectatorName }
-    });
+        dataConn = peer.connect(targetStudioId, {
+          metadata: { role: 'AUDIENCE', sessionToken: sessionToken, name: spectatorName }
+        });
 
-    dataConn.on('open', () => {
-      console.log("Connected to studio data channel successfully!");
-    });
+        dataConn.on('open', () => {
+          console.log("Data connection active.");
+        });
 
-    dataConn.on('data', (data) => {
-      if (data.type === "AUDIENCE_CHAT_BROADCAST") {
-        addMessage(data.author, data.text);
-      } else if (data.type === "SYNC_MATCH_TIMER") {
-        matchClockBadge.textContent = data.timeStr;
-      } else if (data.type === "HOST_EJECTED_SPECTATOR") {
-        alert(data.message || "You have been disconnected from the studio.");
-        location.reload();
-      }
-    });
+        dataConn.on('data', (data) => {
+          if (data.type === "AUDIENCE_CHAT_BROADCAST") {
+            addMessage(data.author, data.text);
+          } else if (data.type === "SYNC_MATCH_TIMER") {
+            matchClockBadge.textContent = data.timeStr;
+          } else if (data.type === "HOST_EJECTED_SPECTATOR") {
+            alert(data.message || "You have been disconnected.");
+            location.reload();
+          }
+        });
 
-    dataConn.on('error', (err) => {
-      console.error("Data connection error:", err);
-    });
+        // Guard against duplicate calls by closing any existing active call
+        peer.on('call', (incomingCall) => {
+          if (activeCall) activeCall.close();
+          activeCall = incomingCall;
 
-    // 2. Handle incoming media stream from Host
-    peer.on('call', (incomingCall) => {
-      console.log("Incoming media call received from host...");
-      incomingCall.answer(); // Answer the media call
-      
-      incomingCall.on('stream', (remoteStream) => {
-        console.log("Remote stream received! Tracks:", remoteStream.getTracks());
-        studioFeed.srcObject = remoteStream;
-        
-        // Force play with metadata listener to prevent black box layout freezes
-        studioFeed.onloadedmetadata = () => {
-          studioFeed.play().then(() => {
-            console.log("Studio feed playing successfully.");
-          }).catch(e => {
-            console.error("Autoplay blocked or failed:", e);
+          incomingCall.answer();
+          
+          incomingCall.on('stream', (remoteStream) => {
+            studioFeed.srcObject = remoteStream;
+            studioFeed.play().then(() => {
+              console.log("Video rendering active.");
+            }).catch(err => {
+              console.error("Autoplay error:", err);
+            });
           });
-        };
+        });
       });
 
-      incomingCall.on('error', (err) => {
-        console.error("Call error:", err);
+      peer.on('error', (err) => {
+        if (err.type === 'peer-unavailable') {
+          alert("Could not find a live studio with room code " + code);
+          location.reload();
+        }
       });
-    });
-  });
-
-  peer.on('error', (err) => {
-    console.error("PeerJS error:", err);
-    if (err.type === 'peer-unavailable') {
-      alert("Could not find a live studio with room code " + code + ". Check the code and try again.");
-      location.reload();
     }
-  });
-}
 
     function sendChat() {
       const text = chatInput.value.trim();
       if (!text) return;
-
       const isBad = checkProfanityEvasion(text);
 
       addMessage(spectatorName, text, true);
