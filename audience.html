@@ -3,17 +3,15 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>The Goody Tonight Show - Audience Plushie Lounge</title>
+  <title>The Goody Tonight Show - Audience Live Stream</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
     html, body {
       width: 100%; height: 100%; height: 100dvh;
       background: #06020c; color: #fff;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      overflow: hidden;
+      overflow: hidden; display: flex; flex-direction: column; align-items: center;
     }
-    #canvas3d { width: 100%; height: 100%; display: block; position: absolute; top: 0; left: 0; z-index: 1; }
-    
     #join-gate {
       position: absolute; top: 0; left: 0; width: 100%; height: 100%;
       background: rgba(6, 2, 15, 0.96); z-index: 50; display: flex;
@@ -38,30 +36,29 @@
       font-size: 0.95rem; text-transform: uppercase; cursor: pointer;
     }
 
-    #hud-overlay {
-      position: absolute; top: 12px; left: 12px; right: 12px;
+    #stream-wrapper {
+      width: 100%; max-width: 600px; flex: 1; display: flex;
+      flex-direction: column; padding: 8px; gap: 6px;
+    }
+    .header-bar {
       display: flex; justify-content: space-between; align-items: center;
-      z-index: 10; pointer-events: none;
+      background: #140728; padding: 6px 12px; border-radius: 8px;
+      font-family: monospace; font-size: 0.78rem; border: 1px solid #331555;
     }
-    .hud-badge {
-      background: rgba(20, 7, 40, 0.85); border: 1px solid #00f0ff; border-radius: 8px;
-      padding: 6px 12px; font-family: monospace; font-size: 0.78rem; color: #ffda66;
-      backdrop-filter: blur(4px);
+    #stage-viewport {
+      width: 100%; aspect-ratio: 16 / 9; background: #000;
+      border: 2px solid #ffda66; border-radius: 10px; overflow: hidden; position: relative;
     }
-
-    /* FLOATING LIVE CHAT HUD */
-    #live-hud-chat {
-      position: absolute; bottom: 20px; left: 20px; width: 320px; height: 180px;
-      background: rgba(10, 3, 20, 0.8); border: 1.5px solid #00f0ff;
-      border-radius: 10px; display: flex; flex-direction: column; z-index: 10;
-      backdrop-filter: blur(4px); pointer-events: auto;
+    #studio-feed { width: 100%; height: 100%; object-fit: cover; }
+    
+    #chat-box {
+      flex: 1; min-height: 180px; background: rgba(14, 5, 28, 0.92);
+      border: 1.5px solid #a29bfe; border-radius: 10px; display: flex;
+      flex-direction: column; overflow: hidden;
     }
-    #live-hud-chat-header {
-      padding: 6px 10px; font-size: 0.72rem; font-family: monospace; font-weight: bold;
-      color: #ffda66; border-bottom: 1px solid #331555; display: flex; justify-content: space-between;
-    }
-    #live-hud-chat-stream {
-      flex: 1; overflow-y: auto; padding: 6px; display: flex; flex-direction: column; gap: 4px; font-size: 0.74rem;
+    #chat-messages {
+      flex: 1; overflow-y: auto; padding: 8px; display: flex;
+      flex-direction: column; gap: 4px; font-size: 0.76rem;
     }
     .chat-row { word-break: break-word; line-height: 1.3; }
     .chat-user { font-weight: bold; color: #00f0ff; font-family: monospace; }
@@ -71,18 +68,11 @@
     }
     #chat-input {
       flex: 1; background: #070212; border: 1px solid #a29bfe; border-radius: 6px;
-      color: #fff; padding: 6px 8px; font-size: 0.76rem; outline: none;
+      color: #fff; padding: 8px; font-size: 0.8rem; outline: none;
     }
     #btn-send {
       background: #ffda66; border: none; border-radius: 6px;
-      font-weight: bold; padding: 0 10px; cursor: pointer; color: #111; font-size: 0.72rem;
-    }
-
-    #crosshair {
-      position: absolute; top: 50%; left: 50%; width: 6px; height: 6px;
-      background: rgba(255, 255, 255, 0.85); border-radius: 50%;
-      transform: translate(-50%, -50%); pointer-events: none; z-index: 10;
-      box-shadow: 0 0 6px #00f0ff;
+      font-weight: bold; padding: 0 14px; cursor: pointer; color: #111;
     }
   </style>
 </head>
@@ -90,41 +80,38 @@
 
   <div id="join-gate">
     <div class="gate-box">
-      <h2>Audience Plushie Lounge</h2>
-      <p>Enter the studio as a translucent plushie spectator!</p>
+      <h2>Audience Red Carpet</h2>
+      <p>Watch the live game & participate in studio audience chat.</p>
       <span class="field-label">Host Screen Room Code:</span>
       <input type="text" id="code-input" class="gate-input" maxlength="4" placeholder="0000" inputmode="numeric" />
       <span class="field-label">Your Nickname:</span>
       <input type="text" id="name-input" class="gate-input" maxlength="15" placeholder="Spectator" style="color:#00f0ff;" />
-      <button class="btn-connect" id="btn-join">Enter Studio</button>
+      <button class="btn-connect" id="btn-join">Join Show</button>
     </div>
   </div>
 
-  <div id="crosshair"></div>
+  <div id="stream-wrapper">
+    <div class="header-bar">
+      <span style="color:#ffda66;">GOODY TONIGHT SHOW</span>
+      <span id="match-clock-badge" style="color:#00f0ff;">20:00</span>
+      <span style="color:#39ff14;">● ON AIR</span>
+    </div>
 
-  <div id="hud-overlay">
-    <div class="hud-badge">GOODY TONIGHT SHOW • <span id="match-clock-badge" style="color:#39ff14;">20:00</span></div>
-    <div class="hud-badge">[WASD] Move around studio</div>
+    <div id="stage-viewport">
+      <video id="studio-feed" autoplay playsinline></video>
+    </div>
+
+    <div id="chat-box">
+      <div id="chat-messages">
+        <div style="color:#888; font-style:italic;">Connecting to live broadcast chat...</div>
+      </div>
+      <div class="chat-input-bar">
+        <input type="text" id="chat-input" maxlength="120" placeholder="Cheer on contestants..." autocomplete="off" />
+        <button id="btn-send">SEND</button>
+      </div>
+    </div>
   </div>
 
-  <div id="live-hud-chat">
-    <div id="live-hud-chat-header">
-      <span>STUDIO AUDIENCE CHAT</span>
-      <span style="color:#39ff14;">● LIVE</span>
-    </div>
-    <div id="live-hud-chat-stream">
-      <div style="color:#888; font-style:italic;">Connecting to audience chat...</div>
-    </div>
-    <div class="chat-input-bar">
-      <input type="text" id="chat-input" maxlength="120" placeholder="Cheer..." autocomplete="off" />
-      <button id="btn-send">SEND</button>
-    </div>
-  </div>
-
-  <canvas id="canvas3d"></canvas>
-
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/PointerLockControls.js"></script>
   <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
   <script>
     let peer = null;
@@ -153,10 +140,21 @@
     }
     const hardwareId = generateHardwareId();
 
+    // Evasion-Resistant Filter (Normalized against leetspeak & separators)
     const baseProfanities = ["fuck", "shit", "bitch", "cunt", "nigger", "nigga", "faggot", "retard", "whore", "slut", "pussy", "dick", "bastard", "asshole"];
+
     function normalizeText(str) {
-      return str.toLowerCase().replace(/[@4]/g, 'a').replace(/[1!|]/g, 'i').replace(/[0]/g, 'o').replace(/[3]/g, 'e').replace(/[$5]/g, 's').replace(/[+]/g, 't').replace(/[^a-z0-9]/g, '');
+      return str
+        .toLowerCase()
+        .replace(/[@4]/g, 'a')
+        .replace(/[1!|]/g, 'i')
+        .replace(/[0]/g, 'o')
+        .replace(/[3]/g, 'e')
+        .replace(/[$5]/g, 's')
+        .replace(/[+]/g, 't')
+        .replace(/[^a-z0-9]/g, ''); // Strips dots, dashes, spaces (defeats "f.u.c.k" and "s h i t")
     }
+
     function checkProfanityEvasion(text) {
       const normalized = normalizeText(text);
       return baseProfanities.some(bad => normalized.includes(bad));
@@ -166,92 +164,11 @@
     const codeInput = document.getElementById('code-input');
     const nameInput = document.getElementById('name-input');
     const btnJoin = document.getElementById('btn-join');
-    const chatMessages = document.getElementById('live-hud-chat-stream');
+    const chatMessages = document.getElementById('chat-messages');
     const chatInput = document.getElementById('chat-input');
     const btnSend = document.getElementById('btn-send');
+    const studioFeed = document.getElementById('studio-feed');
     const matchClockBadge = document.getElementById('match-clock-badge');
-
-    // THREE.JS STUDIO ENVIRONMENT SETUP
-    const scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x040208);
-    scene.fog = new THREE.FogExp2(0x040208, 0.015);
-
-    const camera = new THREE.PerspectiveCamera(65, window.innerWidth / window.innerHeight, 0.1, 150);
-    camera.position.set(0, 3.5, 6.0);
-
-    const canvas = document.getElementById('canvas3d');
-    const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.setPixelRatio(window.devicePixelRatio);
-    renderer.shadowMap.enabled = true;
-
-    const controls = new THREE.PointerLockControls(camera, document.body);
-
-    document.addEventListener('click', () => {
-      if (joinGate.style.display === 'none') {
-        controls.lock();
-      }
-    });
-
-    // STUDIO STAGE SETUP (Directly inside studio)
-    const studioGroup = new THREE.Group();
-    const studioFloor = new THREE.Mesh(new THREE.PlaneGeometry(36, 36), new THREE.MeshStandardMaterial({ color: 0x181026, roughness: 0.6 }));
-    studioFloor.rotation.x = -Math.PI / 2;
-    studioGroup.add(studioFloor);
-
-    const wallMat = new THREE.MeshStandardMaterial({ color: 0x120726 });
-    const backWall = new THREE.Mesh(new THREE.PlaneGeometry(36, 16), wallMat); backWall.position.set(0, 8, -14); studioGroup.add(backWall);
-    
-    // Lighting
-    const ambientLight = new THREE.AmbientLight(0x281845, 1.0); studioGroup.add(ambientLight);
-    const mainSpot = new THREE.SpotLight(0xffffff, 6.0, 30, Math.PI / 3, 0.4);
-    mainSpot.position.set(0, 12, 0);
-    studioGroup.add(mainSpot);
-    scene.add(studioGroup);
-
-    // Live Video Screen Canvas texture for the studio screen
-    const screenCanvas = document.createElement('canvas');
-    screenCanvas.width = 512; screenCanvas.height = 256;
-    const sCtx = screenCanvas.getContext('2d');
-    const screenTex = new THREE.CanvasTexture(screenCanvas);
-    const studioScreenMesh = new THREE.Mesh(new THREE.PlaneGeometry(8, 4.5), new THREE.MeshBasicMaterial({ map: screenTex }));
-    studioScreenMesh.position.set(0, 5.5, -13.8);
-    scene.add(studioScreenMesh);
-
-    const videoElem = document.createElement('video');
-    videoElem.autoplay = true; videoElem.playsInline = true; videoElem.muted = false;
-
-    function renderScreen() {
-      sCtx.fillStyle = '#05020a'; sCtx.fillRect(0, 0, 512, 256);
-      if (videoElem.readyState >= 2) {
-        sCtx.drawImage(videoElem, 0, 0, 512, 256);
-      } else {
-        sCtx.fillStyle = '#ffda66'; sCtx.font = 'bold 20px monospace'; sCtx.textAlign = 'center';
-        sCtx.fillText("WAITING FOR STUDIO BROADCAST...", 256, 128);
-      }
-      screenTex.needsUpdate = true;
-    }
-
-    // CREATE TRANSPARENT PLUSHIE AVATAR FOR USER
-    function createPlushieAvatar(colorHex) {
-      const pGroup = new THREE.Group();
-      const pMat = new THREE.MeshStandardMaterial({ color: colorHex, roughness: 0.9, transparent: true, opacity: 0.82 });
-      const pBody = new THREE.Mesh(new THREE.SphereGeometry(0.32, 14, 14), pMat); pBody.position.y = 0.32; pGroup.add(pBody);
-      const pHead = new THREE.Mesh(new THREE.SphereGeometry(0.25, 14, 14), pMat); pHead.position.y = 0.70; pGroup.add(pHead);
-      
-      const earMat = new THREE.MeshStandardMaterial({ color: 0xff7675, roughness: 0.9, transparent: true, opacity: 0.82 });
-      const ear1 = new THREE.Mesh(new THREE.SphereGeometry(0.09, 10, 10), earMat); ear1.position.set(-0.16, 0.88, 0);
-      const ear2 = new THREE.Mesh(new THREE.SphereGeometry(0.09, 10, 10), earMat); ear2.position.set(0.16, 0.88, 0); 
-      pGroup.add(ear1, ear2);
-      return pGroup;
-    }
-
-    const myPlushie = createPlushieAvatar(0xff9ff3);
-    myPlushie.position.set(0, 0, 3.5);
-    scene.add(myPlushie);
-
-    // REMOTE SPECTATORS MAP
-    const remotePlushies = {};
 
     btnJoin.addEventListener('click', () => {
       const code = codeInput.value.trim();
@@ -262,7 +179,6 @@
         return;
       }
       joinGate.style.display = 'none';
-      controls.lock();
       connectToStudio(code);
     });
 
@@ -284,14 +200,15 @@
       peer.on('open', () => {
         const targetStudioId = "goody-studio-" + code;
 
+        // WebRTC Signaling to Dynamic Studio
         const call = peer.call(targetStudioId, null, {
-          metadata: { role: 'AUDIENCE', sessionToken: sessionToken, name: spectatorName }
+          metadata: { role: 'AUDIENCE', sessionToken: sessionToken }
         });
 
         if (call) {
           call.on('stream', (stream) => {
-            videoElem.srcObject = stream;
-            videoElem.play().catch(console.error);
+            studioFeed.srcObject = stream;
+            studioFeed.play().catch(console.error);
           });
         }
 
@@ -304,8 +221,6 @@
             addMessage(data.author, data.text);
           } else if (data.type === "SYNC_MATCH_TIMER") {
             matchClockBadge.textContent = data.timeStr;
-          } else if (data.type === "SPECTATOR_POS_RELAY") {
-            updateRemoteSpectator(data);
           } else if (data.type === "HOST_EJECTED_SPECTATOR") {
             alert(data.message || "You have been disconnected from the studio.");
             location.reload();
@@ -314,22 +229,13 @@
       });
     }
 
-    function updateRemoteSpectator(data) {
-      let p = remotePlushies[data.peerId];
-      if (!p) {
-        p = createPlushieAvatar(0x74b9ff);
-        scene.add(p);
-        remotePlushies[data.peerId] = p;
-      }
-      p.position.set(data.x, data.y, data.z);
-      p.rotation.y = data.yaw;
-    }
-
     function sendChat() {
       const text = chatInput.value.trim();
       if (!text) return;
 
       const isBad = checkProfanityEvasion(text);
+
+      // Render locally so the sender thinks it posted (shadowban behavior)
       addMessage(spectatorName, text, true);
       chatInput.value = '';
 
@@ -346,82 +252,7 @@
     }
 
     btnSend.addEventListener('click', sendChat);
-    chatInput.addEventListener('keydown', (e) => { 
-      if (e.key === 'Enter') {
-        sendChat();
-      } else {
-        e.stopPropagation(); // Prevent WASD triggering while typing chat
-      }
-    });
-
-    // MOVEMENT & CONTROLS
-    const move = { forward: false, backward: false, left: false, right: false };
-    const velocity = new THREE.Vector3();
-
-    document.addEventListener('keydown', (e) => {
-      if (document.activeElement === chatInput) return;
-      if (e.code === 'KeyW') move.forward = true;
-      if (e.code === 'KeyS') move.backward = true;
-      if (e.code === 'KeyA') move.left = true;
-      if (e.code === 'KeyD') move.right = true;
-    });
-    document.addEventListener('keyup', (e) => {
-      if (e.code === 'KeyW') move.forward = false;
-      if (e.code === 'KeyS') move.backward = false;
-      if (e.code === 'KeyA') move.left = false;
-      if (e.code === 'KeyD') move.right = false;
-    });
-
-    window.addEventListener('resize', () => {
-      camera.aspect = window.innerWidth / window.innerHeight;
-      camera.updateProjectionMatrix();
-      renderer.setSize(window.innerWidth, window.innerHeight);
-    });
-
-    let lastSendPos = 0;
-    function animate() {
-      requestAnimationFrame(animate);
-
-      renderScreen();
-
-      if (controls.isLocked) {
-        velocity.x -= velocity.x * 10.0 * 0.016;
-        velocity.z -= velocity.z * 10.0 * 0.016;
-        const speed = 15.0;
-        if (move.forward || move.backward) velocity.z -= (Number(move.forward) - Number(move.backward)) * speed * 0.016;
-        if (move.left || move.right) velocity.x -= (Number(move.right) - Number(move.left)) * speed * 0.016;
-        
-        controls.moveRight(-velocity.x * 0.016);
-        controls.moveForward(-velocity.z * 0.016);
-
-        // Keep inside studio bounds
-        camera.position.x = Math.max(-12, Math.min(12, camera.position.x));
-        camera.position.z = Math.max(-10, Math.min(12, camera.position.z));
-        camera.position.y = 3.5; // Fixed eye height
-
-        myPlushie.position.copy(camera.position);
-        myPlushie.position.y = 0;
-        myPlushie.rotation.y = camera.rotation.y;
-
-        // Relay position to host periodically
-        const now = performance.now();
-        if (now - lastSendPos > 120 && dataConn && dataConn.open) {
-          lastSendPos = now;
-          dataConn.send({
-            type: "SPECTATOR_MOVE",
-            peerId: peer.id,
-            name: spectatorName,
-            x: myPlushie.position.x,
-            y: myPlushie.position.y,
-            z: myPlushie.position.z,
-            yaw: camera.rotation.y
-          });
-        }
-      }
-
-      renderer.render(scene, camera);
-    }
-    animate();
+    chatInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') sendChat(); });
   </script>
 </body>
 </html>
