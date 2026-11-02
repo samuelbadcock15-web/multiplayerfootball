@@ -38,7 +38,7 @@
 
     #stream-wrapper {
       width: 100%; max-width: 600px; flex: 1; display: flex;
-      flex-direction: column; padding: 8px; gap: 6px;
+      flex-direction: column; padding: 8px; gap: 6px; display: none;
     }
     .header-bar {
       display: flex; justify-content: space-between; align-items: center;
@@ -50,7 +50,7 @@
       border: 2px solid #ffda66; border-radius: 10px; overflow: hidden; position: relative;
     }
     #studio-feed { width: 100%; height: 100%; object-fit: cover; }
-    
+   
     #chat-box {
       flex: 1; min-height: 180px; background: rgba(14, 5, 28, 0.92);
       border: 1.5px solid #a29bfe; border-radius: 10px; display: flex;
@@ -140,7 +140,6 @@
     }
     const hardwareId = generateHardwareId();
 
-    // Evasion-Resistant Filter (Normalized against leetspeak & separators)
     const baseProfanities = ["fuck", "shit", "bitch", "cunt", "nigger", "nigga", "faggot", "retard", "whore", "slut", "pussy", "dick", "bastard", "asshole"];
 
     function normalizeText(str) {
@@ -152,7 +151,7 @@
         .replace(/[3]/g, 'e')
         .replace(/[$5]/g, 's')
         .replace(/[+]/g, 't')
-        .replace(/[^a-z0-9]/g, ''); // Strips dots, dashes, spaces (defeats "f.u.c.k" and "s h i t")
+        .replace(/[^a-z0-9]/g, '');
     }
 
     function checkProfanityEvasion(text) {
@@ -161,6 +160,7 @@
     }
 
     const joinGate = document.getElementById('join-gate');
+    const streamWrapper = document.getElementById('stream-wrapper');
     const codeInput = document.getElementById('code-input');
     const nameInput = document.getElementById('name-input');
     const btnJoin = document.getElementById('btn-join');
@@ -179,6 +179,7 @@
         return;
       }
       joinGate.style.display = 'none';
+      streamWrapper.style.display = 'flex';
       connectToStudio(code);
     });
 
@@ -200,20 +201,13 @@
       peer.on('open', () => {
         const targetStudioId = "goody-studio-" + code;
 
-        // WebRTC Signaling to Dynamic Studio
-        const call = peer.call(targetStudioId, null, {
-          metadata: { role: 'AUDIENCE', sessionToken: sessionToken }
-        });
-
-        if (call) {
-          call.on('stream', (stream) => {
-            studioFeed.srcObject = stream;
-            studioFeed.play().catch(console.error);
-          });
-        }
-
+        // 1. Establish Data Connection first
         dataConn = peer.connect(targetStudioId, {
           metadata: { role: 'AUDIENCE', sessionToken: sessionToken, name: spectatorName }
+        });
+
+        dataConn.on('open', () => {
+          console.log("Connected to studio data channel!");
         });
 
         dataConn.on('data', (data) => {
@@ -226,6 +220,27 @@
             location.reload();
           }
         });
+
+        dataConn.on('error', (err) => {
+          console.error("Data connection error:", err);
+        });
+
+        // 2. Handle incoming media stream from Host (Host calls Audience or sends stream)
+        peer.on('call', (incomingCall) => {
+          incomingCall.answer(); // Answer without sending local mic/cam since audience is view-only
+          incomingCall.on('stream', (stream) => {
+            studioFeed.srcObject = stream;
+            studioFeed.play().catch(e => console.error("Autoplay prevented:", e));
+          });
+        });
+      });
+
+      peer.on('error', (err) => {
+        console.error("PeerJS error:", err);
+        if (err.type === 'peer-unavailable') {
+          alert("Could not find a live studio with room code " + code + ". Check the code and try again.");
+          location.reload();
+        }
       });
     }
 
@@ -235,7 +250,6 @@
 
       const isBad = checkProfanityEvasion(text);
 
-      // Render locally so the sender thinks it posted (shadowban behavior)
       addMessage(spectatorName, text, true);
       chatInput.value = '';
 
