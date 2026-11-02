@@ -36,7 +36,7 @@
 
     #crosshair.hover-active { transform: translate(-50%, -50%) scale(2.2); background: #ff69b4; }
 
-    
+   
 
     /* PRODUCER PIN GATE MODAL */
 
@@ -208,7 +208,7 @@
 
     .btn-producer-choice:hover { background: #9b59b6; }
 
-    
+   
 
     #hud {
 
@@ -454,7 +454,7 @@
 
       <p class="auth-sub">Enter the Host Master PIN to gain broadcast control rights.</p>
 
-      <input type="password" id="host-pin-input" maxlength="4" placeholder="7492" inputmode="numeric" pattern="[0-9]*" autocomplete="off" autofocus />
+      <input type="password" id="host-pin-input" maxlength="4" placeholder="••••" inputmode="numeric" pattern="[0-9]*" autocomplete="off" autofocus />
 
       <button class="btn-unlock-host" id="btn-submit-pin">Unlock Studio</button>
 
@@ -466,7 +466,7 @@
 
   <div id="crosshair"></div>
 
-  
+ 
 
   <div id="hud">
 
@@ -615,83 +615,61 @@
 
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
   <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/PointerLockControls.js"></script>
+
   <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
 
+
+
   <script>
-    // Master Director PIN (7492) with Rate-Limiting Lockout
-    const MASTER_DIRECTOR_PIN = "7492";
+
+    const HOST_SECURITY_PIN = "3776";
+
     let isHostAuthorized = false;
-    let failedAttempts = parseInt(sessionStorage.getItem("host_pin_fails") || "0", 10);
-    let lockoutUntil = parseInt(sessionStorage.getItem("host_pin_lockout") || "0", 10);
+
+
 
     const hostAuthGate = document.getElementById('host-auth-gate');
+
     const hostPinInput = document.getElementById('host-pin-input');
+
     const btnSubmitPin = document.getElementById('btn-submit-pin');
+
     const blockerEl = document.getElementById('blocker');
 
-    function checkLockoutState() {
-      const now = Date.now();
-      if (now < lockoutUntil) {
-        const remainingSecs = Math.ceil((lockoutUntil - now) / 1000);
-        hostPinInput.disabled = true;
-        btnSubmitPin.disabled = true;
-        btnSubmitPin.textContent = `LOCKED (${remainingSecs}s)`;
-        return true;
-      }
-      hostPinInput.disabled = false;
-      btnSubmitPin.disabled = false;
-      btnSubmitPin.textContent = "Unlock Studio";
-      return false;
-    }
 
-    // Run check immediately on page load
-    checkLockoutState();
 
     function checkHostPin() {
-      if (checkLockoutState()) return;
 
       const entered = hostPinInput.value.trim();
-      if (!entered || entered.length !== 4) {
-        alert("ACCESS DENIED: Enter a 4-digit PIN.");
-        return;
-      }
 
-      // Direct comparison against your Master PIN
-      const isValid = (entered === MASTER_DIRECTOR_PIN);
+      if (entered === HOST_SECURITY_PIN) {
 
-      if (isValid) {
-        sessionStorage.removeItem("host_pin_fails");
-        sessionStorage.removeItem("host_pin_lockout");
         sessionStorage.setItem("goody_host_authenticated", "true");
+
         unlockHostEnvironment();
+
       } else {
-        failedAttempts++;
-        sessionStorage.setItem("host_pin_fails", failedAttempts.toString());
-       
-        if (failedAttempts >= 3) {
-          lockoutUntil = Date.now() + (3 * 60 * 1000);
-          sessionStorage.setItem("host_pin_lockout", lockoutUntil.toString());
-          alert("SECURITY ALERT: 3 failed attempts. Terminal locked for 3 minutes.");
-          checkLockoutState();
-          const timer = setInterval(() => {
-            if (!checkLockoutState()) {
-              clearInterval(timer);
-              failedAttempts = 0;
-              sessionStorage.setItem("host_pin_fails", "0");
-            }
-          }, 1000);
-        } else {
-          alert(`ACCESS DENIED: Invalid Director PIN. (${3 - failedAttempts} attempts remaining)`);
-        }
+
+        alert("ACCESS DENIED: Invalid Director PIN.");
+
         hostPinInput.value = "";
+
         hostPinInput.focus();
+
       }
+
     }
 
+
+
     btnSubmitPin.addEventListener('click', checkHostPin);
+
     hostPinInput.addEventListener('keydown', (e) => {
+
       if (e.key === 'Enter') checkHostPin();
+
     });
 
 
@@ -1584,7 +1562,7 @@
 
       const speech = `Welcome back to The Goody Tonight Show! Unfortunately, we have been unable to find a replacement contestant. But the show must go on! So ${remainingName}, we are placing the power in your hands! You have two choices: You can choose to go it alone as a solo race to see if you can reach tile 32 before the 20-minute timer expires—remember, if time runs out, nobody wins and the prize rolls over! Or, you can choose to go head-to-head with me, Goody! I will take over the board right where your opponent left off! ${remainingName}, make your choice now!`;
 
-      
+     
 
       speakGoody(speech, () => {
 
@@ -2440,11 +2418,7 @@
 
       try {
 
-        // DYNAMIC UNIQUE STUDIO ID: Changes every show!
-
-        const dynamicStudioId = "goody-studio-" + studioRoomCode;
-
-        studioPeer = new Peer(dynamicStudioId);
+        studioPeer = new Peer("goody-main-studio");
 
 
 
@@ -2956,45 +2930,7 @@
 
               }
 
-            } else if (data.type === "REQUEST_ROLL") {
-
-              // HOST AUTHORITATIVE ROLL GENERATION
-
-              const slot = data.contestant;
-
-              if (gameState === "OPENING_DUEL") {
-
-                if (slot === "goody-contestant-1" && p1RollVal === null) {
-
-                  const legitRoll = Math.floor(Math.random() * 6) + 1;
-
-                  handlePlayerRoll(slot, contestantNames[slot], legitRoll);
-
-                } else if (slot === "goody-contestant-2" && p2RollVal === null) {
-
-                  const legitRoll = Math.floor(Math.random() * 6) + 1;
-
-                  handlePlayerRoll(slot, contestantNames[slot], legitRoll);
-
-                }
-
-                return;
-
-              }
-
-              if (gameState === "IN_PLAY") {
-
-                if (slot !== activePlayer || hasPlayerRolledThisTurn || isPawnMoving) return;
-
-                const legitRoll = Math.floor(Math.random() * 6) + 1;
-
-                handlePlayerRoll(slot, contestantNames[slot], legitRoll);
-
-              }
-
             } else if (data.type === "PLAYER_ROLLED_DICE") {
-
-              // Backward-compatibility fallback
 
               handlePlayerRoll(data.contestant, data.name, data.roll);
 
@@ -3216,7 +3152,7 @@
 
       }
 
-      
+     
 
       window.speechSynthesis.cancel();
 
@@ -3404,28 +3340,6 @@
 
     function handlePlayerRoll(contestant, name, roll) {
 
-      // Send live visual confirmation to contestant screens
-
-      connectedDataConns.forEach(c => {
-
-        if (c.open) {
-
-          c.send({
-
-            type: "DICE_RESULT_CONFIRMED",
-
-            contestant: contestant,
-
-            roll: roll
-
-          });
-
-        }
-
-      });
-
-
-
       if (gameState === "OPENING_DUEL") {
 
         if (contestant === "goody-contestant-2") {
@@ -3470,7 +3384,7 @@
 
         isPawnMoving = true;
 
-        
+       
 
         if (diceInterval) clearInterval(diceInterval);
 
@@ -3530,7 +3444,7 @@
 
         const timeStr = `${mins}:${secs}`;
 
-        
+       
 
         gameClockValEl.textContent = timeStr;
 
@@ -3816,7 +3730,7 @@
 
         const rawQ = qPool[Math.floor(Math.random() * qPool.length)];
 
-        
+       
 
         activeQuestion = {
 
@@ -5106,7 +5020,7 @@
 
       if (cleanName.length > 12) fontSize = 28;
 
-      
+     
 
       ctx.font = `bold ${fontSize}px sans-serif`;
 
@@ -5250,7 +5164,7 @@
 
         const missingName = contestantNames[droppedOutContestant] || (droppedOutContestant === "goody-contestant-1" ? "Contestant 1" : "Contestant 2");
 
-        const missingNum = droppedOutContestant === "goody-contestant-1" ? `1 (${droppedOutName})` : `2 (${droppedOutName})`;
+        const missingNum = droppedOutContestant === "goody-contestant-1" ? `1 (${missingName.toUpperCase()})` : `2 (${missingName.toUpperCase()})`;
 
         qBoardCtx.fillText(`LOST CONNECTION TO CONTESTANT ${missingNum}`, 256, 140);
 
@@ -6046,7 +5960,7 @@
 
       ctx.font = 'bold 11px monospace'; ctx.textAlign = 'center';
 
-      
+     
 
       const tag = isGoodyHostSlot
 
@@ -6562,4 +6476,4 @@
 
 </body>
 
-</html>
+</html> 
