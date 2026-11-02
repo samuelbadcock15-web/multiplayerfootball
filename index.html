@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>The Goody Tonight Show - Multiplayer Lobby & Studio Host</title>
+  <title>The Goody Tonight Show - Open Lobby & Live Studio Host</title>
   <style>
     body, html {
       margin: 0; padding: 0; width: 100%; height: 100%;
@@ -32,9 +32,9 @@
     p { color: #ebdcf9; font-size: 0.92rem; line-height: 1.5; margin: 8px 0; }
     .key { background: #391563; padding: 2px 7px; border-radius: 4px; border: 1px solid #9c4dd6; font-weight: bold; color: #ff69b4; }
     .room-code-display {
-      font-size: 2.2rem;
+      font-size: 1.8rem;
       font-weight: 900;
-      letter-spacing: 6px;
+      letter-spacing: 2px;
       color: #39ff14;
       font-family: monospace;
       margin: 12px 0 6px 0;
@@ -66,15 +66,9 @@
       text-transform: uppercase;
       transition: background 0.2s;
     }
-    .btn-producer-solo {
-      background: #d63031;
-      border-color: #ff7675;
-    }
+    .btn-producer-solo { background: #d63031; border-color: #ff7675; }
     .btn-producer-solo:hover { background: #e17055; }
-    .btn-producer-choice {
-      background: #8e44ad;
-      border-color: #a29bfe;
-    }
+    .btn-producer-choice { background: #8e44ad; border-color: #a29bfe; }
     .btn-producer-choice:hover { background: #9b59b6; }
    
     #hud {
@@ -149,49 +143,22 @@
       background: rgba(214, 48, 49, 0.15);
       border-left: 2px solid #ff7675;
     }
-    .author-clickable {
-      cursor: pointer;
-      text-decoration: underline;
-      font-weight: bold;
-    }
-    .author-clickable:hover {
-      color: #fffa65 !important;
-    }
+    .author-clickable { cursor: pointer; text-decoration: underline; font-weight: bold; }
+    .author-clickable:hover { color: #fffa65 !important; }
     .mod-btn-action {
-      background: #2b1154;
-      border: 1px solid #d4af37;
-      color: #ffda66;
-      font-size: 0.65rem;
-      font-family: monospace;
-      padding: 2px 5px;
-      border-radius: 4px;
-      cursor: pointer;
-      flex-shrink: 0;
+      background: #2b1154; border: 1px solid #d4af37; color: #ffda66;
+      font-size: 0.65rem; font-family: monospace; padding: 2px 5px; border-radius: 4px; cursor: pointer; flex-shrink: 0;
     }
     .mod-btn-action:hover { background: #6c5ce7; }
     .mod-controls-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-top: 6px;
-      padding-top: 6px;
-      border-top: 1px solid #331555;
+      display: flex; justify-content: space-between; align-items: center;
+      margin-top: 6px; padding-top: 6px; border-top: 1px solid #331555;
     }
     .btn-emergency-mute {
-      background: #27ae60;
-      border: 1px solid #2ecc71;
-      color: #fff;
-      font-family: monospace;
-      font-size: 0.72rem;
-      padding: 4px 8px;
-      border-radius: 6px;
-      cursor: pointer;
-      font-weight: bold;
+      background: #27ae60; border: 1px solid #2ecc71; color: #fff;
+      font-family: monospace; font-size: 0.72rem; padding: 4px 8px; border-radius: 6px; cursor: pointer; font-weight: bold;
     }
-    .btn-emergency-mute.muted-state {
-      background: #d63031;
-      border-color: #ff7675;
-    }
+    .btn-emergency-mute.muted-state { background: #d63031; border-color: #ff7675; }
   </style>
 </head>
 <body>
@@ -199,10 +166,10 @@
   <div id="crosshair"></div>
  
   <div id="hud">
-    <div class="hud-title" id="mode-title" style="color: #ffda66;">MULTIPLIER LOBBY</div>
-    <div class="hud-sub" id="mode-sub">WebRTC Studio Host: ONLINE • 15 JURISDICTIONS ACTIVE</div>
-    <div id="room-code-pill">ROOM URL: <span id="hud-code-val">multiplayerfootball.onrender.com</span></div>
-    <div id="countdown-pill">LOBBY STATUS: <span id="timer-val" style="color:#ff7675;">WAITING FOR 2 PLAYERS ON PODIUMS</span></div>
+    <div class="hud-title" id="mode-title" style="color: #ffda66;">MULTIPLAYER LOBBY</div>
+    <div class="hud-sub" id="mode-sub">multiplayerfootball.onrender.com • 15 Jurisdictions Active</div>
+    <div id="room-code-pill">URL: <span id="hud-code-val">multiplayerfootball.onrender.com</span></div>
+    <div id="countdown-pill">STATUS: <span id="timer-val" style="color:#ff7675;">WALK 2 PLAYERS TO PODIUM ZONES</span></div>
     <div id="match-clock-hud">SHOW CLOCK: <span id="game-clock-val" style="color:#ffda66;">20:00</span></div>
     <div id="audience-pill">CONNECTED PLAYERS: <span id="audience-count" style="color:#39ff14;">1</span></div>
   </div>
@@ -220,14 +187,14 @@
   <div id="blocker" style="display: flex;">
     <div id="instructions-card">
       <h1>The Goody Tonight Show</h1>
-      <p>Welcome to the open lobby! Walk your plushie onto either podium zone to start the match.</p>
+      <p>Welcome to multiplayerfootball.onrender.com! Walk your plushie onto either podium zone to start the match.</p>
       <div class="room-code-display">OPEN LOBBY</div>
       <p><strong>Click Anywhere to Enter Host Control Mode</strong></p>
       <p><span class="key">W</span> <span class="key">A</span> <span class="key">S</span> <span class="key">D</span> &nbsp;Walk around freely</p>
 
       <div id="producer-panel">
         <div style="color: #ffda66; font-weight: bold; font-family: monospace;">PRODUCER OVERRIDE: INTERMISSION ACTIVE</div>
-        <p id="producer-status-txt" style="font-size: 0.8rem; margin: 4px 0;">Looking for contestant...</p>
+        <p id="producer-status-txt" style="font-size: 0.8rem; margin: 4px 0;">Looking for replacement...</p>
         <div class="producer-btn-row">
           <button id="btn-force-solo" class="btn-producer btn-producer-solo" onclick="event.stopPropagation(); triggerOnePlayerMode();">
             Force 1-Player Solo
@@ -244,10 +211,10 @@
         </div>
         <div style="display: flex; gap: 8px; justify-content: center;">
           <button id="btn-kick-p1" class="btn-producer" style="background: #c0392b; border-color: #e74c3c; font-size: 0.75rem; padding: 6px 12px;" onclick="event.stopPropagation(); ejectContestant('goody-contestant-1');">
-            Kick Contestant 1
+            Kick Player 1
           </button>
           <button id="btn-kick-p2" class="btn-producer" style="background: #c0392b; border-color: #e74c3c; font-size: 0.75rem; padding: 6px 12px;" onclick="event.stopPropagation(); ejectContestant('goody-contestant-2');">
-            Kick Contestant 2
+            Kick Player 2
           </button>
         </div>
       </div>
@@ -291,8 +258,6 @@
     });
 
     const studioRoomCode = "multiplayerfootball";
-    document.getElementById('hud-code-val').textContent = studioRoomCode;
-
     let studioPower = false;
     let isGoodySpeaking = false;
 
@@ -337,7 +302,7 @@
     const producerPanel = document.getElementById('producer-panel');
     const producerStatusTxt = document.getElementById('producer-status-txt');
 
-    const connectedPlayers = new Map();
+    const connectedPlayers = new Map(); // peerId -> { name, city, plushie, slot }
     const plushColors = [0xff7675, 0x74b9ff, 0xa29bfe, 0xffbe76, 0x55efc4, 0xfd79a8, 0xf6e58d, 0x48dbfb, 0xff9ff3];
 
     let contestantNames = { "goody-contestant-1": "Player 1", "goody-contestant-2": "Player 2" };
@@ -364,15 +329,22 @@
     const COUNTRY_QUESTIONS = {
       "UK": [
         { q: "In the UK, before the 2019 stake reduction, what was the maximum stake per spin on a Fixed-Odds-Betting-Terminal?", options: ["£2", "£50", "£100", "£500"], ans: "£100", recap: "In April 2019, the UK reduced the maximum FOBT stake per spin from £100 down to £2 to combat severe harms." },
+        { q: "In the UK, before the 2019 stake reduction, what was the maximum amount a person could stake every 20 seconds on a Fixed-Odds-Betting-Terminal?", options: ["£2 every 20 seconds", "£50 every 20 seconds", "£100 every 20 seconds", "£500 every 20 seconds"], ans: "£100 every 20 seconds", recap: "Prior to 2019, FOBTs permitted £100 every 20 seconds, allowing catastrophic loss speeds." },
         { q: "In the UK, what is the name of the land-based self-exclusion scheme that covers Adult Gaming Centres (Arcades)?", options: ["Bingo Association", "SENSE", "Bacta", "Moses"], ans: "Bacta", recap: "Bacta manages the multi-operator arcade self-exclusion scheme across Great Britain." },
         { q: "In the UK, what is the name of the land-based self-exclusion scheme that covers Casinos?", options: ["Bacta", "SENSE", "Moses", "Bingo Association"], ans: "SENSE", recap: "SENSE allows players to enroll once to be excluded from all UK commercial casinos." },
-        { q: "In the UK, what is the name of the land-based self-exclusion scheme that covers Betting Shops (Bookies)?", options: ["Bingo Association", "SENSE", "Bacta", "Moses"], ans: "Moses", recap: "MOSES allows people to self-exclude across high street bookmakers in their chosen localities." }
+        { q: "In the UK, what is the name of the land-based self-exclusion scheme that covers Bingo Halls?", options: ["Bingo Association", "SENSE", "Bacta", "SmartExclusion"], ans: "Bingo Association", recap: "The Bingo Association operates the multi-operator exclusion database across land-based bingo premises." },
+        { q: "In the UK, what is the name of the land-based self-exclusion scheme that covers Service Stations?", options: ["Bingo Association", "Moses", "Bacta", "SmartExclusion"], ans: "SmartExclusion", recap: "SmartExclusion provides digital exclusion tools across motorway service venues and arcades." },
+        { q: "In the UK, what is the name of the land-based self-exclusion scheme that covers Betting Shops (Bookies)?", options: ["Bingo Association", "SENSE", "Bacta", "Moses"], ans: "Moses", recap: "MOSES allows people to self-exclude across high street bookmakers in their chosen localities." },
+        { q: "What does the acronym SENSE stand for in the UK's land-based casino self-exclusion scheme?", options: ["Self-Enrollment National Self Exclusion", "Safe Entry National Security Exclusion", "Single Exclusion National Support Exchange", "Social Entertainment National Safety Exchange"], ans: "Self-Enrollment National Self Exclusion", recap: "SENSE stands for Self-Enrollment National Self Exclusion." },
+        { q: "In 2025, approximately how many self-excluded people were still able to enter a UK betting shop and gamble?", options: ["668", "3,288", "4,789", "8,700"], ans: "3,288", recap: "Around 3,288 self-excluded individuals were able to enter and gamble in UK betting shop premises." },
+        { q: "In which year did the statutory £2 maximum stake on UK FOBTs officially come into force?", options: ["2016", "2017", "2018", "2019"], ans: "2019", recap: "The statutory £2 stake cap officially came into force on April 1st, 2019." }
       ],
       "Canada": [
         { q: "In Ontario, what is the name of the land-based self-exclusion scheme that covers Casinos?", options: ["SENSE", "MyPlay Break", "Bacta", "BetGuard"], ans: "MyPlay Break", recap: "MyPlay Break is Ontario's official casino self-exclusion initiative managed by OLG." },
         { q: "What is the name of Ontario's national online self-exclusion scheme?", options: ["BetGuard", "RUA", "GamStop", "Oasis"], ans: "BetGuard", recap: "BetGuard centralizes online exclusion across licensed iGaming Ontario operators." }
       ],
       "Brazil": [
+        { q: "Which country introduced a near total ban on gambling advertising, sponsorship, and promotional communications in 2018?", options: ["United Kingdom", "Italy", "Spain", "None of the above"], ans: "Italy", recap: "Italy introduced a near total ban on all gambling advertising under the 2018 Dignity Decree." },
         { q: "What is the capital city of Brazil?", options: ["Rio de Janeiro", "São Paulo", "Brasília", "Salvador"], ans: "Brasília", recap: "Brasília was inaugurated as the federal capital of Brazil in 1960." },
         { q: "What is the name of Brazil's national online self-exclusion scheme?", options: ["Spelpaus", "Plataforma Centralizada de Autoexclusão", "Rofus", "RGIAJ"], ans: "Plataforma Centralizada de Autoexclusão", recap: "Brazil uses the Plataforma Centralizada de Autoexclusão across its regulated betting system." }
       ],
@@ -380,10 +352,11 @@
         { q: "Which city in Nevada is world-famous for gambling?", options: ["Las Vegas", "Atlantic City", "Macau", "Monte Carlo"], ans: "Las Vegas", recap: "Las Vegas, Nevada is internationally renowned for its casino entertainment corridors." }
       ],
       "Italy": [
-        { q: "Which country introduced a near total ban on gambling advertising, sponsorship, and promotional communications in 2018?", options: ["United Kingdom", "Italy", "Spain", "None of the above"], ans: "Italy", recap: "Italy introduced a near total ban on all gambling advertising under the 2018 Dignity Decree." },
+        { q: "How does land-based casino self-exclusion work in Italy compared to online RUA?", options: ["One national register covers all casinos", "Players must use individual casino self-exclusion procedures", "RUA automatically blocks all physical venues", "Regional authorities manage separate lists"], ans: "Players must use individual casino self-exclusion procedures", recap: "Unlike digital RUA, Italian physical casinos require separate individual venue enrollments." },
         { q: "What is the name of Italy's national online self-exclusion scheme?", options: ["Spelpaus", "RUA", "GamStop", "Oasis"], ans: "RUA", recap: "RUA (Registro Unico degli Autoesclusi) covers all licensed online platforms in Italy." }
       ],
       "Belgium": [
+        { q: "Belgium's EPIS system is an example of which type of self-exclusion model?", options: ["Separate exclusion at every venue", "National centralised self-exclusion register", "Online-only exclusion", "Casino-only exclusion"], ans: "National centralised self-exclusion register", recap: "EPIS is a unified nationwide registry checking IDs across physical and online venues." },
         { q: "What is the name of Belgium's national self-exclusion scheme covering both online and land-based gambling?", options: ["Rofus", "EPIS", "Oasis", "GamStop"], ans: "EPIS", recap: "EPIS (Excluded Persons Information System) covers all regulated gambling in Belgium." }
       ],
       "Germany": [
@@ -394,7 +367,8 @@
       ],
       "Australia": [
         { q: "What is the capital of Australia?", options: ["Melbourne", "Sydney", "Canberra", "Brisbane"], ans: "Canberra", recap: "Canberra is the federal capital territory of Australia." },
-        { q: "What is the name of Australia's national online self-exclusion scheme?", options: ["Oasis", "Rofus", "BetStop", "SafePlay"], ans: "BetStop", recap: "BetStop is Australia's National Self-Exclusion Register for licensed online and telephone wagering." }
+        { q: "What is the name of Australia's national online self-exclusion scheme?", options: ["Oasis", "Rofus", "BetStop", "SafePlay"], ans: "BetStop", recap: "BetStop is Australia's National Self-Exclusion Register for licensed online and telephone wagering." },
+        { q: "What is Australia's 2023 landmark parliamentary gambling inquiry report commonly known as?", options: ["The Murphy Report", "The Jones Report", "The Harris Report", "The Australian Gambling Reduction Report"], ans: "The Murphy Report", recap: "Chaired by the late Peta Murphy MP, the landmark 2023 inquiry is known as The Murphy Report." }
       ],
       "Nigeria": [
         { q: "What is the capital city of Nigeria?", options: ["Lagos", "Abuja", "Kano", "Port Harcourt"], ans: "Abuja", recap: "Abuja is the federal capital of Nigeria." }
@@ -529,7 +503,6 @@
     function ejectContestant(slotId) {
       const isP1 = slotId === "goody-contestant-1";
       const targetPeerId = isP1 ? p1PeerId : p2PeerId;
-      const playerName = contestantNames[slotId] || "Player";
 
       connectedDataConns.forEach(conn => {
         if (conn.peer === targetPeerId) {
@@ -538,8 +511,8 @@
         }
       });
 
-      if (isP1) { isP1Connected = false; p1PeerId = null; }
-      else { isP2Connected = false; p2PeerId = null; }
+      if (isP1) { isP1Connected = false; p1PeerId = null; p1InPosition = false; }
+      else { isP2Connected = false; p2PeerId = null; p2InPosition = false; }
 
       handleMidGameDropout(slotId);
     }
