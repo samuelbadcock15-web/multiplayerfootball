@@ -132,7 +132,7 @@
       position: relative;
       width: 100%;
       aspect-ratio: 16 / 9;
-      max-height: 23vh;
+      max-height: 25vh;
       background: #000;
       border: 2px solid #ffda66;
       border-radius: 10px;
@@ -142,7 +142,9 @@
       margin: 0 auto;
       cursor: grab;
     }
-    .screens-container:active { cursor: grabbing; }
+    .screens-container:active {
+      cursor: grabbing;
+    }
     #studio-stream-video { width: 100%; height: 100%; object-fit: cover; pointer-events: none; }
     #local-selfie-pip {
       position: absolute; bottom: 4px; right: 4px; width: 26%; aspect-ratio: 4 / 3;
@@ -156,38 +158,79 @@
     }
 
     #turn-banner {
-      width: 100%; padding: 4px 8px; border-radius: 6px; text-align: center;
-      font-weight: 900; font-size: 0.72rem; font-family: monospace; text-transform: uppercase;
+      width: 100%; padding: 5px 8px; border-radius: 6px; text-align: center;
+      font-weight: 900; font-size: 0.75rem; font-family: monospace; text-transform: uppercase;
       letter-spacing: 0.5px; display: none; flex-shrink: 0;
     }
-    .turn-mine { background: #00b894; color: #fff; border: 1.5px solid #55efc4; animation: pulseGlow 1.2s infinite alternate; }
-    .turn-theirs { background: #2d1847; color: #dfe6e9; border: 1.5px solid #636e72; }
-    .turn-tie { background: #e17055; color: #fff; border: 1.5px solid #fdcb6e; animation: pulseGlow 0.8s infinite alternate; }
-    .turn-paused { background: #d63031; color: #fff; border: 1.5px solid #ff7675; animation: pulseGlow 0.9s infinite alternate; }
-    @keyframes pulseGlow { from { box-shadow: 0 0 4px #00b894; } to { box-shadow: 0 0 10px #55efc4; } }
+    .turn-mine {
+      background: #00b894; color: #fff; border: 1.5px solid #55efc4;
+      animation: pulseGlow 1.2s infinite alternate;
+    }
+    .turn-theirs {
+      background: #2d1847; color: #dfe6e9; border: 1.5px solid #636e72;
+    }
+    .turn-tie {
+      background: #e17055; color: #fff; border: 1.5px solid #fdcb6e;
+      animation: pulseGlow 0.8s infinite alternate;
+    }
+    .turn-paused {
+      background: #d63031; color: #fff; border: 1.5px solid #ff7675;
+      animation: pulseGlow 0.9s infinite alternate;
+    }
+    @keyframes pulseGlow {
+      from { box-shadow: 0 0 4px #00b894; }
+      to { box-shadow: 0 0 10px #55efc4; }
+    }
 
     #status-pill {
-      text-align: center; font-family: monospace; font-size: 0.75rem;
-      color: #39ff14; min-height: 16px; line-height: 16px; flex-shrink: 0;
+      text-align: center; font-family: monospace; font-size: 0.78rem;
+      color: #39ff14; min-height: 18px; line-height: 18px; flex-shrink: 0;
     }
 
     #choice-card {
-      background: #1f0b3b; border: 2px solid #f1c40f; border-radius: 12px;
-      padding: 10px; display: none; flex-direction: column; gap: 8px; text-align: center;
-      box-shadow: 0 0 14px rgba(241, 196, 15, 0.4); flex-shrink: 0;
+      background: #1f0b3b;
+      border: 2px solid #f1c40f;
+      border-radius: 12px;
+      padding: 10px;
+      display: none;
+      flex-direction: column;
+      gap: 8px;
+      text-align: center;
+      box-shadow: 0 0 14px rgba(241, 196, 15, 0.4);
+      flex-shrink: 0;
     }
-    #choice-title { color: #ffda66; font-size: 0.85rem; font-weight: 900; letter-spacing: 0.5px; text-transform: uppercase; }
+    #choice-title {
+      color: #ffda66;
+      font-size: 0.85rem;
+      font-weight: 900;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+    }
     .choice-btn {
-      width: 100%; padding: 12px; border-radius: 8px; border: 2px solid;
-      font-size: 0.85rem; font-weight: 900; text-transform: uppercase; cursor: pointer; color: #fff;
+      width: 100%;
+      padding: 12px;
+      border-radius: 8px;
+      border: 2px solid;
+      font-size: 0.85rem;
+      font-weight: 900;
+      text-transform: uppercase;
+      cursor: pointer;
+      color: #fff;
+      transition: transform 0.1s;
     }
     .choice-btn:active { transform: scale(0.98); }
-    .btn-choice-solo { background: #2980b9; border-color: #3498db; }
-    .btn-choice-goody { background: #8e44ad; border-color: #9b59b6; }
+    .btn-choice-solo {
+      background: #2980b9;
+      border-color: #3498db;
+    }
+    .btn-choice-goody {
+      background: #8e44ad;
+      border-color: #9b59b6;
+    }
 
     #btn-roll-dice {
       width: 100%; padding: 10px; background: #444; border: 2px solid #777;
-      border-radius: 10px; font-size: 0.9rem; font-weight: 900; color: #888;
+      border-radius: 10px; font-size: 0.95rem; font-weight: 900; color: #888;
       text-transform: uppercase; letter-spacing: 0.5px; cursor: not-allowed; transition: all 0.2s;
       flex-shrink: 0;
     }
@@ -197,64 +240,55 @@
       box-shadow: 0 2px 0 #b3392b, 0 0 10px #fdcb6e;
     }
 
-    /* IN-CHAT TRIVIA SYSTEM */
-    #chat-container {
-      width: 100%; max-width: 420px; background: rgba(13, 5, 26, 0.95);
-      border: 1.5px solid #d4af37; border-radius: 10px; display: flex; flex-direction: column;
-      flex: 1; min-height: 160px; max-height: 32vh; pointer-events: auto; margin-bottom: 4px; backdrop-filter: blur(4px);
+    #trivia-card {
+      background: #190930; border: 2px solid #00f0ff; border-radius: 10px;
+      padding: 8px; display: none; flex-direction: column; gap: 6px; flex-shrink: 1;
     }
-    #chat-header {
-      padding: 5px 8px; background: #230a42; border-top-left-radius: 8px; border-top-right-radius: 8px;
-      font-size: 0.72rem; font-weight: bold; color: #ffda66; display: flex; justify-content: space-between; align-items: center;
+    #q-country-tag {
+      font-size: 0.75rem; font-weight: bold; color: #ffda66; text-transform: uppercase;
     }
-    #chat-messages {
-      flex: 1; overflow-y: auto; padding: 6px 8px; display: flex; flex-direction: column; gap: 6px; font-size: 0.76rem;
+    #q-timer { font-family: monospace; font-weight: bold; color: #ff7675; font-size: 0.8rem; text-align: right; }
+   
+    #q-text {
+      font-size: 0.82rem; font-weight: 600; line-height: 1.3; color: #ffffff;
+      background: rgba(0,0,0,0.35); padding: 6px; border-radius: 6px; border-left: 3px solid #00f0ff;
     }
-    .chat-msg { word-break: break-word; line-height: 1.25; }
-    .chat-author { font-weight: bold; color: #39ff14; font-family: monospace; }
-    .chat-author.is-self { color: #00f0ff; }
-    .chat-author.is-host { color: #ff7675; }
 
-    /* IN-CHAT TRIVIA CARD */
-    .chat-trivia-card {
-      background: #1c0a35; border: 2px solid #00f0ff; border-radius: 8px; padding: 8px; margin: 4px 0;
-      box-shadow: 0 0 12px rgba(0, 240, 255, 0.25);
+    .options-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 6px;
     }
-    .chat-trivia-country { font-size: 0.68rem; font-family: monospace; color: #ffda66; font-weight: bold; margin-bottom: 2px; }
-    .chat-trivia-text { font-size: 0.76rem; color: #fff; font-weight: 600; margin-bottom: 6px; line-height: 1.2; }
-    .chat-options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; }
-    .chat-opt-btn {
-      background: #2b1154; border: 1.5px solid #a29bfe; border-radius: 5px; color: #fff;
-      padding: 5px 6px; font-size: 0.7rem; font-weight: bold; text-align: left; cursor: pointer;
-      display: flex; justify-content: space-between; align-items: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    .btn-opt {
+      padding: 8px 6px; background: #2f1454; border: 1.5px solid #9c4dd6; border-radius: 8px;
+      color: #fff; font-size: 0.75rem; font-weight: bold; text-align: left; cursor: not-allowed;
+      opacity: 0.6; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
     }
-    .chat-opt-btn:hover:not(:disabled) { background: #6c5ce7; border-color: #00f0ff; }
-    .chat-opt-btn.selected { background: #0984e3 !important; border-color: #00f0ff !important; box-shadow: 0 0 6px rgba(9,132,227,0.6); }
-    .chat-opt-btn.correct { background: #00b894 !important; border-color: #55efc4 !important; }
-    .chat-opt-btn.wrong { background: #d63031 !important; border-color: #ff7675 !important; }
-    .chat-opt-btn:disabled { cursor: default; opacity: 0.9; }
-    .majority-badge { font-size: 0.6rem; font-family: monospace; background: rgba(0,0,0,0.5); padding: 1px 3px; border-radius: 3px; color: #ffda66; }
-    .chat-trivia-status { margin-top: 4px; font-size: 0.68rem; font-family: monospace; color: #39ff14; font-weight: bold; text-align: center; }
+    .btn-opt.unlocked { cursor: pointer; opacity: 1; border-color: #00f0ff; }
+    .btn-opt.selected { background: #6c5ce7; border-color: #a29bfe; }
+    .btn-opt.flash-green { background: #00b894 !important; border-color: #55efc4 !important; }
+    .btn-opt.flash-red { background: #d63031 !important; border-color: #ff7675 !important; }
 
-    .chat-input-row { display: flex; border-top: 1px solid #442266; padding: 4px; gap: 4px; }
-    #chat-text-input {
-      flex: 1; background: #080313; border: 1px solid #a29bfe; border-radius: 6px;
-      color: #fff; padding: 6px 8px; font-size: 0.78rem; outline: none;
+    #recap-card {
+      background: #1c0a32; border: 2px solid #fdcb6e; border-radius: 10px;
+      padding: 8px 10px; display: none; flex-direction: column; gap: 4px; flex-shrink: 1;
     }
-    #btn-send-chat {
-      background: #d4af37; border: none; border-radius: 6px; color: #111; font-weight: bold;
-      font-size: 0.7rem; padding: 0 10px; cursor: pointer;
-    }
+    #recap-header { font-size: 0.76rem; font-weight: bold; color: #fdcb6e; text-transform: uppercase; }
+    #recap-body { font-size: 0.82rem; line-height: 1.3; color: #ffffff; }
 
     .dpad-section {
       background: #140728; border: 1.5px solid #a29bfe; border-radius: 10px;
-      padding: 3px; display: flex; flex-direction: column; align-items: center;
-      gap: 2px; flex-shrink: 0;
+      padding: 4px; display: flex; flex-direction: column; align-items: center;
+      gap: 2px; flex-shrink: 0; margin-bottom: 2px;
     }
-    .dpad-grid { display: grid; grid-template-columns: 42px 42px 42px; grid-template-rows: 28px 28px; gap: 3px; }
+    .dpad-grid {
+      display: grid;
+      grid-template-columns: 46px 46px 46px;
+      grid-template-rows: 32px 32px;
+      gap: 4px;
+    }
     .dpad-btn {
-      background: #2b1154; border: 1.5px solid #ff79b0; border-radius: 5px; color: #fff;
-      font-size: 0.9rem; font-weight: bold; display: flex; justify-content: center; align-items: center; cursor: pointer;
+      background: #2b1154; border: 2px solid #ff79b0; border-radius: 6px; color: #fff;
+      font-size: 1rem; font-weight: bold; display: flex; justify-content: center; align-items: center;
+      cursor: pointer;
     }
   </style>
 </head>
@@ -308,23 +342,27 @@
 
     <button id="btn-roll-dice" disabled> ROLL DICE (LOCKED)</button>
 
-    <!-- IN-CHAT TRIVIA & CHAT CONTAINER -->
-    <div id="chat-container">
-      <div id="chat-header">
-        <span>COMMUNAL CHAT & TRIVIA [CLOCK: <span id="c2-chat-clock" style="color:#ffda66;">20:00</span>]</span>
-        <span id="chat-toggle-icon">▼</span>
+    <div id="trivia-card">
+      <div style="display: flex; justify-content: space-between; align-items: center;">
+        <span id="q-country-tag">COUNTRY</span>
+        <span id="q-timer"> 30s</span>
       </div>
-      <div id="chat-messages">
-        <div class="chat-msg" style="color:#aaa; font-style:italic;">Connected to studio feed...</div>
-      </div>
-      <div class="chat-input-row">
-        <input type="text" id="chat-text-input" maxlength="120" placeholder="Say something..." autocomplete="off" />
-        <button id="btn-send-chat">SEND</button>
+      <div id="q-text">Loading question...</div>
+      <div class="options-grid">
+        <button class="btn-opt" id="opt-0" disabled>A) ...</button>
+        <button class="btn-opt" id="opt-1" disabled>B) ...</button>
+        <button class="btn-opt" id="opt-2" disabled>C) ...</button>
+        <button class="btn-opt" id="opt-3" disabled>D) ...</button>
       </div>
     </div>
 
+    <div id="recap-card">
+      <div id="recap-header"> RECAP: WHAT WE LEARNED</div>
+      <div id="recap-body">Recap loading...</div>
+    </div>
+
     <div class="dpad-section">
-      <div style="font-size: 0.6rem; color: #ff9ff3; font-family: monospace;"> STUDIO NAVIGATION (WASD / D-PAD)</div>
+      <div style="font-size: 0.65rem; color: #ff9ff3; font-family: monospace;"> STUDIO NAVIGATION (WASD / D-PAD)</div>
       <div class="dpad-grid">
         <div></div>
         <button class="dpad-btn" id="dpad-fwd">▲</button>
@@ -338,26 +376,10 @@
 
   <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
   <script>
-    function generateDeviceFingerprint() {
-      try {
-        const c = document.createElement('canvas');
-        const gl = c.getContext('webgl') || c.getContext('experimental-webgl');
-        const d = gl ? gl.getExtension('WEBGL_debug_renderer_info') : null;
-        const rend = d && gl ? gl.getParameter(d.UNMASKED_RENDERER_WEBGL) : 'gpu';
-        const str = `${rend}|${window.screen.width}x${window.screen.height}|${navigator.hardwareConcurrency || 4}`;
-        let h = 0;
-        for (let i = 0; i < str.length; i++) { h = ((h << 5) - h) + str.charCodeAt(i); h |= 0; }
-        return 'hw_' + Math.abs(h).toString(16);
-      } catch (e) {
-        return 'hw_' + Math.random().toString(36).substring(2, 9);
-      }
-    }
-    const deviceHardwareId = generateDeviceFingerprint();
-
-    let playerSessionToken = localStorage.getItem("goody_session_token_c2");
+    let playerSessionToken = sessionStorage.getItem("goody_session_token_c2");
     if (!playerSessionToken) {
       playerSessionToken = "s2_" + Math.random().toString(36).substring(2, 9);
-      localStorage.setItem("goody_session_token_c2", playerSessionToken);
+      sessionStorage.setItem("goody_session_token_c2", playerSessionToken);
     }
 
     const CONTESTANT_ID = "goody-contestant-2";
@@ -369,12 +391,11 @@
     let contestantCity = "";
     let hasRolled = false;
     let rollTimer = null;
+    let questionTimer = null;
     let currentQuestionData = null;
     let selectedOptionIndex = null;
     let isTieBreaker = false;
     let mobileAudioUnlocked = false;
-    let activeTriviaCardEl = null;
-    let audienceVoteCounts = [0, 0, 0, 0];
 
     const passcodeInput = document.getElementById('passcode-input');
     const nameInput = document.getElementById('name-input');
@@ -388,7 +409,6 @@
     const roleTag = document.getElementById('role-tag');
     const micStatusBadge = document.getElementById('mic-status-badge');
     const matchTimerBadge = document.getElementById('match-timer-badge');
-    const c2ChatClock = document.getElementById('c2-chat-clock');
     const turnBanner = document.getElementById('turn-banner');
     const statusPill = document.getElementById('status-pill');
     const btnRollDice = document.getElementById('btn-roll-dice');
@@ -398,9 +418,20 @@
     const btnPickSolo = document.getElementById('btn-pick-solo');
     const btnPickGoody = document.getElementById('btn-pick-goody');
 
-    const chatMessages = document.getElementById('chat-messages');
-    const chatTextInput = document.getElementById('chat-text-input');
-    const btnSendChat = document.getElementById('btn-send-chat');
+    const triviaCard = document.getElementById('trivia-card');
+    const qCountryTag = document.getElementById('q-country-tag');
+    const qText = document.getElementById('q-text');
+    const qTimer = document.getElementById('q-timer');
+    const optButtons = [
+      document.getElementById('opt-0'),
+      document.getElementById('opt-1'),
+      document.getElementById('opt-2'),
+      document.getElementById('opt-3')
+    ];
+
+    const recapCard = document.getElementById('recap-card');
+    const recapHeader = document.getElementById('recap-header');
+    const recapBody = document.getElementById('recap-body');
 
     function setLocalMicEnabled(enabled) {
       if (localStream) {
@@ -415,6 +446,7 @@
     function unlockMobileAudio() {
       if (mobileAudioUnlocked) return;
       mobileAudioUnlocked = true;
+
       studioStreamVideo.muted = false;
 
       if ('speechSynthesis' in window) {
@@ -432,38 +464,6 @@
       utt.pitch = 1.25;
       window.speechSynthesis.speak(utt);
     }
-
-    function addChatMessage(author, text, customClass = '') {
-      const msgEl = document.createElement('div');
-      msgEl.className = 'chat-msg';
-      const authorSpan = document.createElement('span');
-      authorSpan.className = `chat-author ${customClass}`;
-      authorSpan.textContent = author + ': ';
-      const textSpan = document.createElement('span');
-      textSpan.textContent = text;
-      msgEl.appendChild(authorSpan);
-      msgEl.appendChild(textSpan);
-      chatMessages.appendChild(msgEl);
-      chatMessages.scrollTop = chatMessages.scrollHeight;
-    }
-
-    function sendChatMessage() {
-      const text = chatTextInput.value.trim();
-      if (!text) return;
-      addChatMessage(contestantName || "June", text, 'is-self');
-      chatTextInput.value = '';
-      if (dataConn && dataConn.open) {
-        dataConn.send({
-          type: "AUDIENCE_CHAT_MESSAGE",
-          author: contestantName || "June",
-          text: text,
-          sessionToken: playerSessionToken,
-          hardwareId: deviceHardwareId
-        });
-      }
-    }
-    btnSendChat.addEventListener('click', sendChatMessage);
-    chatTextInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') sendChatMessage(); });
 
     function resetToSetupScreen() {
       setLocalMicEnabled(false);
@@ -565,25 +565,35 @@
               statusPill.textContent = "Connected! Standby for host...";
             } else if (data.type === "SET_MIC_STATE") {
               setLocalMicEnabled(Boolean(data.enabled));
-              statusPill.textContent = data.enabled ? (data.promptText || "🎙️ Your mic is LIVE!") : "Microphone muted.";
+              if (data.enabled) {
+                statusPill.textContent = data.promptText || "🎙️ Your microphone is LIVE!";
+              } else {
+                statusPill.textContent = "Microphone muted.";
+              }
             } else if (data.type === "HOST_SPEAK") {
               playHostSpeechLocally(data.text);
             } else if (data.type === "START_DICE_COUNTDOWN") {
               setLocalMicEnabled(false);
               choiceCard.style.display = 'none';
+              triviaCard.style.display = 'none';
+              recapCard.style.display = 'none';
               btnRollDice.style.display = 'block';
               startTenSecondRoll();
             } else if (data.type === "SYNC_MATCH_TIMER") {
               matchTimerBadge.textContent = ` ${data.timeStr}`;
-              c2ChatClock.textContent = data.timeStr;
             } else if (data.type === "INTERMISSION_PAUSE") {
               setLocalMicEnabled(false);
               if (rollTimer) clearInterval(rollTimer);
+              if (questionTimer) clearInterval(questionTimer);
               if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+             
               choiceCard.style.display = 'none';
               btnRollDice.disabled = true;
               btnRollDice.classList.remove('active-roll');
               btnRollDice.textContent = "GAME PAUSED";
+              triviaCard.style.display = 'none';
+              recapCard.style.display = 'none';
+
               turnBanner.style.display = 'block';
               turnBanner.className = 'turn-paused';
               turnBanner.textContent = "STUDIO INTERMISSION IN PROGRESS";
@@ -595,11 +605,15 @@
               turnBanner.textContent = "DECISION TIME: CHOOSE YOUR PATH!";
               statusPill.textContent = "Listen to Goody, then make your selection!";
               btnRollDice.style.display = 'none';
+              triviaCard.style.display = 'none';
+              recapCard.style.display = 'none';
               choiceCard.style.display = 'flex';
             } else if (data.type === "ENABLE_TURN_ROLL") {
               setLocalMicEnabled(false);
               choiceCard.style.display = 'none';
+              recapCard.style.display = 'none';
               btnRollDice.style.display = 'block';
+
               const isMe = data.activeContestantId === CONTESTANT_ID;
               updateTurnBanner(isMe, `${data.activeContestantName}'S TURN TO ROLL`);
               if (isMe) {
@@ -614,10 +628,10 @@
               setLocalMicEnabled(false);
               choiceCard.style.display = 'none';
               isTieBreaker = false;
-              audienceVoteCounts = [0, 0, 0, 0];
+              recapCard.style.display = 'none';
               const isMe = data.activeContestantId === CONTESTANT_ID;
               updateTurnBanner(isMe, `${data.activeContestantName}'S QUESTION`);
-              injectTriviaCardIntoChat(data.question, isMe, data.activeContestantName);
+              showQuestionLocked(data.question, isMe, data.activeContestantName);
             } else if (data.type === "UNLOCK_QUESTION_INPUT") {
               if (data.activeContestantId === CONTESTANT_ID) {
                 unlockQuestionInput();
@@ -627,27 +641,33 @@
               setLocalMicEnabled(false);
               choiceCard.style.display = 'none';
               isTieBreaker = true;
+              recapCard.style.display = 'none';
               btnRollDice.style.display = 'none';
               turnBanner.style.display = 'block';
               turnBanner.className = 'turn-tie';
               turnBanner.textContent = ' TIE-BREAKER! FIRST TO BUZZ WINS!';
-              injectTriviaCardIntoChat(data.question, true, "SUDDEN DEATH");
-              unlockQuestionInput();
+              startTieBreakerQuestion(data.question);
             } else if (data.type === "OPPONENT_ANSWERED") {
               if (data.contestant !== CONTESTANT_ID) {
-                highlightContestantAnswerInChat(data.chosenAnswer);
+                const chosenIdx = currentQuestionData ? currentQuestionData.options.indexOf(data.chosenAnswer) : -1;
+                if (chosenIdx !== -1) {
+                  optButtons.forEach(b => {
+                    b.disabled = true;
+                    b.classList.remove('unlocked');
+                  });
+                  optButtons[chosenIdx].classList.add('selected');
+                  statusPill.textContent = `${data.contestant === "goody-host-bot" ? "Goody" : "Opponent"} locked in! Checking...`;
+                }
               }
             } else if (data.type === "EVALUATION_RESULT") {
               setLocalMicEnabled(false);
-              handleEvaluationResultInChat(data);
+              handleEvaluationResult(data);
             } else if (data.type === "TIE_BREAKER_RESULT") {
               setLocalMicEnabled(false);
               handleTieBreakerResult(data);
             } else if (data.type === "GAME_OVER") {
               setLocalMicEnabled(false);
               handleGameOver(data);
-            } else if (data.type === "AUDIENCE_CHAT_BROADCAST") {
-              addChatMessage(data.author, data.text, data.isHost ? 'is-host' : '');
             }
           });
         });
@@ -734,7 +754,9 @@
       handleLookDelta(deltaX, deltaY);
     });
 
-    window.addEventListener('mouseup', () => { isMouseDown = false; });
+    window.addEventListener('mouseup', () => {
+      isMouseDown = false;
+    });
 
     function startTenSecondRoll() {
       hasRolled = false;
@@ -761,7 +783,7 @@
       }, 1000);
     }
 
-    function executeRoll() {
+    function executeRoll(isAuto = false) {
       if (hasRolled) return;
       hasRolled = true;
       if (rollTimer) clearInterval(rollTimer);
@@ -771,7 +793,7 @@
       btnRollDice.textContent = "DICE ROLLED!";
 
       const rollValue = Math.floor(Math.random() * 6) + 1;
-      statusPill.textContent = ` You rolled: ${rollValue}!`;
+      statusPill.textContent = isAuto ? ` Auto-rolled: ${rollValue}` : ` You rolled: ${rollValue}!`;
 
       if (dataConn && dataConn.open) {
         dataConn.send({
@@ -782,177 +804,134 @@
         });
       }
     }
-    btnRollDice.addEventListener('click', () => executeRoll());
+    btnRollDice.addEventListener('click', () => executeRoll(false));
 
-    // IN-CHAT TRIVIA SYSTEM
-    function injectTriviaCardIntoChat(qData, isMyTurn, activeName) {
+    function showQuestionLocked(qData, isMyTurn, activeName) {
       currentQuestionData = qData;
       selectedOptionIndex = null;
       btnRollDice.style.display = 'none';
+      recapCard.style.display = 'none';
+      triviaCard.style.display = 'flex';
+     
+      qCountryTag.textContent = ` ${qData.country} (${isMyTurn ? "YOUR QUESTION" : activeName.toUpperCase() + "'S QUESTION"})`;
+      qText.textContent = qData.text || qData.q || "Listen to host:";
+      qTimer.textContent = " LISTENING...";
 
-      if (activeTriviaCardEl && activeTriviaCardEl.parentNode) {
-        activeTriviaCardEl.parentNode.removeChild(activeTriviaCardEl);
-      }
-
-      const card = document.createElement('div');
-      card.className = 'chat-trivia-card';
-      card.id = 'active-chat-trivia-card';
-
-      const countryTag = document.createElement('div');
-      countryTag.className = 'chat-trivia-country';
-      countryTag.textContent = `⚡ ${qData.country.toUpperCase()} (${isMyTurn ? "YOUR TURN" : activeName.toUpperCase() + "'S TURN"})`;
-      card.appendChild(countryTag);
-
-      const qTextEl = document.createElement('div');
-      qTextEl.className = 'chat-trivia-text';
-      qTextEl.textContent = qData.text || qData.q;
-      card.appendChild(qTextEl);
-
-      const grid = document.createElement('div');
-      grid.className = 'chat-options-grid';
-
-      const letters = ["A", "B", "C", "D"];
       qData.options.forEach((opt, idx) => {
-        const btn = document.createElement('button');
-        btn.className = 'chat-opt-btn';
-        btn.id = `chat-aud-btn-${idx}`;
-        btn.disabled = !isMyTurn;
-
-        const spanText = document.createElement('span');
-        spanText.textContent = `${letters[idx]}) ${opt}`;
-
-        const badge = document.createElement('span');
-        badge.className = 'majority-badge';
-        badge.id = `chat-maj-badge-${idx}`;
-        badge.textContent = '0%';
-
-        btn.appendChild(spanText);
-        btn.appendChild(badge);
-
-        if (isMyTurn) {
-          btn.onclick = () => submitContestantAnswerInChat(idx);
-        }
-        grid.appendChild(btn);
+        optButtons[idx].textContent = `${["A", "B", "C", "D"][idx]}) ${opt}`;
+        optButtons[idx].className = "btn-opt";
+        optButtons[idx].disabled = true;
       });
-      card.appendChild(grid);
-
-      const statusMsg = document.createElement('div');
-      statusMsg.className = 'chat-trivia-status';
-      statusMsg.id = 'chat-trivia-status-msg';
-      statusMsg.textContent = isMyTurn ? 'Locked! Pick your answer (30s).' : 'Listening to host / waiting for turn...';
-      card.appendChild(statusMsg);
-
-      chatMessages.appendChild(card);
-      chatMessages.scrollTop = chatMessages.scrollHeight;
-      activeTriviaCardEl = card;
     }
 
     function unlockQuestionInput() {
-      if (!activeTriviaCardEl) return;
-      for (let i = 0; i < 4; i++) {
-        const btn = document.getElementById(`chat-aud-btn-${i}`);
-        if (btn) btn.disabled = false;
-      }
-      const statusMsg = document.getElementById('chat-trivia-status-msg');
-      if (statusMsg) statusMsg.textContent = "OPTIONS UNLOCKED! Lock in your answer!";
+      qTimer.textContent = " 30s";
+      optButtons.forEach(btn => {
+        btn.disabled = false;
+        btn.classList.add('unlocked');
+      });
+
+      let timeLeft = 30;
+      if (questionTimer) clearInterval(questionTimer);
+      questionTimer = setInterval(() => {
+        timeLeft--;
+        if (timeLeft > 0) {
+          qTimer.textContent = ` ${timeLeft}s`;
+        } else {
+          clearInterval(questionTimer);
+          qTimer.textContent = "TIME OUT!";
+          setLocalMicEnabled(false);
+          optButtons.forEach(b => b.disabled = true);
+          if (dataConn && dataConn.open) {
+            dataConn.send({ type: "PLAYER_TIMEOUT", contestant: CONTESTANT_ID });
+          }
+        }
+      }, 1000);
     }
 
-    function submitContestantAnswerInChat(idx) {
-      if (selectedOptionIndex !== null || !currentQuestionData) return;
-      selectedOptionIndex = idx;
+    function startTieBreakerQuestion(qData) {
+      currentQuestionData = qData;
+      selectedOptionIndex = null;
+      triviaCard.style.display = 'flex';
+      qCountryTag.textContent = " SUDDEN DEATH TIE-BREAKER";
+      qText.textContent = qData.text || qData.q;
+      qTimer.textContent = "BUZZ IN NOW!";
+      statusPill.textContent = "First correct answer wins!";
 
-      for (let i = 0; i < 4; i++) {
-        const btn = document.getElementById(`chat-aud-btn-${i}`);
-        if (btn) {
-          if (i === idx) btn.classList.add('selected');
-          btn.disabled = true;
-        }
-      }
+      qData.options.forEach((opt, idx) => {
+        optButtons[idx].textContent = `${["A", "B", "C", "D"][idx]}) ${opt}`;
+        optButtons[idx].className = "btn-opt unlocked";
+        optButtons[idx].disabled = false;
+      });
+    }
 
-      const statusMsg = document.getElementById('chat-trivia-status-msg');
-      if (statusMsg) statusMsg.textContent = "Answer locked in! Evaluating...";
+    optButtons.forEach((btn, idx) => {
+      btn.addEventListener('click', () => {
+        if (selectedOptionIndex !== null) return;
+        selectedOptionIndex = idx;
+        if (questionTimer) clearInterval(questionTimer);
 
-      if (dataConn && dataConn.open) {
-        dataConn.send({
-          type: "PLAYER_ANSWERED",
-          contestant: CONTESTANT_ID,
-          chosenAnswer: currentQuestionData.options[idx]
+        setLocalMicEnabled(false);
+
+        optButtons.forEach(b => {
+          b.disabled = true;
+          b.classList.remove('unlocked');
         });
-      }
-    }
+        btn.classList.add('selected');
+        statusPill.textContent = "Locked in! Checking...";
 
-    function highlightContestantAnswerInChat(chosenAnswer) {
-      if (!currentQuestionData) return;
-      const cIdx = currentQuestionData.options.indexOf(chosenAnswer);
-      if (cIdx !== -1) {
-        const btn = document.getElementById(`chat-aud-btn-${cIdx}`);
-        if (btn) btn.classList.add('selected');
-      }
-    }
-
-    function handleEvaluationResultInChat(data) {
-      setLocalMicEnabled(false);
-      if (!currentQuestionData || !activeTriviaCardEl) return;
-
-      const correctAnsText = currentQuestionData.ans;
-      const correctIdx = currentQuestionData.options.indexOf(correctAnsText);
-
-      for (let i = 0; i < 4; i++) {
-        const btn = document.getElementById(`chat-aud-btn-${i}`);
-        if (btn) {
-          btn.disabled = true;
-          if (i === correctIdx) btn.classList.add('correct');
-          else if (i === selectedOptionIndex && i !== correctIdx) btn.classList.add('wrong');
+        if (dataConn && dataConn.open) {
+          dataConn.send({
+            type: "PLAYER_ANSWERED",
+            contestant: CONTESTANT_ID,
+            chosenAnswer: currentQuestionData.options[idx]
+          });
         }
-      }
+      });
+    });
 
+    function handleEvaluationResult(data) {
+      if (questionTimer) clearInterval(questionTimer);
+      setLocalMicEnabled(false);
       const isMe = data.forContestant === CONTESTANT_ID;
-      const statusMsg = document.getElementById('chat-trivia-status-msg');
-      if (statusMsg) {
-        statusMsg.textContent = data.isCorrect ? (isMe ? "CORRECT! Tile secured." : "Opponent correct!") : (isMe ? "INCORRECT! Back to start." : "Opponent incorrect!");
+      const targetName = data.forContestant === "goody-host-bot" ? "Goody" : "Opponent";
+
+      const targetIdx = selectedOptionIndex !== null
+        ? selectedOptionIndex
+        : (currentQuestionData ? currentQuestionData.options.indexOf(data.chosenAnswer) : -1);
+
+      if (targetIdx !== -1 && optButtons[targetIdx]) {
+        if (data.isCorrect) {
+          optButtons[targetIdx].classList.add('flash-green');
+          statusPill.textContent = isMe ? " CORRECT! Tile secured." : ` ${targetName} was CORRECT!`;
+        } else {
+          optButtons[targetIdx].classList.add('flash-red');
+          statusPill.textContent = isMe ? " INCORRECT! Back to start." : ` ${targetName} was INCORRECT!`;
+        }
       }
 
       setTimeout(() => {
-        replaceTriviaCardWithRecapInChat(data.recap, data.country);
+        triviaCard.style.display = 'none';
+        recapHeader.textContent = ` WHAT WE LEARNED (${data.country}):`;
+        recapBody.textContent = data.recap;
+        recapCard.style.display = 'flex';
+        statusPill.textContent = "Goody is reviewing the recap...";
       }, 1200);
     }
 
     function handleTieBreakerResult(data) {
       setLocalMicEnabled(false);
       const isMeWinner = data.winner.toLowerCase() === contestantName.toLowerCase();
-      const statusMsg = document.getElementById('chat-trivia-status-msg');
-      if (statusMsg) statusMsg.textContent = isMeWinner ? "YOU WON THE TIE-BREAKER!" : `${data.winner.toUpperCase()} WON!`;
+      statusPill.textContent = isMeWinner ? ` YOU WON THE TIE-BREAKER!` : ` ${data.winner.toUpperCase()} WON THE TIE-BREAKER!`;
 
-      if (currentQuestionData && activeTriviaCardEl) {
-        const correctIdx = currentQuestionData.options.indexOf(data.ans);
-        const btn = document.getElementById(`chat-aud-btn-${correctIdx}`);
-        if (btn) btn.classList.add('correct');
+      const targetIdx = currentQuestionData ? currentQuestionData.options.indexOf(data.chosenAnswer) : -1;
+      if (targetIdx !== -1 && optButtons[targetIdx]) {
+        optButtons[targetIdx].classList.add(data.isCorrect ? 'flash-green' : 'flash-red');
       }
 
       setTimeout(() => {
-        if (activeTriviaCardEl && activeTriviaCardEl.parentNode) {
-          activeTriviaCardEl.parentNode.removeChild(activeTriviaCardEl);
-          activeTriviaCardEl = null;
-        }
+        triviaCard.style.display = 'none';
       }, 4000);
-    }
-
-    function replaceTriviaCardWithRecapInChat(recapText, country) {
-      if (!activeTriviaCardEl) return;
-
-      activeTriviaCardEl.innerHTML = `
-        <div class="chat-trivia-country" style="color: #fdcb6e;">📜 RECAP: WHAT WE LEARNED (${country.toUpperCase()})</div>
-        <div class="chat-trivia-text" style="margin-bottom: 2px;">${recapText}</div>
-        <div class="chat-trivia-status" style="color: #ffda66;">Next turn starting soon...</div>
-      `;
-
-      setTimeout(() => {
-        if (activeTriviaCardEl && activeTriviaCardEl.parentNode) {
-          activeTriviaCardEl.parentNode.removeChild(activeTriviaCardEl);
-          activeTriviaCardEl = null;
-        }
-        selectedOptionIndex = null;
-      }, 5000);
     }
 
     function handleGameOver(data) {
