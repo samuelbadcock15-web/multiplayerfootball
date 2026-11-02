@@ -6,7 +6,7 @@
   <title>Goody Tonight Show - Contestant 2</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-user-select: none; }
-    
+   
     html, body {
       width: 100%;
       height: 100%;
@@ -132,7 +132,7 @@
       position: relative;
       width: 100%;
       aspect-ratio: 16 / 9;
-      max-height: 23vh;
+      max-height: 20vh;
       background: #000;
       border: 2px solid #ffda66;
       border-radius: 10px;
@@ -155,19 +155,68 @@
       color: #00f0ff; font-family: monospace; pointer-events: none; z-index: 6;
     }
 
+    /* PIN ENTRY PANEL */
+    #pin-panel {
+      background: #16082b;
+      border: 2px solid #0984e3;
+      border-radius: 10px;
+      padding: 8px;
+      text-align: center;
+      flex-shrink: 0;
+    }
+    #pin-status-txt {
+      font-size: 0.7rem;
+      font-family: monospace;
+      color: #ff7675;
+      font-weight: bold;
+      margin-bottom: 4px;
+    }
+    .pin-display-row {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+    }
+    .pin-digit-box {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+    }
+    .pin-arrow-btn {
+      background: #2b1154;
+      border: 1px solid #00f0ff;
+      color: #00f0ff;
+      font-weight: bold;
+      font-size: 0.8rem;
+      width: 32px;
+      height: 22px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .pin-arrow-btn:active { background: #00f0ff; color: #111; }
+    .pin-digit-val {
+      font-size: 1.5rem;
+      font-family: monospace;
+      font-weight: 900;
+      color: #ffda66;
+      width: 32px;
+      text-align: center;
+      background: #080313;
+      border: 1px solid #a29bfe;
+      border-radius: 4px;
+      padding: 2px 0;
+    }
+
     #turn-banner {
       width: 100%; padding: 4px 8px; border-radius: 6px; text-align: center;
       font-weight: 900; font-size: 0.72rem; font-family: monospace; text-transform: uppercase;
       letter-spacing: 0.5px; display: none; flex-shrink: 0;
     }
-    .turn-mine { background: #00b894; color: #fff; border: 1.5px solid #55efc4; animation: pulseGlow 1.2s infinite alternate; }
+    .turn-mine { background: #00b894; color: #fff; border: 1.5px solid #55efc4; }
     .turn-theirs { background: #2d1847; color: #dfe6e9; border: 1.5px solid #636e72; }
-    .turn-tie { background: #e17055; color: #fff; border: 1.5px solid #fdcb6e; animation: pulseGlow 0.8s infinite alternate; }
-    .turn-paused { background: #d63031; color: #fff; border: 1.5px solid #ff7675; animation: pulseGlow 0.9s infinite alternate; }
-    @keyframes pulseGlow { from { box-shadow: 0 0 4px #00b894; } to { box-shadow: 0 0 10px #55efc4; } }
 
     #status-pill {
-      text-align: center; font-family: monospace; font-size: 0.75rem;
+      text-align: center; font-family: monospace; font-size: 0.72rem;
       color: #39ff14; min-height: 16px; line-height: 16px; flex-shrink: 0;
     }
 
@@ -181,7 +230,6 @@
       width: 100%; padding: 12px; border-radius: 8px; border: 2px solid;
       font-size: 0.85rem; font-weight: 900; text-transform: uppercase; cursor: pointer; color: #fff;
     }
-    .choice-btn:active { transform: scale(0.98); }
     .btn-choice-solo { background: #2980b9; border-color: #3498db; }
     .btn-choice-goody { background: #8e44ad; border-color: #9b59b6; }
 
@@ -189,7 +237,7 @@
       width: 100%; padding: 10px; background: #444; border: 2px solid #777;
       border-radius: 10px; font-size: 0.9rem; font-weight: 900; color: #888;
       text-transform: uppercase; letter-spacing: 0.5px; cursor: not-allowed; transition: all 0.2s;
-      flex-shrink: 0;
+      flex-shrink: 0; display: none;
     }
     #btn-roll-dice.active-roll {
       background: linear-gradient(180deg, #fdcb6e, #e17055);
@@ -201,7 +249,7 @@
     #chat-container {
       width: 100%; max-width: 420px; background: rgba(13, 5, 26, 0.95);
       border: 1.5px solid #d4af37; border-radius: 10px; display: flex; flex-direction: column;
-      flex: 1; min-height: 160px; max-height: 32vh; pointer-events: auto; margin-bottom: 4px; backdrop-filter: blur(4px);
+      flex: 1; min-height: 130px; max-height: 28vh; pointer-events: auto; margin-bottom: 4px; backdrop-filter: blur(4px);
     }
     #chat-header {
       padding: 5px 8px; background: #230a42; border-top-left-radius: 8px; border-top-right-radius: 8px;
@@ -213,12 +261,9 @@
     .chat-msg { word-break: break-word; line-height: 1.25; }
     .chat-author { font-weight: bold; color: #39ff14; font-family: monospace; }
     .chat-author.is-self { color: #00f0ff; }
-    .chat-author.is-host { color: #ff7675; }
 
-    /* IN-CHAT TRIVIA CARD */
     .chat-trivia-card {
       background: #1c0a35; border: 2px solid #00f0ff; border-radius: 8px; padding: 8px; margin: 4px 0;
-      box-shadow: 0 0 12px rgba(0, 240, 255, 0.25);
     }
     .chat-trivia-country { font-size: 0.68rem; font-family: monospace; color: #ffda66; font-weight: bold; margin-bottom: 2px; }
     .chat-trivia-text { font-size: 0.76rem; color: #fff; font-weight: 600; margin-bottom: 6px; line-height: 1.2; }
@@ -226,14 +271,10 @@
     .chat-opt-btn {
       background: #2b1154; border: 1.5px solid #a29bfe; border-radius: 5px; color: #fff;
       padding: 5px 6px; font-size: 0.7rem; font-weight: bold; text-align: left; cursor: pointer;
-      display: flex; justify-content: space-between; align-items: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
     }
-    .chat-opt-btn:hover:not(:disabled) { background: #6c5ce7; border-color: #00f0ff; }
-    .chat-opt-btn.selected { background: #0984e3 !important; border-color: #00f0ff !important; box-shadow: 0 0 6px rgba(9,132,227,0.6); }
-    .chat-opt-btn.correct { background: #00b894 !important; border-color: #55efc4 !important; }
-    .chat-opt-btn.wrong { background: #d63031 !important; border-color: #ff7675 !important; }
-    .chat-opt-btn:disabled { cursor: default; opacity: 0.9; }
-    .majority-badge { font-size: 0.6rem; font-family: monospace; background: rgba(0,0,0,0.5); padding: 1px 3px; border-radius: 3px; color: #ffda66; }
+    .chat-opt-btn.selected { background: #0984e3 !important; border-color: #00f0ff !important; }
+    .chat-opt-btn.correct { background: #00b894 !important; }
+    .chat-opt-btn.wrong { background: #d63031 !important; }
     .chat-trivia-status { margin-top: 4px; font-size: 0.68rem; font-family: monospace; color: #39ff14; font-weight: bold; text-align: center; }
 
     .chat-input-row { display: flex; border-top: 1px solid #442266; padding: 4px; gap: 4px; }
@@ -251,10 +292,10 @@
       padding: 3px; display: flex; flex-direction: column; align-items: center;
       gap: 2px; flex-shrink: 0;
     }
-    .dpad-grid { display: grid; grid-template-columns: 42px 42px 42px; grid-template-rows: 28px 28px; gap: 3px; }
+    .dpad-grid { display: grid; grid-template-columns: 38px 38px 38px; grid-template-rows: 26px 26px; gap: 3px; }
     .dpad-btn {
       background: #2b1154; border: 1.5px solid #ff79b0; border-radius: 5px; color: #fff;
-      font-size: 0.9rem; font-weight: bold; display: flex; justify-content: center; align-items: center; cursor: pointer;
+      font-size: 0.85rem; font-weight: bold; display: flex; justify-content: center; align-items: center; cursor: pointer;
     }
   </style>
 </head>
@@ -263,7 +304,7 @@
   <div id="setup-card">
     <div class="badge-podium">PODIUM 2</div>
     <h2 style="color: #ffda66; margin-bottom: 12px; font-size: 1.25rem;">The Goody Tonight Show</h2>
-    
+   
     <div class="form-group">
       <span class="input-label">Host Screen 4-Digit Code:</span>
       <input type="text" id="passcode-input" maxlength="4" placeholder="0000" inputmode="numeric" pattern="[0-9]*" autocomplete="off" />
@@ -285,7 +326,7 @@
   <main id="live-stage-portal">
     <div class="badge-bar">
       <span id="role-tag" style="color: #00f0ff;">CONNECTING...</span>
-      <span id="mic-status-badge">🎙️ MIC LIVE (ON AIR)</span>
+      <span id="mic-status-badge">🎙️ MIC LIVE</span>
       <span id="match-timer-badge" style="color: #ffda66;"> 20:00</span>
       <span style="color: #39ff14;"> LIVE</span>
     </div>
@@ -296,23 +337,41 @@
       <video id="local-selfie-pip" autoplay playsinline muted></video>
     </div>
 
-    <div id="turn-banner"></div>
-
-    <div id="status-pill">Waiting for host...</div>
-
-    <div id="choice-card">
-      <div id="choice-title">Make Your Choice, Contestant!</div>
-      <button class="choice-btn btn-choice-solo" id="btn-pick-solo">Race Solo Against Clock</button>
-      <button class="choice-btn btn-choice-goody" id="btn-pick-goody">Battle Goody Head-To-Head</button>
+    <!-- MOBILE PIN ENTRY PANEL -->
+    <div id="pin-panel">
+      <div id="pin-status-txt">🔴 STEP PLUSHIE ON STAGE PAD TO POWER PIN</div>
+      <div class="pin-display-row">
+        <div class="pin-digit-box">
+          <button class="pin-arrow-btn" onclick="adjustPin(0, 1)">▲</button>
+          <span id="p-digit-0" class="pin-digit-val">0</span>
+          <button class="pin-arrow-btn" onclick="adjustPin(0, -1)">▼</button>
+        </div>
+        <div class="pin-digit-box">
+          <button class="pin-arrow-btn" onclick="adjustPin(1, 1)">▲</button>
+          <span id="p-digit-1" class="pin-digit-val">0</span>
+          <button class="pin-arrow-btn" onclick="adjustPin(1, -1)">▼</button>
+        </div>
+        <div class="pin-digit-box">
+          <button class="pin-arrow-btn" onclick="adjustPin(2, 1)">▲</button>
+          <span id="p-digit-2" class="pin-digit-val">0</span>
+          <button class="pin-arrow-btn" onclick="adjustPin(2, -1)">▼</button>
+        </div>
+        <div class="pin-digit-box">
+          <button class="pin-arrow-btn" onclick="adjustPin(3, 1)">▲</button>
+          <span id="p-digit-3" class="pin-digit-val">0</span>
+          <button class="pin-arrow-btn" onclick="adjustPin(3, -1)">▼</button>
+        </div>
+      </div>
     </div>
 
-    <button id="btn-roll-dice" disabled> ROLL DICE (LOCKED)</button>
+    <div id="turn-banner"></div>
+    <div id="status-pill">Walk plushie to stage pad & enter 0002!</div>
 
-    <!-- IN-CHAT TRIVIA & CHAT CONTAINER -->
+    <button id="btn-roll-dice" disabled>ROLL DICE (LOCKED)</button>
+
     <div id="chat-container">
       <div id="chat-header">
         <span>COMMUNAL CHAT & TRIVIA [CLOCK: <span id="c2-chat-clock" style="color:#ffda66;">20:00</span>]</span>
-        <span id="chat-toggle-icon">▼</span>
       </div>
       <div id="chat-messages">
         <div class="chat-msg" style="color:#aaa; font-style:italic;">Connected to studio feed...</div>
@@ -324,7 +383,7 @@
     </div>
 
     <div class="dpad-section">
-      <div style="font-size: 0.6rem; color: #ff9ff3; font-family: monospace;"> STUDIO NAVIGATION (WASD / D-PAD)</div>
+      <div style="font-size: 0.6rem; color: #ff9ff3; font-family: monospace;"> PLUSHIE NAVIGATION (WASD / D-PAD)</div>
       <div class="dpad-grid">
         <div></div>
         <button class="dpad-btn" id="dpad-fwd">▲</button>
@@ -338,28 +397,6 @@
 
   <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
   <script>
-    function generateDeviceFingerprint() {
-      try {
-        const c = document.createElement('canvas');
-        const gl = c.getContext('webgl') || c.getContext('experimental-webgl');
-        const d = gl ? gl.getExtension('WEBGL_debug_renderer_info') : null;
-        const rend = d && gl ? gl.getParameter(d.UNMASKED_RENDERER_WEBGL) : 'gpu';
-        const str = `${rend}|${window.screen.width}x${window.screen.height}|${navigator.hardwareConcurrency || 4}`;
-        let h = 0;
-        for (let i = 0; i < str.length; i++) { h = ((h << 5) - h) + str.charCodeAt(i); h |= 0; }
-        return 'hw_' + Math.abs(h).toString(16);
-      } catch (e) {
-        return 'hw_' + Math.random().toString(36).substring(2, 9);
-      }
-    }
-    const deviceHardwareId = generateDeviceFingerprint();
-
-    let playerSessionToken = localStorage.getItem("goody_session_token_c2");
-    if (!playerSessionToken) {
-      playerSessionToken = "s2_" + Math.random().toString(36).substring(2, 9);
-      localStorage.setItem("goody_session_token_c2", playerSessionToken);
-    }
-
     const CONTESTANT_ID = "goody-contestant-2";
     let localStream = null;
     let peer = null;
@@ -367,13 +404,9 @@
     let mediaCall = null;
     let contestantName = "";
     let contestantCity = "";
-    let hasRolled = false;
-    let rollTimer = null;
-    let currentQuestionData = null;
-    let selectedOptionIndex = null;
-    let isTieBreaker = false;
-    let mobileAudioUnlocked = false;
-    let activeTriviaCardEl = null;
+    let pinDigits = [0, 0, 0, 0];
+    let isPadPowered = false;
+    let isPinAccepted = false;
 
     const passcodeInput = document.getElementById('passcode-input');
     const nameInput = document.getElementById('name-input');
@@ -392,44 +425,40 @@
     const statusPill = document.getElementById('status-pill');
     const btnRollDice = document.getElementById('btn-roll-dice');
     const interactiveViewport = document.getElementById('interactive-viewport');
-
-    const choiceCard = document.getElementById('choice-card');
-    const btnPickSolo = document.getElementById('btn-pick-solo');
-    const btnPickGoody = document.getElementById('btn-pick-goody');
+    const pinStatusTxt = document.getElementById('pin-status-txt');
 
     const chatMessages = document.getElementById('chat-messages');
     const chatTextInput = document.getElementById('chat-text-input');
     const btnSendChat = document.getElementById('btn-send-chat');
 
+    function adjustPin(index, delta) {
+      if (!isPadPowered || isPinAccepted) return;
+      pinDigits[index] = (pinDigits[index] + delta + 10) % 10;
+      document.getElementById(`p-digit-${index}`).textContent = pinDigits[index];
+
+      const currentPinStr = pinDigits.join('');
+      if (currentPinStr === "0002") {
+        isPinAccepted = true;
+        pinStatusTxt.style.color = '#39ff14';
+        pinStatusTxt.textContent = "🟢 PIN 0002 ACCEPTED!";
+        statusPill.textContent = "PIN Accepted! Waiting for opponent...";
+      }
+
+      if (dataConn && dataConn.open) {
+        dataConn.send({
+          type: "CONTESTANT_PIN_UPDATE",
+          contestant: CONTESTANT_ID,
+          digits: pinDigits
+        });
+      }
+    }
+
     function setLocalMicEnabled(enabled) {
       if (localStream) {
         const audioTracks = localStream.getAudioTracks();
-        if (audioTracks.length > 0) {
-          audioTracks[0].enabled = enabled;
-        }
+        if (audioTracks.length > 0) audioTracks[0].enabled = enabled;
       }
       micStatusBadge.style.display = enabled ? 'inline-block' : 'none';
-    }
-
-    function unlockMobileAudio() {
-      if (mobileAudioUnlocked) return;
-      mobileAudioUnlocked = true;
-      studioStreamVideo.muted = false;
-
-      if ('speechSynthesis' in window) {
-        const primeUtterance = new SpeechSynthesisUtterance('');
-        primeUtterance.volume = 0;
-        window.speechSynthesis.speak(primeUtterance);
-      }
-    }
-
-    function playHostSpeechLocally(text) {
-      if (!('speechSynthesis' in window)) return;
-      window.speechSynthesis.cancel();
-      const utt = new SpeechSynthesisUtterance(text);
-      utt.rate = 0.95;
-      utt.pitch = 1.25;
-      window.speechSynthesis.speak(utt);
     }
 
     function addChatMessage(author, text, customClass = '') {
@@ -452,535 +481,74 @@
       addChatMessage(contestantName || "June", text, 'is-self');
       chatTextInput.value = '';
       if (dataConn && dataConn.open) {
-        dataConn.send({
-          type: "AUDIENCE_CHAT_MESSAGE",
-          author: contestantName || "June",
-          text: text,
-          sessionToken: playerSessionToken,
-          hardwareId: deviceHardwareId
-        });
+        dataConn.send({ type: "AUDIENCE_CHAT_MESSAGE", author: contestantName || "June", text: text });
       }
     }
     btnSendChat.addEventListener('click', sendChatMessage);
     chatTextInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') sendChatMessage(); });
-
-    function resetToSetupScreen() {
-      setLocalMicEnabled(false);
-      if (dataConn) { try { dataConn.close(); } catch(e){} dataConn = null; }
-      if (mediaCall) { try { mediaCall.close(); } catch(e){} mediaCall = null; }
-      if (peer) { try { peer.destroy(); } catch(e){} peer = null; }
-
-      liveStagePortal.style.display = 'none';
-      setupCard.style.display = 'block';
-      statusPill.textContent = "Waiting for host...";
-    }
 
     btnEnterStudio.addEventListener('click', () => {
       const code = passcodeInput.value.trim();
       const name = nameInput.value.trim();
       const city = cityInput.value.trim() || "Nottingham";
 
-      if (!/^\d{4}$/.test(code)) {
-        alert("Please enter the 4-digit code shown on the host screen.");
-        passcodeInput.focus();
-        return;
-      }
-      if (!name || name.length < 2) {
-        alert("Please enter your first name (at least 2 letters).");
-        nameInput.focus();
-        return;
-      }
+      if (!/^\d{4}$/.test(code)) { alert("Please enter the 4-digit code."); return; }
+      if (!name) { alert("Please enter your name."); return; }
 
-      unlockMobileAudio();
-      joinGame(name, city, code);
-    });
-
-    async function joinGame(name, city, enteredCode) {
-      contestantName = name;
-      contestantCity = city;
       setupCard.style.display = 'none';
       liveStagePortal.style.display = 'flex';
       roleTag.textContent = `${name.toUpperCase()} (CONNECTING...)`;
 
-      try {
-        if (!localStream) {
-          localStream = await navigator.mediaDevices.getUserMedia({
-            video: { facingMode: "user", width: { ideal: 640 }, height: { ideal: 480 } },
-            audio: { echoCancellation: true, noiseSuppression: true }
-          });
-          localSelfiePip.srcObject = localStream;
-          setLocalMicEnabled(false);
-        }
+      navigator.mediaDevices.getUserMedia({ video: { width: 640, height: 480 }, audio: true }).then(stream => {
+        localStream = stream;
+        localSelfiePip.srcObject = stream;
+        setLocalMicEnabled(false);
 
-        if (peer) { try { peer.destroy(); } catch(e){} }
         peer = new Peer();
-
         peer.on('open', () => {
-          // Connect to the unique dynamic studio ID
-          const targetStudioId = "goody-studio-" + enteredCode;
-
+          const targetStudioId = "goody-studio-" + code;
           mediaCall = peer.call(targetStudioId, localStream, {
-            metadata: {
-              contestant: CONTESTANT_ID,
-              name: contestantName,
-              city: contestantCity,
-              passcode: enteredCode,
-              sessionToken: playerSessionToken
-            }
+            metadata: { contestant: CONTESTANT_ID, name, city, passcode: code }
           });
-
-          mediaCall.on('stream', (returnStudioStream) => {
-            studioStreamVideo.srcObject = returnStudioStream;
-            studioStreamVideo.muted = false;
+          mediaCall.on('stream', (s) => {
+            studioStreamVideo.srcObject = s;
             studioStreamVideo.play().catch(console.error);
           });
 
           dataConn = peer.connect(targetStudioId, {
-            metadata: {
-              contestant: CONTESTANT_ID,
-              name: contestantName,
-              city: contestantCity,
-              passcode: enteredCode,
-              sessionToken: playerSessionToken
-            }
+            metadata: { contestant: CONTESTANT_ID, name, city, passcode: code }
           });
-
-          dataConn.on('open', () => {
-            statusPill.textContent = "Verifying availability with studio...";
-          });
-
           dataConn.on('data', (data) => {
-            if (data.type === "AUTH_FAILED") {
-              alert("Incorrect 4-digit code! Please check the host screen and try again.");
-              resetToSetupScreen();
-              return;
-            } else if (data.type === "SLOT_TAKEN") {
-              alert(`Podium 2 (${data.slotName}) is already occupied! If you are the other player, please open the Contestant 1 link.`);
-              resetToSetupScreen();
-              return;
-            } else if (data.type === "HOST_EJECTED_PLAYER") {
-              alert(data.message || "You have been disconnected by the studio director.");
-              resetToSetupScreen();
-              return;
-            } else if (data.type === "AUTH_SUCCESS") {
-              roleTag.textContent = `${contestantName.toUpperCase()} (CONTESTANT 2)`;
-              statusPill.textContent = "Connected! Standby for host...";
-            } else if (data.type === "SET_MIC_STATE") {
-              setLocalMicEnabled(Boolean(data.enabled));
-              statusPill.textContent = data.enabled ? (data.promptText || "🎙️ Your mic is LIVE!") : "Microphone muted.";
-            } else if (data.type === "HOST_SPEAK") {
-              playHostSpeechLocally(data.text);
-            } else if (data.type === "START_DICE_COUNTDOWN") {
-              setLocalMicEnabled(false);
-              choiceCard.style.display = 'none';
-              btnRollDice.style.display = 'block';
-              startTenSecondRoll();
-            } else if (data.type === "DICE_RESULT_CONFIRMED") {
-              // Host-authoritative roll feedback
-              if (data.contestant === CONTESTANT_ID) {
-                statusPill.textContent = `🎲 You rolled: ${data.roll}!`;
-                btnRollDice.textContent = `ROLLED A ${data.roll}!`;
+            if (data.type === "AUTH_SUCCESS") {
+              roleTag.textContent = `${name.toUpperCase()} (PODIUM 2)`;
+              statusPill.textContent = "Walk plushie to stage pad!";
+            } else if (data.type === "PAD_POWER_STATE") {
+              isPadPowered = Boolean(data.powered);
+              if (isPadPowered) {
+                pinStatusTxt.style.color = '#00f0ff';
+                pinStatusTxt.textContent = "🟢 PAD ACTIVE! ENTER PIN 0002";
               } else {
-                statusPill.textContent = `Opponent rolled: ${data.roll}!`;
+                pinStatusTxt.style.color = '#ff7675';
+                pinStatusTxt.textContent = "🔴 STEP PLUSHIE ON STAGE PAD";
               }
             } else if (data.type === "SYNC_MATCH_TIMER") {
               matchTimerBadge.textContent = ` ${data.timeStr}`;
               c2ChatClock.textContent = data.timeStr;
-            } else if (data.type === "INTERMISSION_PAUSE") {
-              setLocalMicEnabled(false);
-              if (rollTimer) clearInterval(rollTimer);
-              if ('speechSynthesis' in window) window.speechSynthesis.cancel();
-              choiceCard.style.display = 'none';
-              btnRollDice.disabled = true;
-              btnRollDice.classList.remove('active-roll');
-              btnRollDice.textContent = "GAME PAUSED";
-              turnBanner.style.display = 'block';
-              turnBanner.className = 'turn-paused';
-              turnBanner.textContent = "STUDIO INTERMISSION IN PROGRESS";
-              statusPill.textContent = "A contestant disconnected! Standby for replacement...";
-            } else if (data.type === "OFFER_CONTESTANT_CHOICE") {
-              setLocalMicEnabled(false);
-              turnBanner.style.display = 'block';
-              turnBanner.className = 'turn-mine';
-              turnBanner.textContent = "DECISION TIME: CHOOSE YOUR PATH!";
-              statusPill.textContent = "Listen to Goody, then make your selection!";
-              btnRollDice.style.display = 'none';
-              choiceCard.style.display = 'flex';
-            } else if (data.type === "ENABLE_TURN_ROLL") {
-              setLocalMicEnabled(false);
-              choiceCard.style.display = 'none';
+            } else if (data.type === "START_DICE_COUNTDOWN") {
               btnRollDice.style.display = 'block';
-              const isMe = data.activeContestantId === CONTESTANT_ID;
-              updateTurnBanner(isMe, `${data.activeContestantName}'S TURN TO ROLL`);
-              if (isMe) {
-                startTenSecondRoll();
-              } else {
-                statusPill.textContent = `Waiting for ${data.activeContestantName} to roll...`;
-                btnRollDice.disabled = true;
-                btnRollDice.classList.remove('active-roll');
-                btnRollDice.textContent = ` WAITING FOR ${data.activeContestantName.toUpperCase()}...`;
+              btnRollDice.disabled = false;
+              btnRollDice.classList.add('active-roll');
+              btnRollDice.textContent = "ROLL DICE NOW!";
+            } else if (data.type === "DICE_RESULT_CONFIRMED") {
+              if (data.contestant === CONTESTANT_ID) {
+                statusPill.textContent = `🎲 You rolled: ${data.roll}!`;
+                btnRollDice.textContent = `ROLLED A ${data.roll}!`;
               }
-            } else if (data.type === "SHOW_QUESTION_LOCKED") {
-              setLocalMicEnabled(false);
-              choiceCard.style.display = 'none';
-              isTieBreaker = false;
-              const isMe = data.activeContestantId === CONTESTANT_ID;
-              updateTurnBanner(isMe, `${data.activeContestantName}'S QUESTION`);
-              injectTriviaCardIntoChat(data.question, isMe, data.activeContestantName);
-            } else if (data.type === "UNLOCK_QUESTION_INPUT") {
-              if (data.activeContestantId === CONTESTANT_ID) {
-                unlockQuestionInput();
-                setLocalMicEnabled(true);
-              }
-            } else if (data.type === "START_TIE_BREAKER") {
-              setLocalMicEnabled(false);
-              choiceCard.style.display = 'none';
-              isTieBreaker = true;
-              btnRollDice.style.display = 'none';
-              turnBanner.style.display = 'block';
-              turnBanner.className = 'turn-tie';
-              turnBanner.textContent = ' TIE-BREAKER! FIRST TO BUZZ WINS!';
-              injectTriviaCardIntoChat(data.question, true, "SUDDEN DEATH");
-              unlockQuestionInput();
-            } else if (data.type === "OPPONENT_ANSWERED") {
-              if (data.contestant !== CONTESTANT_ID) {
-                highlightContestantAnswerInChat(data.chosenAnswer);
-              }
-            } else if (data.type === "EVALUATION_RESULT") {
-              setLocalMicEnabled(false);
-              handleEvaluationResultInChat(data);
-            } else if (data.type === "TIE_BREAKER_RESULT") {
-              setLocalMicEnabled(false);
-              handleTieBreakerResult(data);
-            } else if (data.type === "GAME_OVER") {
-              setLocalMicEnabled(false);
-              handleGameOver(data);
-            } else if (data.type === "AUDIENCE_CHAT_BROADCAST") {
-              addChatMessage(data.author, data.text, data.isHost ? 'is-host' : '');
             }
           });
         });
-
-      } catch (err) {
-        alert("Camera & microphone permissions required: " + err.message);
-        resetToSetupScreen();
-      }
-    }
-
-    btnPickSolo.addEventListener('click', () => {
-      choiceCard.style.display = 'none';
-      statusPill.textContent = "Choice confirmed: Solo Race against time!";
-      if (dataConn && dataConn.open) {
-        dataConn.send({ type: "CONTESTANT_CHOSE_PATH", choice: "SOLO", contestant: CONTESTANT_ID });
-      }
+      }).catch(err => alert("Cam/Mic error: " + err.message));
     });
-
-    btnPickGoody.addEventListener('click', () => {
-      choiceCard.style.display = 'none';
-      statusPill.textContent = "Choice confirmed: Battling Goody Head-To-Head!";
-      if (dataConn && dataConn.open) {
-        dataConn.send({ type: "CONTESTANT_CHOSE_PATH", choice: "GOODY", contestant: CONTESTANT_ID });
-      }
-    });
-
-    function updateTurnBanner(isMe, subText) {
-      turnBanner.style.display = 'block';
-      if (isMe) {
-        turnBanner.className = 'turn-mine';
-        turnBanner.textContent = ` YOUR TURN (${subText})!`;
-      } else {
-        turnBanner.className = 'turn-theirs';
-        turnBanner.textContent = ` WAITING: ${subText}`;
-      }
-    }
-
-    let isMouseDown = false;
-    let lookStartX = 0;
-    let lookStartY = 0;
-
-    function handleLookDelta(dx, dy) {
-      if (dataConn && dataConn.open) {
-        dataConn.send({
-          type: "PLUSHIE_LOOK",
-          contestant: CONTESTANT_ID,
-          deltaX: -dx,
-          deltaY: dy
-        });
-      }
-    }
-
-    interactiveViewport.addEventListener('touchstart', (e) => {
-      if (e.touches.length === 1) {
-        lookStartX = e.touches[0].clientX;
-        lookStartY = e.touches[0].clientY;
-      }
-    }, { passive: true });
-
-    interactiveViewport.addEventListener('touchmove', (e) => {
-      if (e.touches.length === 1) {
-        const deltaX = e.touches[0].clientX - lookStartX;
-        const deltaY = e.touches[0].clientY - lookStartY;
-        lookStartX = e.touches[0].clientX;
-        lookStartY = e.touches[0].clientY;
-        handleLookDelta(deltaX, deltaY);
-      }
-    }, { passive: true });
-
-    interactiveViewport.addEventListener('mousedown', (e) => {
-      if (e.button === 0) {
-        isMouseDown = true;
-        lookStartX = e.clientX;
-        lookStartY = e.clientY;
-      }
-    });
-
-    window.addEventListener('mousemove', (e) => {
-      if (!isMouseDown) return;
-      const deltaX = e.clientX - lookStartX;
-      const deltaY = e.clientY - lookStartY;
-      lookStartX = e.clientX;
-      lookStartY = e.clientY;
-      handleLookDelta(deltaX, deltaY);
-    });
-
-    window.addEventListener('mouseup', () => { isMouseDown = false; });
-
-    function startTenSecondRoll() {
-      hasRolled = false;
-      btnRollDice.style.display = 'block';
-      btnRollDice.disabled = false;
-      btnRollDice.classList.add('active-roll');
-      btnRollDice.textContent = " ROLL DICE NOW!";
-
-      let timeLeft = 10;
-      statusPill.textContent = ` ROLL TIMER: ${timeLeft}s`;
-
-      if (rollTimer) clearInterval(rollTimer);
-      rollTimer = setInterval(() => {
-        timeLeft--;
-        if (timeLeft > 0) {
-          statusPill.textContent = ` ROLL TIMER: ${timeLeft}s`;
-        } else {
-          clearInterval(rollTimer);
-          btnRollDice.disabled = true;
-          btnRollDice.classList.remove('active-roll');
-          btnRollDice.textContent = "TIME EXPIRED";
-          statusPill.textContent = "Time expired! Host auto-rolling...";
-        }
-      }, 1000);
-    }
-
-    function executeRoll() {
-      if (hasRolled) return;
-      hasRolled = true;
-      if (rollTimer) clearInterval(rollTimer);
-
-      btnRollDice.disabled = true;
-      btnRollDice.classList.remove('active-roll');
-      btnRollDice.textContent = "ROLLING...";
-      statusPill.textContent = "Rolling dice on studio board...";
-
-      // HOST-AUTHORITATIVE: Send roll request only
-      if (dataConn && dataConn.open) {
-        dataConn.send({
-          type: "REQUEST_ROLL",
-          contestant: CONTESTANT_ID
-        });
-      }
-    }
-    btnRollDice.addEventListener('click', () => executeRoll());
-
-    // IN-CHAT TRIVIA SYSTEM
-    function injectTriviaCardIntoChat(qData, isMyTurn, activeName) {
-      currentQuestionData = qData;
-      selectedOptionIndex = null;
-      btnRollDice.style.display = 'none';
-
-      if (activeTriviaCardEl && activeTriviaCardEl.parentNode) {
-        activeTriviaCardEl.parentNode.removeChild(activeTriviaCardEl);
-      }
-
-      const card = document.createElement('div');
-      card.className = 'chat-trivia-card';
-      card.id = 'active-chat-trivia-card';
-
-      const countryTag = document.createElement('div');
-      countryTag.className = 'chat-trivia-country';
-      countryTag.textContent = `⚡ ${qData.country.toUpperCase()} (${isMyTurn ? "YOUR TURN" : activeName.toUpperCase() + "'S TURN"})`;
-      card.appendChild(countryTag);
-
-      const qTextEl = document.createElement('div');
-      qTextEl.className = 'chat-trivia-text';
-      qTextEl.textContent = qData.text || qData.q;
-      card.appendChild(qTextEl);
-
-      const grid = document.createElement('div');
-      grid.className = 'chat-options-grid';
-
-      const letters = ["A", "B", "C", "D"];
-      qData.options.forEach((opt, idx) => {
-        const btn = document.createElement('button');
-        btn.className = 'chat-opt-btn';
-        btn.id = `chat-aud-btn-${idx}`;
-        btn.disabled = !isMyTurn;
-
-        const spanText = document.createElement('span');
-        spanText.textContent = `${letters[idx]}) ${opt}`;
-
-        const badge = document.createElement('span');
-        badge.className = 'majority-badge';
-        badge.id = `chat-maj-badge-${idx}`;
-        badge.textContent = '0%';
-
-        btn.appendChild(spanText);
-        btn.appendChild(badge);
-
-        if (isMyTurn) {
-          btn.onclick = () => submitContestantAnswerInChat(idx);
-        }
-        grid.appendChild(btn);
-      });
-      card.appendChild(grid);
-
-      const statusMsg = document.createElement('div');
-      statusMsg.className = 'chat-trivia-status';
-      statusMsg.id = 'chat-trivia-status-msg';
-      statusMsg.textContent = isMyTurn ? 'Locked! Pick your answer (30s).' : 'Listening to host / waiting for turn...';
-      card.appendChild(statusMsg);
-
-      chatMessages.appendChild(card);
-      chatMessages.scrollTop = chatMessages.scrollHeight;
-      activeTriviaCardEl = card;
-    }
-
-    function unlockQuestionInput() {
-      if (!activeTriviaCardEl) return;
-      for (let i = 0; i < 4; i++) {
-        const btn = document.getElementById(`chat-aud-btn-${i}`);
-        if (btn) btn.disabled = false;
-      }
-      const statusMsg = document.getElementById('chat-trivia-status-msg');
-      if (statusMsg) statusMsg.textContent = "OPTIONS UNLOCKED! Lock in your answer!";
-    }
-
-    function submitContestantAnswerInChat(idx) {
-      if (selectedOptionIndex !== null || !currentQuestionData) return;
-      selectedOptionIndex = idx;
-
-      for (let i = 0; i < 4; i++) {
-        const btn = document.getElementById(`chat-aud-btn-${i}`);
-        if (btn) {
-          if (i === idx) btn.classList.add('selected');
-          btn.disabled = true;
-        }
-      }
-
-      const statusMsg = document.getElementById('chat-trivia-status-msg');
-      if (statusMsg) statusMsg.textContent = "Answer locked in! Evaluating...";
-
-      if (dataConn && dataConn.open) {
-        dataConn.send({
-          type: "PLAYER_ANSWERED",
-          contestant: CONTESTANT_ID,
-          chosenAnswer: currentQuestionData.options[idx]
-        });
-      }
-    }
-
-    function highlightContestantAnswerInChat(chosenAnswer) {
-      if (!currentQuestionData) return;
-      const cIdx = currentQuestionData.options.indexOf(chosenAnswer);
-      if (cIdx !== -1) {
-        const btn = document.getElementById(`chat-aud-btn-${cIdx}`);
-        if (btn) btn.classList.add('selected');
-      }
-    }
-
-    function handleEvaluationResultInChat(data) {
-      setLocalMicEnabled(false);
-      if (!currentQuestionData || !activeTriviaCardEl) return;
-
-      const correctAnsText = currentQuestionData.ans;
-      const correctIdx = currentQuestionData.options.indexOf(correctAnsText);
-
-      for (let i = 0; i < 4; i++) {
-        const btn = document.getElementById(`chat-aud-btn-${i}`);
-        if (btn) {
-          btn.disabled = true;
-          if (i === correctIdx) btn.classList.add('correct');
-          else if (i === selectedOptionIndex && i !== correctIdx) btn.classList.add('wrong');
-        }
-      }
-
-      const isMe = data.forContestant === CONTESTANT_ID;
-      const statusMsg = document.getElementById('chat-trivia-status-msg');
-      if (statusMsg) {
-        statusMsg.textContent = data.isCorrect ? (isMe ? "CORRECT! Tile secured." : "Opponent correct!") : (isMe ? "INCORRECT! Back to start." : "Opponent incorrect!");
-      }
-
-      setTimeout(() => {
-        replaceTriviaCardWithRecapInChat(data.recap, data.country);
-      }, 1200);
-    }
-
-    function handleTieBreakerResult(data) {
-      setLocalMicEnabled(false);
-      const isMeWinner = data.winner.toLowerCase() === contestantName.toLowerCase();
-      const statusMsg = document.getElementById('chat-trivia-status-msg');
-      if (statusMsg) statusMsg.textContent = isMeWinner ? "YOU WON THE TIE-BREAKER!" : `${data.winner.toUpperCase()} WON!`;
-
-      if (currentQuestionData && activeTriviaCardEl) {
-        const correctIdx = currentQuestionData.options.indexOf(data.ans);
-        const btn = document.getElementById(`chat-aud-btn-${correctIdx}`);
-        if (btn) btn.classList.add('correct');
-      }
-
-      setTimeout(() => {
-        if (activeTriviaCardEl && activeTriviaCardEl.parentNode) {
-          activeTriviaCardEl.parentNode.removeChild(activeTriviaCardEl);
-          activeTriviaCardEl = null;
-        }
-      }, 4000);
-    }
-
-    function replaceTriviaCardWithRecapInChat(recapText, country) {
-      if (!activeTriviaCardEl) return;
-
-      activeTriviaCardEl.innerHTML = `
-        <div class="chat-trivia-country" style="color: #fdcb6e;">📜 RECAP: WHAT WE LEARNED (${country.toUpperCase()})</div>
-        <div class="chat-trivia-text" style="margin-bottom: 2px;">${recapText}</div>
-        <div class="chat-trivia-status" style="color: #ffda66;">Next turn starting soon...</div>
-      `;
-
-      setTimeout(() => {
-        if (activeTriviaCardEl && activeTriviaCardEl.parentNode) {
-          activeTriviaCardEl.parentNode.removeChild(activeTriviaCardEl);
-          activeTriviaCardEl = null;
-        }
-        selectedOptionIndex = null;
-      }, 5000);
-    }
-
-    function handleGameOver(data) {
-      if (rollTimer) clearInterval(rollTimer);
-      setLocalMicEnabled(false);
-      choiceCard.style.display = 'none';
-      turnBanner.style.display = 'block';
-
-      if (data.winner === "NOBODY") {
-        turnBanner.className = 'turn-theirs';
-        turnBanner.textContent = " NOBODY WINS! PRIZE ROLLS OVER!";
-        statusPill.textContent = "Show ended without completion. Prize rolls over!";
-      } else {
-        const isMe = data.winner.toLowerCase() === contestantName.toLowerCase();
-        turnBanner.className = isMe ? 'turn-mine' : 'turn-theirs';
-        turnBanner.textContent = ` ${data.winner.toUpperCase()} WINS THE GAME!`;
-        statusPill.textContent = isMe ? "Well done! Congratulations!" : "Commiserations! Thanks for playing!";
-      }
-
-      btnRollDice.disabled = true;
-      btnRollDice.classList.remove('active-roll');
-    }
 
     let dpadInterval = null;
     let activeMovementDir = null;
@@ -1018,25 +586,15 @@
     bindDpad('dpad-left', 'LEFT');
     bindDpad('dpad-right', 'RIGHT');
 
-    const keyMap = {
-      'KeyW': 'FORWARD', 'ArrowUp': 'FORWARD',
-      'KeyS': 'BACK',    'ArrowDown': 'BACK',
-      'KeyA': 'LEFT',    'ArrowLeft': 'LEFT',
-      'KeyD': 'RIGHT',   'ArrowRight': 'RIGHT'
-    };
-
+    const keyMap = { 'KeyW': 'FORWARD', 'KeyS': 'BACK', 'KeyA': 'LEFT', 'KeyD': 'RIGHT' };
     window.addEventListener('keydown', (e) => {
-      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
-      if (keyMap[e.code]) {
+      if (keyMap[e.code] && document.activeElement.tagName !== 'INPUT') {
         e.preventDefault();
         startPlushieMove(keyMap[e.code]);
       }
     });
-
     window.addEventListener('keyup', (e) => {
-      if (keyMap[e.code]) {
-        stopPlushieMove(keyMap[e.code]);
-      }
+      if (keyMap[e.code]) stopPlushieMove(keyMap[e.code]);
     });
   </script>
 </body>
