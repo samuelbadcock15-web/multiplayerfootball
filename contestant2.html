@@ -6,23 +6,12 @@
   <title>Goody Tonight Show - Contestant 2</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-user-select: none; }
-   
+    
     html, body {
-      width: 100%;
-      height: 100%;
-      height: 100dvh;
-      overflow: hidden;
-      background: #090314;
-      color: #fff;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      width: 100%; height: 100%; height: 100dvh; overflow: hidden;
+      background: #090314; color: #fff; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     }
-
-    body {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 6px;
-    }
+    body { display: flex; flex-direction: column; align-items: center; padding: 6px; }
 
     #setup-card {
       width: 100%; max-width: 420px; background: #1b0933; border: 2px solid #d63031;
@@ -30,273 +19,59 @@
       box-shadow: 0 0 20px rgba(214, 48, 49, 0.35);
     }
     .badge-podium {
-      display: inline-block;
-      padding: 4px 10px;
-      background: #d63031;
-      color: #fff;
-      font-family: monospace;
-      font-weight: 900;
-      font-size: 0.8rem;
-      border-radius: 6px;
-      margin-bottom: 10px;
-      letter-spacing: 1px;
+      display: inline-block; padding: 4px 10px; background: #d63031; color: #fff;
+      font-family: monospace; font-weight: 900; font-size: 0.8rem; border-radius: 6px; margin-bottom: 10px;
     }
-    .input-label {
-      font-size: 0.72rem;
-      font-family: monospace;
-      color: #ffda66;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      margin-bottom: 3px;
-      display: block;
-      text-align: left;
-    }
-    .form-group {
-      margin-bottom: 10px;
-      text-align: left;
-    }
+    .input-label { font-size: 0.72rem; font-family: monospace; color: #ffda66; text-transform: uppercase; margin-bottom: 3px; display: block; text-align: left; }
+    .form-group { margin-bottom: 10px; text-align: left; }
     #passcode-input {
-      width: 100%;
-      padding: 8px;
-      font-size: 1.6rem;
-      font-family: monospace;
-      font-weight: 900;
-      letter-spacing: 8px;
-      text-align: center;
-      background: #080313;
-      color: #39ff14;
-      border: 2px solid #a29bfe;
-      border-radius: 10px;
-      outline: none;
-      transition: border-color 0.2s;
-    }
-    #passcode-input:focus {
-      border-color: #39ff14;
-      box-shadow: 0 0 10px rgba(57, 255, 20, 0.4);
+      width: 100%; padding: 8px; font-size: 1.6rem; font-family: monospace; font-weight: 900;
+      letter-spacing: 8px; text-align: center; background: #080313; color: #39ff14; border: 2px solid #a29bfe; border-radius: 10px;
     }
     .text-field {
-      width: 100%;
-      padding: 10px 12px;
-      font-size: 1rem;
-      font-weight: bold;
-      background: #080313;
-      color: #ff7675;
-      border: 2px solid #a29bfe;
-      border-radius: 10px;
-      outline: none;
-      transition: border-color 0.2s;
-    }
-    .text-field:focus {
-      border-color: #ff7675;
-      box-shadow: 0 0 10px rgba(255, 118, 117, 0.4);
+      width: 100%; padding: 10px 12px; font-size: 1rem; font-weight: bold; background: #080313;
+      color: #ff7675; border: 2px solid #a29bfe; border-radius: 10px; outline: none;
     }
     .btn-enter {
       width: 100%; padding: 14px; margin-top: 6px; border-radius: 12px; border: none;
       font-size: 1rem; font-weight: 900; text-transform: uppercase; cursor: pointer; color: #fff;
       background: linear-gradient(180deg, #d63031, #b71540);
-      box-shadow: 0 3px 0 #5f0a1c, 0 0 14px rgba(214, 48, 49, 0.5);
-    }
-    .btn-enter:active { transform: scale(0.98); }
-
-    #live-stage-portal {
-      width: 100%;
-      max-width: 440px;
-      height: 100%;
-      display: none;
-      flex-direction: column;
-      justify-content: space-between;
-      gap: 4px;
     }
 
-    .badge-bar {
-      display: flex; justify-content: space-between; align-items: center;
-      background: #18092d; padding: 4px 8px; border-radius: 6px;
-      font-family: monospace; font-size: 0.72rem; flex-shrink: 0;
-    }
-
-    #mic-status-badge {
-      display: none;
-      background: #27ae60;
-      color: #fff;
-      padding: 2px 6px;
-      border-radius: 4px;
-      font-weight: 900;
-      animation: pulseMic 0.8s infinite alternate;
-    }
-    @keyframes pulseMic {
-      from { box-shadow: 0 0 4px #2ecc71; opacity: 0.85; }
-      to { box-shadow: 0 0 12px #2ecc71; opacity: 1; }
-    }
-
-    .screens-container {
-      position: relative;
-      width: 100%;
-      aspect-ratio: 16 / 9;
-      max-height: 20vh;
-      background: #000;
-      border: 2px solid #ffda66;
-      border-radius: 10px;
-      overflow: hidden;
-      touch-action: none;
-      flex-shrink: 0;
-      margin: 0 auto;
-      cursor: grab;
-    }
-    .screens-container:active { cursor: grabbing; }
-    #studio-stream-video { width: 100%; height: 100%; object-fit: cover; pointer-events: none; }
-    #local-selfie-pip {
-      position: absolute; bottom: 4px; right: 4px; width: 26%; aspect-ratio: 4 / 3;
-      border: 2px solid #39ff14; border-radius: 6px; object-fit: cover;
-      transform: scaleX(-1); background: #111; z-index: 5; pointer-events: none;
-    }
-    .swipe-hint {
-      position: absolute; top: 4px; left: 6px; font-size: 0.62rem;
-      background: rgba(0,0,0,0.65); padding: 2px 4px; border-radius: 4px;
-      color: #00f0ff; font-family: monospace; pointer-events: none; z-index: 6;
-    }
-
-    /* PIN ENTRY PANEL */
-    #pin-panel {
-      background: #16082b;
-      border: 2px solid #0984e3;
-      border-radius: 10px;
-      padding: 8px;
-      text-align: center;
-      flex-shrink: 0;
-    }
-    #pin-status-txt {
-      font-size: 0.7rem;
-      font-family: monospace;
-      color: #ff7675;
-      font-weight: bold;
-      margin-bottom: 4px;
-    }
-    .pin-display-row {
-      display: flex;
-      justify-content: center;
-      gap: 12px;
-    }
-    .pin-digit-box {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 2px;
-    }
-    .pin-arrow-btn {
-      background: #2b1154;
-      border: 1px solid #00f0ff;
-      color: #00f0ff;
-      font-weight: bold;
-      font-size: 0.8rem;
-      width: 32px;
-      height: 22px;
-      border-radius: 4px;
-      cursor: pointer;
-    }
-    .pin-arrow-btn:active { background: #00f0ff; color: #111; }
-    .pin-digit-val {
-      font-size: 1.5rem;
-      font-family: monospace;
-      font-weight: 900;
-      color: #ffda66;
-      width: 32px;
-      text-align: center;
-      background: #080313;
-      border: 1px solid #a29bfe;
-      border-radius: 4px;
-      padding: 2px 0;
-    }
-
-    #turn-banner {
-      width: 100%; padding: 4px 8px; border-radius: 6px; text-align: center;
-      font-weight: 900; font-size: 0.72rem; font-family: monospace; text-transform: uppercase;
-      letter-spacing: 0.5px; display: none; flex-shrink: 0;
-    }
-    .turn-mine { background: #00b894; color: #fff; border: 1.5px solid #55efc4; }
-    .turn-theirs { background: #2d1847; color: #dfe6e9; border: 1.5px solid #636e72; }
-
-    #status-pill {
-      text-align: center; font-family: monospace; font-size: 0.72rem;
-      color: #39ff14; min-height: 16px; line-height: 16px; flex-shrink: 0;
-    }
-
-    #choice-card {
-      background: #1f0b3b; border: 2px solid #f1c40f; border-radius: 12px;
-      padding: 10px; display: none; flex-direction: column; gap: 8px; text-align: center;
-      box-shadow: 0 0 14px rgba(241, 196, 15, 0.4); flex-shrink: 0;
-    }
-    #choice-title { color: #ffda66; font-size: 0.85rem; font-weight: 900; letter-spacing: 0.5px; text-transform: uppercase; }
-    .choice-btn {
-      width: 100%; padding: 12px; border-radius: 8px; border: 2px solid;
-      font-size: 0.85rem; font-weight: 900; text-transform: uppercase; cursor: pointer; color: #fff;
-    }
+    #live-stage-portal { width: 100%; max-width: 440px; height: 100%; display: none; flex-direction: column; justify-content: space-between; gap: 4px; }
+    .badge-bar { display: flex; justify-content: space-between; align-items: center; background: #18092d; padding: 4px 8px; border-radius: 6px; font-family: monospace; font-size: 0.72rem; }
+    #mic-status-badge { display: none; background: #27ae60; color: #fff; padding: 2px 6px; border-radius: 4px; font-weight: 900; }
+    .screens-container { position: relative; width: 100%; aspect-ratio: 16/9; max-height: 23vh; background: #000; border: 2px solid #ffda66; border-radius: 10px; overflow: hidden; margin: 0 auto; }
+    #studio-stream-video { width: 100%; height: 100%; object-fit: cover; }
+    #local-selfie-pip { position: absolute; bottom: 4px; right: 4px; width: 26%; aspect-ratio: 4/3; border: 2px solid #39ff14; border-radius: 6px; transform: scaleX(-1); background: #111; }
+    
+    #turn-banner { width: 100%; padding: 4px 8px; border-radius: 6px; text-align: center; font-weight: 900; font-size: 0.72rem; font-family: monospace; display: none; }
+    .turn-mine { background: #00b894; color: #fff; }
+    .turn-theirs { background: #2d1847; color: #dfe6e9; }
+    
+    #status-pill { text-align: center; font-family: monospace; font-size: 0.75rem; color: #39ff14; min-height: 16px; }
+    #choice-card { background: #1f0b3b; border: 2px solid #f1c40f; border-radius: 12px; padding: 10px; display: none; flex-direction: column; gap: 8px; text-align: center; }
+    .choice-btn { width: 100%; padding: 12px; border-radius: 8px; font-size: 0.85rem; font-weight: 900; color: #fff; cursor: pointer; border: 2px solid; }
     .btn-choice-solo { background: #2980b9; border-color: #3498db; }
     .btn-choice-goody { background: #8e44ad; border-color: #9b59b6; }
 
-    #btn-roll-dice {
-      width: 100%; padding: 10px; background: #444; border: 2px solid #777;
-      border-radius: 10px; font-size: 0.9rem; font-weight: 900; color: #888;
-      text-transform: uppercase; letter-spacing: 0.5px; cursor: not-allowed; transition: all 0.2s;
-      flex-shrink: 0; display: none;
-    }
-    #btn-roll-dice.active-roll {
-      background: linear-gradient(180deg, #fdcb6e, #e17055);
-      border-color: #ffeaa7; color: #2d3436; cursor: pointer;
-      box-shadow: 0 2px 0 #b3392b, 0 0 10px #fdcb6e;
-    }
+    #btn-roll-dice { width: 100%; padding: 10px; background: #444; border: 2px solid #777; border-radius: 10px; font-size: 0.9rem; font-weight: 900; color: #888; cursor: not-allowed; }
+    #btn-roll-dice.active-roll { background: linear-gradient(180deg, #fdcb6e, #e17055); border-color: #ffeaa7; color: #2d3436; cursor: pointer; }
 
-    /* IN-CHAT TRIVIA SYSTEM */
-    #chat-container {
-      width: 100%; max-width: 420px; background: rgba(13, 5, 26, 0.95);
-      border: 1.5px solid #d4af37; border-radius: 10px; display: flex; flex-direction: column;
-      flex: 1; min-height: 130px; max-height: 28vh; pointer-events: auto; margin-bottom: 4px; backdrop-filter: blur(4px);
-    }
-    #chat-header {
-      padding: 5px 8px; background: #230a42; border-top-left-radius: 8px; border-top-right-radius: 8px;
-      font-size: 0.72rem; font-weight: bold; color: #ffda66; display: flex; justify-content: space-between; align-items: center;
-    }
-    #chat-messages {
-      flex: 1; overflow-y: auto; padding: 6px 8px; display: flex; flex-direction: column; gap: 6px; font-size: 0.76rem;
-    }
+    #chat-container { width: 100%; max-width: 420px; background: rgba(13, 5, 26, 0.95); border: 1.5px solid #d4af37; border-radius: 10px; display: flex; flex-direction: column; flex: 1; min-height: 160px; max-height: 32vh; }
+    #chat-header { padding: 5px 8px; background: #230a42; font-size: 0.72rem; font-weight: bold; color: #ffda66; }
+    #chat-messages { flex: 1; overflow-y: auto; padding: 6px 8px; display: flex; flex-direction: column; gap: 6px; font-size: 0.76rem; }
     .chat-msg { word-break: break-word; line-height: 1.25; }
     .chat-author { font-weight: bold; color: #39ff14; font-family: monospace; }
     .chat-author.is-self { color: #00f0ff; }
 
-    .chat-trivia-card {
-      background: #1c0a35; border: 2px solid #00f0ff; border-radius: 8px; padding: 8px; margin: 4px 0;
-    }
-    .chat-trivia-country { font-size: 0.68rem; font-family: monospace; color: #ffda66; font-weight: bold; margin-bottom: 2px; }
-    .chat-trivia-text { font-size: 0.76rem; color: #fff; font-weight: 600; margin-bottom: 6px; line-height: 1.2; }
-    .chat-options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; }
-    .chat-opt-btn {
-      background: #2b1154; border: 1.5px solid #a29bfe; border-radius: 5px; color: #fff;
-      padding: 5px 6px; font-size: 0.7rem; font-weight: bold; text-align: left; cursor: pointer;
-    }
-    .chat-opt-btn.selected { background: #0984e3 !important; border-color: #00f0ff !important; }
-    .chat-opt-btn.correct { background: #00b894 !important; }
-    .chat-opt-btn.wrong { background: #d63031 !important; }
-    .chat-trivia-status { margin-top: 4px; font-size: 0.68rem; font-family: monospace; color: #39ff14; font-weight: bold; text-align: center; }
-
     .chat-input-row { display: flex; border-top: 1px solid #442266; padding: 4px; gap: 4px; }
-    #chat-text-input {
-      flex: 1; background: #080313; border: 1px solid #a29bfe; border-radius: 6px;
-      color: #fff; padding: 6px 8px; font-size: 0.78rem; outline: none;
-    }
-    #btn-send-chat {
-      background: #d4af37; border: none; border-radius: 6px; color: #111; font-weight: bold;
-      font-size: 0.7rem; padding: 0 10px; cursor: pointer;
-    }
+    #chat-text-input { flex: 1; background: #080313; border: 1px solid #a29bfe; border-radius: 6px; color: #fff; padding: 6px 8px; font-size: 0.78rem; outline: none; }
+    #btn-send-chat { background: #d4af37; border: none; border-radius: 6px; color: #111; font-weight: bold; font-size: 0.7rem; padding: 0 10px; cursor: pointer; }
 
-    .dpad-section {
-      background: #140728; border: 1.5px solid #a29bfe; border-radius: 10px;
-      padding: 3px; display: flex; flex-direction: column; align-items: center;
-      gap: 2px; flex-shrink: 0;
-    }
-    .dpad-grid { display: grid; grid-template-columns: 38px 38px 38px; grid-template-rows: 26px 26px; gap: 3px; }
-    .dpad-btn {
-      background: #2b1154; border: 1.5px solid #ff79b0; border-radius: 5px; color: #fff;
-      font-size: 0.85rem; font-weight: bold; display: flex; justify-content: center; align-items: center; cursor: pointer;
-    }
+    .dpad-section { background: #140728; border: 1.5px solid #a29bfe; border-radius: 10px; padding: 3px; display: flex; flex-direction: column; align-items: center; gap: 2px; }
+    .dpad-grid { display: grid; grid-template-columns: 42px 42px 42px; grid-template-rows: 28px 28px; gap: 3px; }
+    .dpad-btn { background: #2b1154; border: 1.5px solid #ff79b0; border-radius: 5px; color: #fff; font-size: 0.9rem; font-weight: bold; display: flex; justify-content: center; align-items: center; cursor: pointer; }
   </style>
 </head>
 <body>
@@ -326,46 +101,24 @@
   <main id="live-stage-portal">
     <div class="badge-bar">
       <span id="role-tag" style="color: #00f0ff;">CONNECTING...</span>
-      <span id="mic-status-badge">🎙️ MIC LIVE</span>
+      <span id="mic-status-badge"> MIC LIVE</span>
       <span id="match-timer-badge" style="color: #ffda66;"> 20:00</span>
       <span style="color: #39ff14;"> LIVE</span>
     </div>
 
     <div class="screens-container" id="interactive-viewport">
-      <div class="swipe-hint">🖱️ Drag to look | WASD to move</div>
       <video id="studio-stream-video" autoplay playsinline></video>
       <video id="local-selfie-pip" autoplay playsinline muted></video>
     </div>
 
-    <!-- MOBILE PIN ENTRY PANEL -->
-    <div id="pin-panel">
-      <div id="pin-status-txt">🔴 STEP PLUSHIE ON STAGE PAD TO POWER PIN</div>
-      <div class="pin-display-row">
-        <div class="pin-digit-box">
-          <button class="pin-arrow-btn" onclick="adjustPin(0, 1)">▲</button>
-          <span id="p-digit-0" class="pin-digit-val">0</span>
-          <button class="pin-arrow-btn" onclick="adjustPin(0, -1)">▼</button>
-        </div>
-        <div class="pin-digit-box">
-          <button class="pin-arrow-btn" onclick="adjustPin(1, 1)">▲</button>
-          <span id="p-digit-1" class="pin-digit-val">0</span>
-          <button class="pin-arrow-btn" onclick="adjustPin(1, -1)">▼</button>
-        </div>
-        <div class="pin-digit-box">
-          <button class="pin-arrow-btn" onclick="adjustPin(2, 1)">▲</button>
-          <span id="p-digit-2" class="pin-digit-val">0</span>
-          <button class="pin-arrow-btn" onclick="adjustPin(2, -1)">▼</button>
-        </div>
-        <div class="pin-digit-box">
-          <button class="pin-arrow-btn" onclick="adjustPin(3, 1)">▲</button>
-          <span id="p-digit-3" class="pin-digit-val">0</span>
-          <button class="pin-arrow-btn" onclick="adjustPin(3, -1)">▼</button>
-        </div>
-      </div>
-    </div>
-
     <div id="turn-banner"></div>
-    <div id="status-pill">Walk plushie to stage pad & enter 0002!</div>
+    <div id="status-pill">Waiting for host...</div>
+
+    <div id="choice-card">
+      <div id="choice-title">Make Your Choice, Contestant!</div>
+      <button class="choice-btn btn-choice-solo" id="btn-pick-solo">Race Solo Against Clock</button>
+      <button class="choice-btn btn-choice-goody" id="btn-pick-goody">Battle Goody Head-To-Head</button>
+    </div>
 
     <button id="btn-roll-dice" disabled>ROLL DICE (LOCKED)</button>
 
@@ -383,7 +136,7 @@
     </div>
 
     <div class="dpad-section">
-      <div style="font-size: 0.6rem; color: #ff9ff3; font-family: monospace;"> PLUSHIE NAVIGATION (WASD / D-PAD)</div>
+      <div style="font-size: 0.6rem; color: #ff9ff3; font-family: monospace;">STUDIO NAVIGATION</div>
       <div class="dpad-grid">
         <div></div>
         <button class="dpad-btn" id="dpad-fwd">▲</button>
@@ -398,21 +151,14 @@
   <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
   <script>
     const CONTESTANT_ID = "goody-contestant-2";
-    let localStream = null;
-    let peer = null;
-    let dataConn = null;
-    let mediaCall = null;
-    let contestantName = "";
-    let contestantCity = "";
-    let pinDigits = [0, 0, 0, 0];
-    let isPadPowered = false;
-    let isPinAccepted = false;
+    let localStream = null, peer = null, dataConn = null, mediaCall = null;
+    let contestantName = "", contestantCity = "", hasRolled = false, rollTimer = null;
+    let currentQuestionData = null, selectedOptionIndex = null;
 
     const passcodeInput = document.getElementById('passcode-input');
     const nameInput = document.getElementById('name-input');
     const cityInput = document.getElementById('city-input');
     const btnEnterStudio = document.getElementById('btn-enter-studio');
-
     const setupCard = document.getElementById('setup-card');
     const liveStagePortal = document.getElementById('live-stage-portal');
     const localSelfiePip = document.getElementById('local-selfie-pip');
@@ -424,39 +170,16 @@
     const turnBanner = document.getElementById('turn-banner');
     const statusPill = document.getElementById('status-pill');
     const btnRollDice = document.getElementById('btn-roll-dice');
-    const interactiveViewport = document.getElementById('interactive-viewport');
-    const pinStatusTxt = document.getElementById('pin-status-txt');
-
+    const choiceCard = document.getElementById('choice-card');
+    const btnPickSolo = document.getElementById('btn-pick-solo');
+    const btnPickGoody = document.getElementById('btn-pick-goody');
     const chatMessages = document.getElementById('chat-messages');
     const chatTextInput = document.getElementById('chat-text-input');
     const btnSendChat = document.getElementById('btn-send-chat');
 
-    function adjustPin(index, delta) {
-      if (!isPadPowered || isPinAccepted) return;
-      pinDigits[index] = (pinDigits[index] + delta + 10) % 10;
-      document.getElementById(`p-digit-${index}`).textContent = pinDigits[index];
-
-      const currentPinStr = pinDigits.join('');
-      if (currentPinStr === "0002") {
-        isPinAccepted = true;
-        pinStatusTxt.style.color = '#39ff14';
-        pinStatusTxt.textContent = "🟢 PIN 0002 ACCEPTED!";
-        statusPill.textContent = "PIN Accepted! Waiting for opponent...";
-      }
-
-      if (dataConn && dataConn.open) {
-        dataConn.send({
-          type: "CONTESTANT_PIN_UPDATE",
-          contestant: CONTESTANT_ID,
-          digits: pinDigits
-        });
-      }
-    }
-
     function setLocalMicEnabled(enabled) {
-      if (localStream) {
-        const audioTracks = localStream.getAudioTracks();
-        if (audioTracks.length > 0) audioTracks[0].enabled = enabled;
+      if (localStream && localStream.getAudioTracks().length > 0) {
+        localStream.getAudioTracks()[0].enabled = enabled;
       }
       micStatusBadge.style.display = enabled ? 'inline-block' : 'none';
     }
@@ -487,114 +210,59 @@
     btnSendChat.addEventListener('click', sendChatMessage);
     chatTextInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') sendChatMessage(); });
 
-    btnEnterStudio.addEventListener('click', () => {
+    btnEnterStudio.addEventListener('click', async () => {
       const code = passcodeInput.value.trim();
       const name = nameInput.value.trim();
       const city = cityInput.value.trim() || "Nottingham";
-
-      if (!/^\d{4}$/.test(code)) { alert("Please enter the 4-digit code."); return; }
-      if (!name) { alert("Please enter your name."); return; }
+      if (!/^\d{4}$/.test(code)) { alert("Enter the 4-digit code."); return; }
+      if (!name) { alert("Enter your name."); return; }
 
       setupCard.style.display = 'none';
       liveStagePortal.style.display = 'flex';
-      roleTag.textContent = `${name.toUpperCase()} (CONNECTING...)`;
 
-      navigator.mediaDevices.getUserMedia({ video: { width: 640, height: 480 }, audio: true }).then(stream => {
-        localStream = stream;
-        localSelfiePip.srcObject = stream;
-        setLocalMicEnabled(false);
+      localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+      localSelfiePip.srcObject = localStream;
+      setLocalMicEnabled(false);
 
-        peer = new Peer();
-        peer.on('open', () => {
-          const targetStudioId = "goody-studio-" + code;
-          mediaCall = peer.call(targetStudioId, localStream, {
-            metadata: { contestant: CONTESTANT_ID, name, city, passcode: code }
-          });
-          mediaCall.on('stream', (s) => {
-            studioStreamVideo.srcObject = s;
-            studioStreamVideo.play().catch(console.error);
-          });
+      peer = new Peer();
+      peer.on('open', () => {
+        const studioId = "goody-studio-" + code;
+        mediaCall = peer.call(studioId, localStream, { metadata: { contestant: CONTESTANT_ID, name, city, passcode: code } });
+        mediaCall.on('stream', (stream) => { studioStreamVideo.srcObject = stream; studioStreamVideo.play(); });
 
-          dataConn = peer.connect(targetStudioId, {
-            metadata: { contestant: CONTESTANT_ID, name, city, passcode: code }
-          });
-          dataConn.on('data', (data) => {
-            if (data.type === "AUTH_SUCCESS") {
-              roleTag.textContent = `${name.toUpperCase()} (PODIUM 2)`;
-              statusPill.textContent = "Walk plushie to stage pad!";
-            } else if (data.type === "PAD_POWER_STATE") {
-              isPadPowered = Boolean(data.powered);
-              if (isPadPowered) {
-                pinStatusTxt.style.color = '#00f0ff';
-                pinStatusTxt.textContent = "🟢 PAD ACTIVE! ENTER PIN 0002";
-              } else {
-                pinStatusTxt.style.color = '#ff7675';
-                pinStatusTxt.textContent = "🔴 STEP PLUSHIE ON STAGE PAD";
-              }
-            } else if (data.type === "SYNC_MATCH_TIMER") {
-              matchTimerBadge.textContent = ` ${data.timeStr}`;
-              c2ChatClock.textContent = data.timeStr;
-            } else if (data.type === "START_DICE_COUNTDOWN") {
-              btnRollDice.style.display = 'block';
-              btnRollDice.disabled = false;
-              btnRollDice.classList.add('active-roll');
-              btnRollDice.textContent = "ROLL DICE NOW!";
-            } else if (data.type === "DICE_RESULT_CONFIRMED") {
-              if (data.contestant === CONTESTANT_ID) {
-                statusPill.textContent = `🎲 You rolled: ${data.roll}!`;
-                btnRollDice.textContent = `ROLLED A ${data.roll}!`;
-              }
-            }
-          });
+        dataConn = peer.connect(studioId, { metadata: { contestant: CONTESTANT_ID, name, city, passcode: code } });
+        dataConn.on('data', (data) => {
+          if (data.type === "AUTH_SUCCESS") {
+            roleTag.textContent = `${name.toUpperCase()} (CONTESTANT 2)`;
+          } else if (data.type === "SET_MIC_STATE") {
+            setLocalMicEnabled(data.enabled);
+          } else if (data.type === "START_DICE_COUNTDOWN" || data.type === "ENABLE_TURN_ROLL") {
+            btnRollDice.style.display = 'block';
+            btnRollDice.disabled = false;
+            btnRollDice.classList.add('active-roll');
+            btnRollDice.textContent = "ROLL DICE NOW!";
+          } else if (data.type === "SHOW_QUESTION_LOCKED") {
+            btnRollDice.style.display = 'none';
+          }
         });
-      }).catch(err => alert("Cam/Mic error: " + err.message));
+      });
     });
 
-    let dpadInterval = null;
-    let activeMovementDir = null;
-
-    function sendPlushieMove(direction) {
+    btnRollDice.addEventListener('click', () => {
+      btnRollDice.disabled = true;
+      btnRollDice.classList.remove('active-roll');
       if (dataConn && dataConn.open) {
-        dataConn.send({ type: "PLUSHIE_MOVE", contestant: CONTESTANT_ID, direction: direction });
-      }
-    }
-    function startPlushieMove(direction) {
-      if (activeMovementDir === direction) return;
-      activeMovementDir = direction;
-      sendPlushieMove(direction);
-      if (dpadInterval) clearInterval(dpadInterval);
-      dpadInterval = setInterval(() => sendPlushieMove(direction), 100);
-    }
-    function stopPlushieMove(direction = null) {
-      if (direction === null || activeMovementDir === direction) {
-        activeMovementDir = null;
-        if (dpadInterval) { clearInterval(dpadInterval); dpadInterval = null; }
-      }
-    }
-
-    const bindDpad = (btnId, dir) => {
-      const el = document.getElementById(btnId);
-      el.addEventListener('touchstart', (e) => { e.preventDefault(); startPlushieMove(dir); });
-      el.addEventListener('touchend', (e) => { e.preventDefault(); stopPlushieMove(dir); });
-      el.addEventListener('mousedown', () => startPlushieMove(dir));
-      el.addEventListener('mouseup', () => stopPlushieMove(dir));
-      el.addEventListener('mouseleave', () => stopPlushieMove(dir));
-    };
-
-    bindDpad('dpad-fwd', 'FORWARD');
-    bindDpad('dpad-back', 'BACK');
-    bindDpad('dpad-left', 'LEFT');
-    bindDpad('dpad-right', 'RIGHT');
-
-    const keyMap = { 'KeyW': 'FORWARD', 'KeyS': 'BACK', 'KeyA': 'LEFT', 'KeyD': 'RIGHT' };
-    window.addEventListener('keydown', (e) => {
-      if (keyMap[e.code] && document.activeElement.tagName !== 'INPUT') {
-        e.preventDefault();
-        startPlushieMove(keyMap[e.code]);
+        dataConn.send({ type: "REQUEST_ROLL", contestant: CONTESTANT_ID });
       }
     });
-    window.addEventListener('keyup', (e) => {
-      if (keyMap[e.code]) stopPlushieMove(keyMap[e.code]);
+
+    btnPickSolo.addEventListener('click', () => {
+      choiceCard.style.display = 'none';
+      dataConn.send({ type: "CONTESTANT_CHOSE_PATH", choice: "SOLO", contestant: CONTESTANT_ID });
+    });
+    btnPickGoody.addEventListener('click', () => {
+      choiceCard.style.display = 'none';
+      dataConn.send({ type: "CONTESTANT_CHOSE_PATH", choice: "GOODY", contestant: CONTESTANT_ID });
     });
   </script>
 </body>
