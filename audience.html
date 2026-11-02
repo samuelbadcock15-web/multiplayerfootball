@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>The Goody Tonight Show - Audience Live Stream</title>
+  <title>The Goody Tonight Show - Audience</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
     html, body {
@@ -12,6 +12,7 @@
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       overflow: hidden; display: flex; flex-direction: column; align-items: center;
     }
+
     #join-gate {
       position: absolute; top: 0; left: 0; width: 100%; height: 100%;
       background: rgba(6, 2, 15, 0.96); z-index: 50; display: flex;
@@ -40,18 +41,23 @@
       width: 100%; max-width: 600px; height: 100%; display: none;
       flex-direction: column; padding: 8px; gap: 6px;
     }
+
+    /* Exact Host Header Style */
     .header-bar {
       display: flex; justify-content: space-between; align-items: center;
       background: #140728; padding: 6px 12px; border-radius: 8px;
       font-family: monospace; font-size: 0.78rem; border: 1px solid #331555; flex-shrink: 0;
     }
+
+    /* Exact Host Viewport Style */
     #stage-viewport {
       width: 100%; aspect-ratio: 16 / 9; background: #000;
       border: 2px solid #ffda66; border-radius: 10px; overflow: hidden;
       position: relative; flex-shrink: 0;
     }
     #studio-feed { display: block; width: 100%; height: 100%; object-fit: cover; }
-   
+
+    /* Exact Host Chat Box Style */
     #chat-box {
       flex: 1; min-height: 120px; background: rgba(14, 5, 28, 0.92);
       border: 1.5px solid #a29bfe; border-radius: 10px; display: flex;
@@ -79,18 +85,20 @@
 </head>
 <body>
 
+  <!-- Entry Gate matching host screen room code flow -->
   <div id="join-gate">
     <div class="gate-box">
       <h2>Audience Red Carpet</h2>
-      <p>Watch the live game & participate in studio audience chat.</p>
-      <span class="field-label">Host Screen Room Code:</span>
+      <p>Enter room code to watch the host broadcast & join chat.</p>
+      <span class="field-label">Host Room Code:</span>
       <input type="text" id="code-input" class="gate-input" maxlength="4" placeholder="0000" inputmode="numeric" />
       <span class="field-label">Your Nickname:</span>
       <input type="text" id="name-input" class="gate-input" maxlength="15" placeholder="Spectator" style="color:#00f0ff;" />
-      <button class="btn-connect" id="btn-join">Join Show</button>
+      <button class="btn-connect" id="btn-join">Enter Studio</button>
     </div>
   </div>
 
+  <!-- Main View (Exact clone of host structural containers) -->
   <div id="stream-wrapper">
     <div class="header-bar">
       <span style="color:#ffda66;">GOODY TONIGHT SHOW</span>
@@ -104,10 +112,10 @@
 
     <div id="chat-box">
       <div id="chat-messages">
-        <div style="color:#888; font-style:italic;">Connecting to live broadcast chat...</div>
+        <div style="color:#888; font-style:italic;">Connecting to studio stream...</div>
       </div>
       <div class="chat-input-bar">
-        <input type="text" id="chat-input" maxlength="120" placeholder="Cheer on contestants..." autocomplete="off" />
+        <input type="text" id="chat-input" maxlength="120" placeholder="Chat with audience..." autocomplete="off" />
         <button id="btn-send">SEND</button>
       </div>
     </div>
@@ -166,7 +174,7 @@
       spectatorName = nameInput.value.trim() || "Spectator";
 
       if (!/^\d{4}$/.test(code)) {
-        alert("Enter the 4-digit room code shown on the host stream.");
+        alert("Enter the 4-digit room code shown on the host screen.");
         return;
       }
       joinGate.style.display = 'none';
