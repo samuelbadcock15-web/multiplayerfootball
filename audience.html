@@ -391,6 +391,7 @@
     scene.background = new THREE.Color(0x040208);
     scene.fog = new THREE.FogExp2(0x040208, 0.015);
 
+    // EXACT camera position matching your main host view overlooking the diorama
     const camera = new THREE.PerspectiveCamera(65, window.innerWidth / window.innerHeight, 0.1, 150);
     camera.position.set(0, 7.5, 5.5);
     camera.rotation.x = -0.35;
@@ -602,6 +603,48 @@
       tile.position.set(x, 0.48, z); miniDiorama.add(tile);
     }
 
+    function createCutePlushie3D(color, transparent = false) {
+      const pGroup = new THREE.Group();
+      const pMat = new THREE.MeshStandardMaterial({ color: color, roughness: 0.95, transparent: transparent, opacity: transparent ? 0.45 : 1.0 });
+      const pBody = new THREE.Mesh(new THREE.SphereGeometry(0.28, 14, 14), pMat); pBody.position.y = 0.28; pGroup.add(pBody);
+      const pHead = new THREE.Mesh(new THREE.SphereGeometry(0.22, 14, 14), pMat); pHead.position.y = 0.58; pGroup.add(pHead);
+      return pGroup;
+    }
+
+    // Build the surrounding giant spectator plushies ring in the studio
+    const plushColors = [0xff69b4, 0x00ffff, 0xffda66, 0x39ff14, 0xff7675, 0xa29bfe, 0x00b894, 0xfd79a8];
+    for (let i = 0; i < 18; i++) {
+      const angle = (i / 18) * Math.PI * 2;
+      const radius = 6.2;
+      const px = Math.cos(angle) * radius;
+      const pz = 1.8 + (Math.sin(angle) * radius);
+      const plush = createCutePlushie3D(plushColors[i % plushColors.length]);
+      plush.position.set(px, 0.44, pz);
+      plush.scale.set(1.8, 1.8, 1.8);
+      miniDiorama.add(plush);
+    }
+
+    // Rules Board
+    const rulesCanvas = document.createElement('canvas'); rulesCanvas.width = 512; rulesCanvas.height = 384;
+    const rCtx = rulesCanvas.getContext('2d');
+    rCtx.fillStyle = '#120726'; rCtx.fillRect(0, 0, 512, 384);
+    rCtx.strokeStyle = '#00f0ff'; rCtx.lineWidth = 6; rCtx.strokeRect(3, 3, 506, 378);
+    rCtx.fillStyle = '#ffda66'; rCtx.font = 'bold 20px sans-serif'; rCtx.textAlign = 'center';
+    rCtx.fillText("OFFICIAL GAME RULES", 256, 45);
+    rCtx.fillStyle = '#ffffff'; rCtx.font = '14px sans-serif'; rCtx.textAlign = 'left';
+    const rulesText = [
+      "1. Host has 30 seconds to read the active trivia action.",
+      "2. Land on a tile to trigger that country's trivia.",
+      "3. You have 30 seconds to answer the country's trivia.",
+      "4. Correct answer advances your position on the tile.",
+      "5. Incorrect answer or timeout hands turn to opponent.",
+      "6. Reach tile 32 or be furthest ahead at 20:00!"
+    ];
+    rulesText.forEach((r, idx) => { rCtx.fillText(r, 30, 90 + (idx * 40)); });
+    const rulesTex = new THREE.CanvasTexture(rulesCanvas);
+    const rulesMesh = new THREE.Mesh(new THREE.PlaneGeometry(3.6, 2.7), new THREE.MeshBasicMaterial({ map: rulesTex }));
+    rulesMesh.position.set(-5.5, 3.8, 0.5); rulesMesh.rotation.y = 0.6; miniDiorama.add(rulesMesh);
+
     function updatePawnNameBadge(pawnGroup, displayName) {
       if (!pawnGroup || !pawnGroup.userData || !pawnGroup.userData.badgeCanvas) return;
       const canvas = pawnGroup.userData.badgeCanvas; const ctx = canvas.getContext('2d');
@@ -739,14 +782,6 @@
         fctx.beginPath(); fctx.arc(64, 78, 16, 0.2, Math.PI - 0.2, false); fctx.stroke();
       }
       faceTex.needsUpdate = true;
-    }
-
-    function createCutePlushie3D(color, transparent = false) {
-      const pGroup = new THREE.Group();
-      const pMat = new THREE.MeshStandardMaterial({ color: color, roughness: 0.95, transparent: transparent, opacity: transparent ? 0.45 : 1.0 });
-      const pBody = new THREE.Mesh(new THREE.SphereGeometry(0.28, 14, 14), pMat); pBody.position.y = 0.28; pGroup.add(pBody);
-      const pHead = new THREE.Mesh(new THREE.SphereGeometry(0.22, 14, 14), pMat); pHead.position.y = 0.58; pGroup.add(pHead);
-      return pGroup;
     }
 
     const localPlushieAvatar = createCutePlushie3D(0x00f0ff, true);
