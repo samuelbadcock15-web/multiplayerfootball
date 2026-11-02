@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>The Goody Tonight Show - Studio Master Display</title>
+  <title>The Goody Tonight Show - Live Studio Master Display</title>
   <style>
     body, html {
       margin: 0; padding: 0; width: 100%; height: 100%;
@@ -19,12 +19,13 @@
     #room-code-pill { margin-top: 5px; font-weight: bold; color: #39ff14; font-size: 0.95rem; }
     #countdown-pill { margin-top: 6px; font-weight: bold; color: #ffda66; font-size: 0.95rem; }
     #match-clock-hud { margin-top: 4px; font-weight: bold; color: #00f0ff; font-size: 0.95rem; }
-    
+    #audience-pill { margin-top: 4px; font-weight: bold; color: #39ff14; }
+
     #blocker {
       position: absolute; top: 0; left: 0; width: 100%; height: 100%;
       background: rgba(8, 4, 16, 0.94); display: flex; flex-direction: column;
       justify-content: center; align-items: center; color: #fff; z-index: 100; text-align: center;
-      padding: 20px;
+      padding: 20px; cursor: pointer;
     }
     #instructions-card {
       background: #1c0a32; border: 3px solid #ff79b0; border-radius: 18px;
@@ -32,28 +33,28 @@
     }
     h1 { color: #ffda66; margin-top: 0; font-size: 1.6rem; letter-spacing: 1.5px; }
     p { color: #ebdcf9; font-size: 0.92rem; line-height: 1.5; margin: 8px 0; }
-    .podium-box {
-      font-size: 1.8rem; font-weight: 900; letter-spacing: 6px; color: #39ff14;
-      font-family: monospace; margin: 10px 0; background: #070212; padding: 10px; border-radius: 8px; border: 1.5px dashed #00f0ff;
+    .room-code-display {
+      font-size: 3.2rem; font-weight: 900; letter-spacing: 12px; color: #39ff14;
+      font-family: monospace; margin: 12px 0 6px 0; text-shadow: 0 0 16px rgba(57, 255, 20, 0.6);
     }
   </style>
 </head>
 <body>
 
   <div id="hud">
-    <div style="color: #ffda66; font-weight: bold;">STUDIO MASTER DISPLAY</div>
-    <div id="room-code-pill">STUDIO SESSION PIN: <span id="hud-code-val">7777</span></div>
-    <div id="countdown-pill">STATUS: <span id="timer-val" style="color:#ff7675;">WAITING FOR PODIUM PANELS</span></div>
+    <div style="color: #ffda66; font-weight: bold;">STUDIO MASTER MONITOR</div>
+    <div id="room-code-pill">SESSION PIN: <span id="hud-code-val">----</span></div>
+    <div id="countdown-pill">STATUS: <span id="timer-val" style="color:#ff7675;">STUDIO STANDBY</span></div>
     <div id="match-clock-hud">SHOW CLOCK: <span id="game-clock-val" style="color:#ffda66;">20:00</span></div>
+    <div id="audience-pill">ACTIVE FEEDS: <span id="audience-count" style="color:#39ff14;">0/2</span></div>
   </div>
 
   <div id="blocker">
     <div id="instructions-card">
       <h1>The Goody Tonight Show</h1>
-      <p>In-Studio Podium Control System Active!</p>
-      <p>Open the Podium Panels on your studio control desks using PINs:</p>
-      <div class="podium-box">PIN: 0001 / 0002</div>
-      <p style="font-size:0.8rem; color:#a29bfe;">Podium buttons control the 3D avatars directly. Use phones for live face-cams!</p>
+      <p>24/7 In-Person Studio Active — Click Anywhere to Launch Master Screen</p>
+      <div id="entry-code" class="room-code-display">----</div>
+      <p>Contestants use fixed Podium PINs <strong>0001</strong> &amp; <strong>0002</strong> on their phones for live face-cams.</p>
     </div>
   </div>
 
@@ -63,79 +64,80 @@
   <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
 
   <script>
-    const studioRoomCode = "7777";
-    let studioPower = false;
-    let studioPeer = null;
-    let connectedDataConns = [];
+    // Generate unique session code for this broadcast instance
+    const studioRoomCode = Math.floor(1000 + Math.random() * 9000).toString();
+    document.getElementById('entry-code').textContent = studioRoomCode;
+    document.getElementById('hud-code-val').textContent = studioRoomCode;
 
-    let isP1Connected = false;
-    let isP2Connected = false;
+    let studioPeer = null;
+    let studioPower = false;
+    let isGoodySpeaking = false;
+
+    // Video streams for Podium 1 and Podium 2 walkie-talkie face-cams
+    const videoP1 = document.createElement('video');
+    videoP1.autoplay = true; videoP1.playsInline = true; videoP1.muted = false;
+    const videoP2 = document.createElement('video');
+    videoP2.autoplay = true; videoP2.playsInline = true; videoP2.muted = false;
+
+    let hasLiveP1Stream = false;
+    let hasLiveP2Stream = false;
+
+    // Start studio audio/graphics on click blocker
+    document.getElementById('blocker').addEventListener('click', () => {
+      document.getElementById('blocker').style.display = 'none';
+      bootStudioMaster();
+    });
+
+    function bootStudioMaster() {
+      studioPower = true;
+      document.getElementById('timer-val').textContent = "LIVE ON AIR!";
+      document.getElementById('timer-val').style.color = "#39ff14";
+      initStudioWebRTC();
+      speakGoody("Good evening, ladies and gentlemen! Welcome to The Goody Tonight Show! Our physical contestants are locked in at their podiums, and we are live!");
+    }
 
     function initStudioWebRTC() {
+      if (studioPeer) return;
       try {
         const dynamicStudioId = "goody-studio-" + studioRoomCode;
         studioPeer = new Peer(dynamicStudioId);
 
-        studioPeer.on('open', (id) => console.log("Studio Master Host Online:", id));
+        studioPeer.on('open', (id) => console.log("Master Host Registered:", id));
 
-        studioPeer.on('connection', (conn) => {
-          connectedDataConns.push(conn);
+        studioPeer.on('call', (call) => {
+          const pSlot = call.metadata ? call.metadata.podium : null;
+          call.answer();
 
-          conn.on('open', () => {
-            const pSlot = conn.metadata ? conn.metadata.podium : null;
-            if (pSlot === "podium-1") isP1Connected = true;
-            if (pSlot === "podium-2") isP2Connected = true;
-
-            conn.send({ type: "AUTH_SUCCESS" });
-            checkBothReady();
-          });
-
-          conn.on('data', (data) => {
-            if (data.type === "PODIUM_ACTION") {
-              console.log(`Received action from ${data.podium}:`, data.action);
-              // Handle dice roll or trivia selection for the respective diorama avatar
-              handlePodiumAction(data.podium, data.action);
+          call.on('stream', (remoteStream) => {
+            if (pSlot === "0002") {
+              videoP2.srcObject = remoteStream;
+              videoP2.play().catch(console.error);
+              hasLiveP2Stream = true;
+            } else {
+              videoP1.srcObject = remoteStream;
+              videoP1.play().catch(console.error);
+              hasLiveP1Stream = true;
             }
-          });
-
-          conn.on('close', () => {
-            connectedDataConns = connectedDataConns.filter(c => c.peer !== conn.peer);
+            updateActiveFeedCount();
           });
         });
       } catch(e) { console.error(e); }
     }
 
-    function checkBothReady() {
-      if (isP1Connected && isP2Connected && !studioPower) {
-        document.getElementById('timer-val').textContent = "LIVE ON AIR!";
-        document.getElementById('timer-val').style.color = "#39ff14";
-        document.getElementById('blocker').style.display = 'none';
-        studioPower = true;
-      } else {
-        document.getElementById('timer-val').textContent = `WAITING FOR PODIUMS (${(isP1Connected?1:0)+(isP2Connected?1:0)}/2)`;
-      }
-    }
-
-    function handlePodiumAction(podiumId, action) {
-      if (action.type === "ROLL_DICE") {
-        const roll = Math.floor(Math.random() * 6) + 1;
-        speakGoody(`${podiumId === 'podium-1' ? 'Player 1' : 'Player 2'} rolled a ${roll}!`);
-      }
+    function updateActiveFeedCount() {
+      let count = (hasLiveP1Stream ? 1 : 0) + (hasLiveP2Stream ? 1 : 0);
+      document.getElementById('audience-count').textContent = `${count}/2`;
     }
 
     function speakGoody(text) {
-      connectedDataConns.forEach(c => {
-        if (c.open) c.send({ type: "HOST_SPEAK", text: text });
-      });
-      if ('speechSynthesis' in window) {
-        window.speechSynthesis.cancel();
-        const utt = new SpeechSynthesisUtterance(text);
-        utt.rate = 0.95; utt.pitch = 1.25;
-        window.speechSynthesis.speak(utt);
-      }
+      if (!('speechSynthesis' in window)) return;
+      window.speechSynthesis.cancel();
+      const utt = new SpeechSynthesisUtterance(text);
+      utt.rate = 0.95; utt.pitch = 1.25;
+      window.speechSynthesis.speak(utt);
     }
 
-    // --- Three.js Studio Scene Setup ---
+    // --- Three.js 3D Studio Setup ---
     const scene = new THREE.Scene();
     scene.background = new THREE.Color(0x040208);
     scene.fog = new THREE.FogExp2(0x040208, 0.015);
@@ -154,6 +156,7 @@
     const feltCarpet = new THREE.Mesh(new THREE.CylinderGeometry(7.0, 7.0, 0.08, 48), new THREE.MeshStandardMaterial({ color: 0x271147 }));
     feltCarpet.position.y = 0.44; miniDiorama.add(feltCarpet);
 
+    // 3D Plushie Avatars representing the in-person physical contestants
     function createPlayerPawn(colorHex) {
       const pawn = new THREE.Group();
       const baseMat = new THREE.MeshStandardMaterial({ color: colorHex, metalness: 0.6, roughness: 0.25 });
@@ -166,9 +169,44 @@
       return pawn;
     }
 
-    const pawn1 = createPlayerPawn(0x00d2d3); pawn1.position.set(-0.5, 0.52, 1.8); miniDiorama.add(pawn1);
-    const pawn2 = createPlayerPawn(0xff3838); pawn2.position.set(0.5, 0.52, 1.8); miniDiorama.add(pawn2);
+    const pawn1 = createPlayerPawn(0x00d2d3); pawn1.position.set(-0.6, 0.52, 1.8); miniDiorama.add(pawn1);
+    const pawn2 = createPlayerPawn(0xff3838); pawn2.position.set(0.6, 0.52, 1.8); miniDiorama.add(pawn2);
     scene.add(miniDiorama);
+
+    // Dynamic Canvas Texture for Studio Screen Feeds (showing live face-cams)
+    const studioScreenCanvas = document.createElement('canvas'); studioScreenCanvas.width = 512; studioScreenCanvas.height = 256;
+    const sScreenCtx = studioScreenCanvas.getContext('2d');
+    const studioScreenTex = new THREE.CanvasTexture(studioScreenCanvas);
+
+    function renderBackstageScreens() {
+      sScreenCtx.fillStyle = '#060210'; sScreenCtx.fillRect(0, 0, 512, 256);
+      
+      // Draw Podium 1 Feed (Left Screen)
+      sScreenCtx.strokeStyle = hasLiveP1Stream ? '#39ff14' : '#ffb300';
+      sScreenCtx.lineWidth = 3; sScreenCtx.strokeRect(15, 20, 225, 215);
+      if (hasLiveP1Stream && videoP1.readyState >= 2) {
+        sScreenCtx.drawImage(videoP1, 17, 22, 221, 211);
+      } else {
+        sScreenCtx.fillStyle = '#ffda66'; sScreenCtx.font = 'bold 18px sans-serif'; sScreenCtx.textAlign = 'center';
+        sScreenCtx.fillText("PODIUM 1 (0001)", 127, 120);
+        sScreenCtx.font = '13px monospace'; sScreenCtx.fillText("VOICE/CAM STANDBY", 127, 150);
+      }
+
+      // Draw Podium 2 Feed (Right Screen)
+      sScreenCtx.strokeStyle = hasLiveP2Stream ? '#39ff14' : '#ffb300';
+      sScreenCtx.lineWidth = 3; sScreenCtx.strokeRect(272, 20, 225, 215);
+      if (hasLiveP2Stream && videoP2.readyState >= 2) {
+        sScreenCtx.drawImage(videoP2, 274, 22, 221, 211);
+      } else {
+        sScreenCtx.fillStyle = '#ffda66'; sScreenCtx.font = 'bold 18px sans-serif'; sScreenCtx.textAlign = 'center';
+        sScreenCtx.fillText("PODIUM 2 (0002)", 384, 120);
+        sScreenCtx.font = '13px monospace'; sScreenCtx.fillText("VOICE/CAM STANDBY", 384, 150);
+      }
+      studioScreenTex.needsUpdate = true;
+    }
+
+    const studioBackScreenMesh = new THREE.Mesh(new THREE.PlaneGeometry(6.4, 2.8), new THREE.MeshBasicMaterial({ map: studioScreenTex }));
+    studioBackScreenMesh.position.set(0, 3.4, -4.5); miniDiorama.add(studioBackScreenMesh);
 
     window.addEventListener('resize', () => {
       camera.aspect = window.innerWidth / window.innerHeight; camera.updateProjectionMatrix();
@@ -177,10 +215,9 @@
 
     function animate() {
       requestAnimationFrame(animate);
+      renderBackstageScreens();
       renderer.render(scene, camera);
     }
-
-    initStudioWebRTC();
     animate();
   </script>
 </body>
