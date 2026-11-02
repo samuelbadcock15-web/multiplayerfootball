@@ -196,53 +196,69 @@
     }
 
     function connectToStudio(code) {
-      peer = new Peer();
+  peer = new Peer();
 
-      peer.on('open', () => {
-        const targetStudioId = "goody-studio-" + code;
+  peer.on('open', () => {
+    const targetStudioId = "goody-studio-" + code;
+    console.log("Attempting to connect to studio:", targetStudioId);
 
-        // 1. Establish Data Connection first
-        dataConn = peer.connect(targetStudioId, {
-          metadata: { role: 'AUDIENCE', sessionToken: sessionToken, name: spectatorName }
-        });
+    // 1. Establish Data Connection
+    dataConn = peer.connect(targetStudioId, {
+      metadata: { role: 'AUDIENCE', sessionToken: sessionToken, name: spectatorName }
+    });
 
-        dataConn.on('open', () => {
-          console.log("Connected to studio data channel!");
-        });
+    dataConn.on('open', () => {
+      console.log("Connected to studio data channel successfully!");
+    });
 
-        dataConn.on('data', (data) => {
-          if (data.type === "AUDIENCE_CHAT_BROADCAST") {
-            addMessage(data.author, data.text);
-          } else if (data.type === "SYNC_MATCH_TIMER") {
-            matchClockBadge.textContent = data.timeStr;
-          } else if (data.type === "HOST_EJECTED_SPECTATOR") {
-            alert(data.message || "You have been disconnected from the studio.");
-            location.reload();
-          }
-        });
+    dataConn.on('data', (data) => {
+      if (data.type === "AUDIENCE_CHAT_BROADCAST") {
+        addMessage(data.author, data.text);
+      } else if (data.type === "SYNC_MATCH_TIMER") {
+        matchClockBadge.textContent = data.timeStr;
+      } else if (data.type === "HOST_EJECTED_SPECTATOR") {
+        alert(data.message || "You have been disconnected from the studio.");
+        location.reload();
+      }
+    });
 
-        dataConn.on('error', (err) => {
-          console.error("Data connection error:", err);
-        });
+    dataConn.on('error', (err) => {
+      console.error("Data connection error:", err);
+    });
 
-        // 2. Handle incoming media stream from Host (Host calls Audience or sends stream)
-        peer.on('call', (incomingCall) => {
-          incomingCall.answer(); // Answer without sending local mic/cam since audience is view-only
-          incomingCall.on('stream', (stream) => {
-            studioFeed.srcObject = stream;
-            studioFeed.play().catch(e => console.error("Autoplay prevented:", e));
+    // 2. Handle incoming media stream from Host
+    peer.on('call', (incomingCall) => {
+      console.log("Incoming media call received from host...");
+      incomingCall.answer(); // Answer the media call
+      
+      incomingCall.on('stream', (remoteStream) => {
+        console.log("Remote stream received! Tracks:", remoteStream.getTracks());
+        studioFeed.srcObject = remoteStream;
+        
+        // Force play with metadata listener to prevent black box layout freezes
+        studioFeed.onloadedmetadata = () => {
+          studioFeed.play().then(() => {
+            console.log("Studio feed playing successfully.");
+          }).catch(e => {
+            console.error("Autoplay blocked or failed:", e);
           });
-        });
+        };
       });
 
-      peer.on('error', (err) => {
-        console.error("PeerJS error:", err);
-        if (err.type === 'peer-unavailable') {
-          alert("Could not find a live studio with room code " + code + ". Check the code and try again.");
-          location.reload();
-        }
+      incomingCall.on('error', (err) => {
+        console.error("Call error:", err);
       });
+    });
+  });
+
+  peer.on('error', (err) => {
+    console.error("PeerJS error:", err);
+    if (err.type === 'peer-unavailable') {
+      alert("Could not find a live studio with room code " + code + ". Check the code and try again.");
+      location.reload();
     }
+  });
+}
 
     function sendChat() {
       const text = chatInput.value.trim();
