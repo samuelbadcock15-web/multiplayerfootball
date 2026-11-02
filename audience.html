@@ -82,9 +82,27 @@
       box-shadow: 0 0 18px rgba(253, 203, 110, 0.45);
     }
 
-    /* IN-CHAT TRIVIA BOX */
+    /* TRIVIA OVERLAY */
+    #stage-synced-banner {
+      background: rgba(22, 9, 44, 0.94); border: 2px solid #00f0ff; border-radius: 10px;
+      padding: 8px 12px; margin: 6px auto; width: 100%; max-width: 440px; text-align: center;
+      display: none; pointer-events: auto;
+    }
+    #stage-q-title { font-size: 0.75rem; color: #ffda66; font-weight: bold; font-family: monospace; }
+    #stage-q-text { font-size: 0.84rem; color: #ffffff; margin: 4px 0 8px 0; font-weight: 600; line-height: 1.3; }
+    .options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; }
+    .opt-box {
+      background: #250f44; border: 1.5px solid #a29bfe; border-radius: 6px;
+      color: #fff; padding: 6px 8px; font-size: 0.72rem; text-align: left;
+      font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .opt-box.selected { background: #6c5ce7; border-color: #fdcb6e; }
+    .opt-box.correct { background: #00b894 !important; border-color: #55efc4 !important; }
+    .opt-box.wrong { background: #d63031 !important; border-color: #ff7675 !important; }
+
+    /* CHAT */
     #chat-container {
-      width: 100%; max-width: 420px; background: rgba(13, 5, 26, 0.92);
+      width: 100%; max-width: 420px; background: rgba(13, 5, 26, 0.88);
       border: 1.5px solid #d4af37; border-radius: 10px; display: flex; flex-direction: column;
       pointer-events: auto; margin-bottom: 6px; backdrop-filter: blur(4px);
     }
@@ -94,36 +112,13 @@
       align-items: center; cursor: pointer;
     }
     #chat-messages {
-      height: 190px; overflow-y: auto; padding: 6px 8px; display: flex; flex-direction: column;
-      gap: 6px; font-size: 0.78rem;
+      height: 95px; overflow-y: auto; padding: 6px 8px; display: flex; flex-direction: column;
+      gap: 4px; font-size: 0.78rem;
     }
     .chat-msg { word-break: break-word; line-height: 1.25; }
     .chat-author { font-weight: bold; color: #39ff14; font-family: monospace; }
     .chat-author.is-self { color: #00f0ff; }
     .chat-author.is-host { color: #ff7675; }
-
-    /* IN-CHAT INTERACTIVE TRIVIA STYLING */
-    .chat-trivia-card {
-      background: #1c0a35; border: 2px solid #00f0ff; border-radius: 8px; padding: 8px; margin: 4px 0;
-      box-shadow: 0 0 12px rgba(0, 240, 255, 0.25);
-    }
-    .chat-trivia-country { font-size: 0.68rem; font-family: monospace; color: #ffda66; font-weight: bold; margin-bottom: 2px; }
-    .chat-trivia-text { font-size: 0.76rem; color: #fff; font-weight: 600; margin-bottom: 6px; line-height: 1.2; }
-    .chat-options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; }
-    .chat-opt-btn {
-      background: #2b1154; border: 1.5px solid #a29bfe; border-radius: 5px; color: #fff;
-      padding: 5px 6px; font-size: 0.7rem; font-weight: bold; text-align: left; cursor: pointer;
-      display: flex; justify-content: space-between; align-items: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-    }
-    .chat-opt-btn:hover:not(:disabled) { background: #6c5ce7; border-color: #00f0ff; }
-    .chat-opt-btn.selected { background: #0984e3 !important; border-color: #00f0ff !important; box-shadow: 0 0 6px rgba(9,132,227,0.6); }
-    .chat-opt-btn.contestant-picked { border: 2.5px dashed #ffda66 !important; }
-    .chat-opt-btn.correct { background: #00b894 !important; border-color: #55efc4 !important; }
-    .chat-opt-btn.wrong { background: #d63031 !important; border-color: #ff7675 !important; }
-    .chat-opt-btn:disabled { cursor: default; opacity: 0.9; }
-    .majority-badge { font-size: 0.6rem; font-family: monospace; background: rgba(0,0,0,0.5); padding: 1px 3px; border-radius: 3px; color: #ffda66; }
-    .chat-trivia-status { margin-top: 4px; font-size: 0.68rem; font-family: monospace; color: #39ff14; font-weight: bold; text-align: center; }
-
     .chat-input-row { display: flex; border-top: 1px solid #442266; padding: 4px; gap: 4px; }
     #chat-text-input {
       flex: 1; background: #080313; border: 1px solid #a29bfe; border-radius: 6px;
@@ -143,7 +138,9 @@
       background: rgba(20, 7, 40, 0.90); border: 1.5px solid #d4af37; border-radius: 10px;
       padding: 4px; pointer-events: auto; display: flex; flex-direction: column; align-items: center;
     }
-    .dpad-sublabel { font-size: 0.60rem; font-family: monospace; color: #ffda66; margin-top: 2px; }
+    .dpad-sublabel {
+      font-size: 0.60rem; font-family: monospace; color: #ffda66; margin-top: 2px;
+    }
     .dpad-grid { display: grid; grid-template-columns: 44px 44px 44px; grid-template-rows: 32px 32px; gap: 4px; }
     .dpad-btn {
       background: #2b1154; border: 1.5px solid #d4af37; border-radius: 6px; color: #fff;
@@ -204,10 +201,21 @@
 
     <div id="interaction-prompt">PRESS [ W / ▲ ] TO TAKE ELEVATOR</div>
 
+    <div id="stage-synced-banner">
+      <div id="stage-q-title">CURRENT QUESTION</div>
+      <div id="stage-q-text">Standby for next question...</div>
+      <div class="options-grid" id="stage-options-grid" style="display:none;">
+        <div class="opt-box" id="aud-opt-0">A) ...</div>
+        <div class="opt-box" id="aud-opt-1">B) ...</div>
+        <div class="opt-box" id="aud-opt-2">C) ...</div>
+        <div class="opt-box" id="aud-opt-3">D) ...</div>
+      </div>
+    </div>
+
     <div style="display:flex; flex-direction:column; align-items:center; width:100%;">
       <div id="chat-container">
         <div id="chat-header">
-          <span>COMMUNAL CHAT & TRIVIA [CLOCK: <span id="aud-chat-clock" style="color:#ffda66;">20:00</span>]</span>
+          <span>COMMUNAL AUDIENCE CHAT</span>
           <span id="chat-toggle-icon">▼</span>
         </div>
         <div id="chat-messages">
@@ -324,8 +332,17 @@
     const userDisplayName = document.getElementById('user-display-name');
     const locationPill = document.getElementById('location-pill');
     const showClockPill = document.getElementById('show-clock-pill');
-    const audChatClock = document.getElementById('aud-chat-clock');
     const interactionPrompt = document.getElementById('interaction-prompt');
+    const stageSyncedBanner = document.getElementById('stage-synced-banner');
+    const stageQTitle = document.getElementById('stage-q-title');
+    const stageQText = document.getElementById('stage-q-text');
+    const stageOptionsGrid = document.getElementById('stage-options-grid');
+    const audOptBoxes = [
+      document.getElementById('aud-opt-0'),
+      document.getElementById('aud-opt-1'),
+      document.getElementById('aud-opt-2'),
+      document.getElementById('aud-opt-3')
+    ];
 
     const lensOverlay = document.getElementById('lens-overlay');
     const barTop = document.getElementById('bar-top');
@@ -350,22 +367,20 @@
     let p2ContestantName = "June";
     let p1ContestantCity = "London";
     let p2ContestantCity = "Nottingham";
+    let p1RollVal = null;
+    let p2RollVal = null;
     let p1Index = 0;
     let p2Index = 0;
-    let audienceIndex = 0;
-    let audiencePawnIdx = 0;
 
     let activeQuestion = null;
     let activeRecap = null;
-    let audienceSelectedOption = null;
-    let audienceHasAnswered = false;
-    let activeTriviaCardEl = null;
-    let audienceVoteCounts = [0, 0, 0, 0];
+    let stageSelectedOption = null;
+    let stageOptionStatus = null;
 
     const videoJake = document.createElement('video');
-    videoJake.autoplay = true; videoJake.playsInline = true; videoJake.muted = false;
+    videoJake.autoplay = true; videoJake.playsInline = true; videoJake.muted = true;
     const videoJune = document.createElement('video');
-    videoJune.autoplay = true; videoJune.playsInline = true; videoJune.muted = false;
+    videoJune.autoplay = true; videoJune.playsInline = true; videoJune.muted = true;
     let hasLiveJakeStream = false;
     let hasLiveJuneStream = false;
 
@@ -401,7 +416,6 @@
         dataConn.on('data', (data) => {
           if (data.type === 'SYNC_MATCH_TIMER') {
             showClockPill.textContent = `SHOW: ${data.timeStr}`;
-            audChatClock.textContent = data.timeStr;
             renderWallClockTexture(data.timeStr);
           } else if (data.type === 'SYNC_BOARD_STATE') {
             studioPower = data.studioPower;
@@ -420,21 +434,44 @@
             renderStageQuestionBoard();
           } else if (data.type === 'SHOW_QUESTION_LOCKED') {
             activeQuestion = data.question; activeRecap = null;
-            audienceSelectedOption = null;
-            audienceHasAnswered = false;
-            audienceVoteCounts = [0, 0, 0, 0];
+            stageSelectedOption = null; stageOptionStatus = null;
             renderStageQuestionBoard();
-            injectTriviaCardIntoChat(data.question);
-          } else if (data.type === 'OPPONENT_ANSWERED') {
-            highlightContestantAnswerInChat(data.chosenAnswer);
-          } else if (data.type === 'EVALUATION_RESULT') {
-            handleAudienceEvaluationInChat(data);
+            stageSyncedBanner.style.display = 'block';
+            stageQTitle.textContent = `${data.question.country.toUpperCase()} [${data.activeContestantName.toUpperCase()}]`;
+            stageQText.textContent = data.question.text || data.question.q;
 
+            if (data.question.options && data.question.options.length === 4) {
+              stageOptionsGrid.style.display = 'grid';
+              data.question.options.forEach((opt, idx) => {
+                audOptBoxes[idx].textContent = `${["A", "B", "C", "D"][idx]}) ${opt}`;
+                audOptBoxes[idx].className = 'opt-box';
+              });
+            } else {
+              stageOptionsGrid.style.display = 'none';
+            }
+          } else if (data.type === 'OPPONENT_ANSWERED') {
+            stageSelectedOption = data.chosenAnswer; stageOptionStatus = 'selected';
+            renderStageQuestionBoard();
+            if (activeQuestion && activeQuestion.options) {
+              const idx = activeQuestion.options.indexOf(data.chosenAnswer);
+              if (idx !== -1) audOptBoxes[idx].className = 'opt-box selected';
+            }
+          } else if (data.type === 'EVALUATION_RESULT') {
+            stageOptionStatus = data.isCorrect ? 'correct' : 'wrong';
+            stageSelectedOption = data.chosenAnswer;
+            renderStageQuestionBoard();
+            if (activeQuestion && activeQuestion.options) {
+              const idx = activeQuestion.options.indexOf(data.chosenAnswer);
+              if (idx !== -1) audOptBoxes[idx].className = `opt-box ${data.isCorrect ? 'correct' : 'wrong'}`;
+            }
             setTimeout(() => {
               activeRecap = { country: data.country, text: data.recap, isCorrect: data.isCorrect };
               activeQuestion = null;
-              renderStageRecap(data.recap, data.country);
-              replaceTriviaCardWithRecapInChat(data.recap, data.country);
+              renderStageQuestionBoard();
+              stageSyncedBanner.style.display = 'block';
+              stageOptionsGrid.style.display = 'none';
+              stageQTitle.textContent = `WHAT WE LEARNED (${data.country})`;
+              stageQText.textContent = data.recap;
             }, 1400);
           } else if (data.type === 'HOST_SPEAK') {
             isGoodySpeaking = true;
@@ -453,18 +490,17 @@
           }
         });
 
+        // INCOMING VIDEO RELAY FROM HOST
         peer.on('call', (call) => {
           call.answer();
           call.on('stream', (remoteStream) => {
             const contestantSlot = call.metadata ? call.metadata.contestant : null;
             if (contestantSlot === "goody-contestant-2") {
               videoJune.srcObject = remoteStream;
-              videoJune.muted = false;
               videoJune.play().catch(() => {});
               hasLiveJuneStream = true;
             } else {
               videoJake.srcObject = remoteStream;
-              videoJake.muted = false;
               videoJake.play().catch(() => {});
               hasLiveJakeStream = true;
             }
@@ -479,156 +515,6 @@
 
       peer.on('error', () => setTimeout(connectToStudio, 4000));
     }
-
-    // --- IN-CHAT TRIVIA & MAJORITY TALLY SYSTEM ---
-    function injectTriviaCardIntoChat(qData) {
-      if (activeTriviaCardEl && activeTriviaCardEl.parentNode) {
-        activeTriviaCardEl.parentNode.removeChild(activeTriviaCardEl);
-      }
-
-      const card = document.createElement('div');
-      card.className = 'chat-trivia-card';
-      card.id = 'active-chat-trivia-card';
-
-      const countryTag = document.createElement('div');
-      countryTag.className = 'chat-trivia-country';
-      countryTag.textContent = `⚡ LIVE TRIVIA: ${qData.country.toUpperCase()}`;
-      card.appendChild(countryTag);
-
-      const qTextEl = document.createElement('div');
-      qTextEl.className = 'chat-trivia-text';
-      qTextEl.textContent = qData.text || qData.q;
-      card.appendChild(qTextEl);
-
-      const grid = document.createElement('div');
-      grid.className = 'chat-options-grid';
-
-      const letters = ["A", "B", "C", "D"];
-      qData.options.forEach((opt, idx) => {
-        const btn = document.createElement('button');
-        btn.className = 'chat-opt-btn';
-        btn.id = `chat-aud-btn-${idx}`;
-       
-        const spanText = document.createElement('span');
-        spanText.textContent = `${letters[idx]}) ${opt}`;
-        spanText.style.overflow = 'hidden';
-        spanText.style.textOverflow = 'ellipsis';
-       
-        const badge = document.createElement('span');
-        badge.className = 'majority-badge';
-        badge.id = `chat-maj-badge-${idx}`;
-        badge.textContent = '0%';
-
-        btn.appendChild(spanText);
-        btn.appendChild(badge);
-
-        btn.onclick = () => submitAudienceAnswerInChat(idx);
-        grid.appendChild(btn);
-      });
-      card.appendChild(grid);
-
-      const statusMsg = document.createElement('div');
-      statusMsg.className = 'chat-trivia-status';
-      statusMsg.id = 'chat-trivia-status-msg';
-      statusMsg.textContent = 'Tap an answer to vote & play along!';
-      card.appendChild(statusMsg);
-
-      chatMessages.appendChild(card);
-      chatMessages.scrollTop = chatMessages.scrollHeight;
-      activeTriviaCardEl = card;
-    }
-
-    function submitAudienceAnswerInChat(idx) {
-      if (audienceHasAnswered || !activeQuestion) return;
-      audienceHasAnswered = true;
-      audienceSelectedOption = idx;
-
-      audienceVoteCounts[idx]++;
-
-      for (let i = 0; i < 4; i++) {
-        const btn = document.getElementById(`chat-aud-btn-${i}`);
-        if (btn) {
-          if (i === idx) btn.classList.add('selected');
-          btn.disabled = true;
-        }
-      }
-
-      const statusMsg = document.getElementById('chat-trivia-status-msg');
-      if (statusMsg) statusMsg.textContent = "Answer locked in! Tallying audience majority...";
-    }
-
-    function highlightContestantAnswerInChat(chosenAnswer) {
-      if (!activeQuestion) return;
-      const cIdx = activeQuestion.options.indexOf(chosenAnswer);
-      if (cIdx !== -1) {
-        const btn = document.getElementById(`chat-aud-btn-${cIdx}`);
-        if (btn) btn.classList.add('contestant-picked');
-      }
-    }
-
-    function handleAudienceEvaluationInChat(data) {
-      if (!activeQuestion || !activeTriviaCardEl) return;
-
-      const correctAnsText = activeQuestion.ans;
-      const correctIdx = activeQuestion.options.indexOf(correctAnsText);
-
-      let totalVotes = audienceVoteCounts.reduce((a, b) => a + b, 0);
-      if (totalVotes === 0) totalVotes = 1;
-
-      for (let i = 0; i < 4; i++) {
-        const btn = document.getElementById(`chat-aud-btn-${i}`);
-        const badge = document.getElementById(`chat-maj-badge-${i}`);
-        if (btn && badge) {
-          const pct = Math.round((audienceVoteCounts[i] / totalVotes) * 100);
-          badge.textContent = `${pct}%`;
-
-          if (i === correctIdx) {
-            btn.classList.add('correct');
-          } else if (i === audienceSelectedOption && i !== correctIdx) {
-            btn.classList.add('wrong');
-          }
-        }
-      }
-
-      const userGotItRight = (audienceSelectedOption !== null && activeQuestion.options[audienceSelectedOption] === correctAnsText);
-      const statusMsg = document.getElementById('chat-trivia-status-msg');
-
-      if (userGotItRight) {
-        audienceIndex = Math.min(boardTileCoords.length - 1, audienceIndex + 1);
-        animatePawnHop(audiencePawn, audiencePawnIdx, audienceIndex, 0);
-        audiencePawnIdx = audienceIndex;
-        if (statusMsg) statusMsg.textContent = `🎉 Correct! Ghost token advanced (+1 tile)!`;
-        playTone(587, 'sine', 0.2, 0.05);
-      } else {
-        if (audiencePawnIdx > 0) {
-          animatePawnHop(audiencePawn, audiencePawnIdx, 0, 0, 100);
-          audienceIndex = 0;
-          audiencePawnIdx = 0;
-        }
-        if (statusMsg) statusMsg.textContent = `❌ Incorrect! Ghost token sent back to START (Tile 0)!`;
-        playTone(220, 'triangle', 0.2, 0.05);
-      }
-    }
-
-    function replaceTriviaCardWithRecapInChat(recapText, country) {
-      if (!activeTriviaCardEl) return;
-
-      activeTriviaCardEl.innerHTML = `
-        <div class="chat-trivia-country" style="color: #fdcb6e;">📜 RECAP: WHAT WE LEARNED (${country.toUpperCase()})</div>
-        <div class="chat-trivia-text" style="margin-bottom: 2px;">${recapText}</div>
-        <div class="chat-trivia-status" style="color: #ffda66;">Next turn starting soon...</div>
-      `;
-
-      setTimeout(() => {
-        if (activeTriviaCardEl && activeTriviaCardEl.parentNode) {
-          activeTriviaCardEl.parentNode.removeChild(activeTriviaCardEl);
-          activeTriviaCardEl = null;
-        }
-        audienceSelectedOption = null;
-      }, 5000);
-    }
-
-    function renderStageRecap(recapText, country) {}
 
     function broadcastSpectatorMovement() {
       if (dataConn && dataConn.open && !isSpectatorControlsLocked) {
@@ -681,6 +567,7 @@
       if (!text) return;
       const now = performance.now();
      
+      // Cooldown rule: 2.5s between messages
       if (now - lastMessageSentTime < 2500) return;
       lastMessageSentTime = now;
 
@@ -945,24 +832,18 @@
       pawnGroup.userData.badgeTexture.needsUpdate = true;
     }
 
-    function createPlayerPawn(colorHex, initialName, isGhost = false) {
+    function createPlayerPawn(colorHex, initialName) {
       const pawn = new THREE.Group();
-      const baseMat = new THREE.MeshStandardMaterial({
-        color: colorHex, metalness: 0.6, roughness: 0.25,
-        transparent: isGhost, opacity: isGhost ? 0.45 : 1.0
-      });
+      const baseMat = new THREE.MeshStandardMaterial({ color: colorHex, metalness: 0.6, roughness: 0.25 });
       const base = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.10, 0.04, 16), baseMat); base.position.y = 0.02; pawn.add(base);
       const body = new THREE.Mesh(new THREE.ConeGeometry(0.07, 0.16, 16), baseMat); body.position.y = 0.12; pawn.add(body);
       const head = new THREE.Mesh(new THREE.SphereGeometry(0.055, 16, 16), baseMat); head.position.y = 0.22; pawn.add(head);
-
-      if (!isGhost) {
-        const bCanvas = document.createElement('canvas'); bCanvas.width = 256; bCanvas.height = 96;
-        const bTex = new THREE.CanvasTexture(bCanvas);
-        const badgeMesh = new THREE.Mesh(new THREE.PlaneGeometry(0.34, 0.13), new THREE.MeshBasicMaterial({ map: bTex, transparent: true, side: THREE.DoubleSide, depthWrite: false }));
-        badgeMesh.position.set(0, 0.35, 0); pawn.add(badgeMesh);
-        pawn.userData = { badgeCanvas: bCanvas, badgeTexture: bTex, badgeMesh, tagColor: '#' + colorHex.toString(16).padStart(6, '0') };
-        updatePawnNameBadge(pawn, initialName);
-      }
+      const bCanvas = document.createElement('canvas'); bCanvas.width = 256; bCanvas.height = 96;
+      const bTex = new THREE.CanvasTexture(bCanvas);
+      const badgeMesh = new THREE.Mesh(new THREE.PlaneGeometry(0.34, 0.13), new THREE.MeshBasicMaterial({ map: bTex, transparent: true, side: THREE.DoubleSide, depthWrite: false }));
+      badgeMesh.position.set(0, 0.35, 0); pawn.add(badgeMesh);
+      pawn.userData = { badgeCanvas: bCanvas, badgeTexture: bTex, badgeMesh, tagColor: '#' + colorHex.toString(16).padStart(6, '0') };
+      updatePawnNameBadge(pawn, initialName);
       return pawn;
     }
     const pawn1 = createPlayerPawn(0x00d2d3, "Jake");
@@ -970,10 +851,6 @@
     pawn1.position.set(boardTileCoords[0].x - 0.08, 0.52, boardTileCoords[0].z);
     pawn2.position.set(boardTileCoords[0].x + 0.08, 0.52, boardTileCoords[0].z);
     miniDiorama.add(pawn1); miniDiorama.add(pawn2);
-
-    const audiencePawn = createPlayerPawn(0xf1c40f, "AUDIENCE", true);
-    audiencePawn.position.set(boardTileCoords[0].x, 0.52, boardTileCoords[0].z - 0.12);
-    miniDiorama.add(audiencePawn);
 
     function animatePawnHop(pawn, fromIdx, toIdx, offsetX, hopDurationMs = 280) {
       if (fromIdx === toIdx) return;
@@ -1004,7 +881,7 @@
       hopNextStep();
     }
 
-    // 3D Studio Question Board
+    // 3D Question Board
     const qBoardCanvas = document.createElement('canvas'); qBoardCanvas.width = 512; qBoardCanvas.height = 384;
     const qBoardCtx = qBoardCanvas.getContext('2d');
     const qBoardTex = new THREE.CanvasTexture(qBoardCanvas);
@@ -1031,7 +908,7 @@
         qBoardCtx.fillText(line, 256, y);
       } else if (activeQuestion) {
         qBoardCtx.fillStyle = '#ffda66'; qBoardCtx.font = 'bold 18px monospace'; qBoardCtx.textAlign = 'left';
-        qBoardCtx.fillText(` ${activeQuestion.country.toUpperCase()} TRIVIA`, 20, 36);
+        qBoardCtx.fillText(` ${activeQuestion.country.toUpperCase()} [${p1ContestantName.toUpperCase()}]`, 20, 36);
         qBoardCtx.fillStyle = '#ffffff'; qBoardCtx.font = '15px sans-serif';
         const words = (activeQuestion.q || activeQuestion.text || "").split(' ');
         let line = ''; let y = 72;
@@ -1042,24 +919,6 @@
           } else line = testLine;
         }
         qBoardCtx.fillText(line, 20, y);
-
-        const letters = ["A", "B", "C", "D"];
-        activeQuestion.options.forEach((opt, idx) => {
-          const optY = 210 + (idx * 40);
-          qBoardCtx.fillStyle = '#220f3d';
-          qBoardCtx.strokeStyle = '#a29bfe';
-          qBoardCtx.fillRect(20, optY - 24, 472, 32);
-          qBoardCtx.lineWidth = 2;
-          qBoardCtx.strokeRect(20, optY - 24, 472, 32);
-
-          qBoardCtx.fillStyle = '#ffda66';
-          qBoardCtx.font = 'bold 16px monospace';
-          qBoardCtx.fillText(`${letters[idx]})`, 30, optY - 2);
-
-          qBoardCtx.fillStyle = '#ffffff';
-          qBoardCtx.font = '14px sans-serif';
-          qBoardCtx.fillText(opt.length > 48 ? opt.substring(0, 48) + "..." : opt, 64, optY - 2);
-        });
       } else {
         qBoardCtx.fillStyle = '#ffda66'; qBoardCtx.font = 'bold 24px sans-serif'; qBoardCtx.textAlign = 'center';
         qBoardCtx.fillText("OFFICIAL GAME RULES", 256, 44);
@@ -1203,26 +1062,12 @@
       faceTex.needsUpdate = true;
     }
 
-    // --- DICE DRAWING HELPER ---
-    function drawDiceFace(ctx, x, y, size, value) {
-      ctx.fillStyle = '#ffffff'; ctx.strokeStyle = '#222222'; ctx.lineWidth = 3;
-      ctx.fillRect(x, y, size, size); ctx.strokeRect(x, y, size, size);
-      ctx.fillStyle = '#e74c3c';
-      const dot = (dx, dy) => {
-        ctx.beginPath(); ctx.arc(x + dx * size, y + dy * size, size * 0.08, 0, Math.PI * 2); ctx.fill();
-      };
-      if (value % 2 === 1) dot(0.5, 0.5);
-      if (value > 1) { dot(0.25, 0.25); dot(0.75, 0.75); }
-      if (value > 3) { dot(0.75, 0.25); dot(0.25, 0.75); }
-      if (value === 6) { dot(0.25, 0.5); dot(0.75, 0.5); }
-    }
-
-    // Backstage Screens
+    // Backstage Screens (Renders the Actual Live Cameras)
     const studioScreenCanvas = document.createElement('canvas'); studioScreenCanvas.width = 512; studioScreenCanvas.height = 256;
     const sScreenCtx = studioScreenCanvas.getContext('2d');
     const studioScreenTex = new THREE.CanvasTexture(studioScreenCanvas);
    
-    function drawScreenFeed(ctx, x, y, width, height, name, city, isLive, videoElem, isGuy, currentRoll, isRolling) {
+    function drawScreenFeed(ctx, x, y, width, height, name, city, isLive, videoElem, isGuy, currentRoll) {
       ctx.fillStyle = '#05020a'; ctx.fillRect(x, y, width, height);
       ctx.strokeStyle = '#39ff14'; ctx.lineWidth = 3; ctx.strokeRect(x, y, width, height);
 
@@ -1234,18 +1079,6 @@
         ctx.fillStyle = isGuy ? '#4a69bd' : '#e84393'; ctx.beginPath(); ctx.ellipse(cx, cy + 25, 26, 32, 0, 0, Math.PI * 2); ctx.fill();
         ctx.fillStyle = '#f8c291'; ctx.beginPath(); ctx.arc(cx, cy - 10, 16, 0, Math.PI * 2); ctx.fill();
       }
-
-      const diceSize = 42;
-      const diceX = x + width - diceSize - 12;
-      const diceY = y + 12;
-
-      if (isRolling) {
-        const animVal = Math.floor((performance.now() / 80) % 6) + 1;
-        drawDiceFace(ctx, diceX, diceY, diceSize, animVal);
-      } else if (currentRoll !== null && currentRoll !== undefined) {
-        drawDiceFace(ctx, diceX, diceY, diceSize, currentRoll);
-      }
-
       ctx.fillStyle = 'rgba(0,0,0,0.85)'; ctx.fillRect(x, y + height - 26, width, 26);
       ctx.fillStyle = '#39ff14'; ctx.font = 'bold 11px monospace'; ctx.textAlign = 'center';
       ctx.fillText(`${isLive ? 'LIVE' : 'CALL'} ${name.toUpperCase()} [${city.toUpperCase()}]`, x + width / 2, y + height - 8);
@@ -1253,8 +1086,8 @@
 
     function renderBackstageScreens() {
       sScreenCtx.fillStyle = '#060210'; sScreenCtx.fillRect(0, 0, 512, 256);
-      drawScreenFeed(sScreenCtx, 15, 20, 225, 215, p1ContestantName, p1ContestantCity, hasLiveJakeStream, videoJake, true, p1RollVal, isDiceRollingP1);
-      drawScreenFeed(sScreenCtx, 272, 20, 225, 215, p2ContestantName, p2ContestantCity, hasLiveJuneStream, videoJune, false, p2RollVal, isDiceRollingP2);
+      drawScreenFeed(sScreenCtx, 15, 20, 225, 215, p1ContestantName, p1ContestantCity, hasLiveJakeStream, videoJake, true, p1RollVal);
+      drawScreenFeed(sScreenCtx, 272, 20, 225, 215, p2ContestantName, p2ContestantCity, hasLiveJuneStream, videoJune, false, p2RollVal);
       studioScreenTex.needsUpdate = true;
     }
     const studioBackScreenMesh = new THREE.Mesh(new THREE.PlaneGeometry(6.4, 2.8), new THREE.MeshBasicMaterial({ map: studioScreenTex }));
