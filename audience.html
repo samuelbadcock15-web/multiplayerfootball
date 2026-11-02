@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>The Goody Tonight Show - Live Audience Spectator</title>
+  <title>The Goody Tonight Show - Live Audience Spectator Gallery</title>
   <style>
     body, html {
       margin: 0; padding: 0; width: 100%; height: 100%;
@@ -145,7 +145,7 @@
   <div id="blocker">
     <div id="instructions-card">
       <h1>The Goody Tonight Show</h1>
-      <p>Spectator Gallery Active! Explore the 3D studio and chat live.</p>
+      <p>Spectator Gallery Active! Explore the 3D studio, see other audience plushies, and chat live.</p>
       <p><strong>Click Anywhere to Capture Mouse & Walk Around</strong></p>
       <p><span class="key">W</span> <span class="key">A</span> <span class="key">S</span> <span class="key">D</span> &nbsp;Walk around gallery freely</p>
     </div>
@@ -173,7 +173,7 @@
     }
     const deviceHardwareId = generateDeviceFingerprint();
 
-    let spectatorSessionToken = localStorage.getItem("goody_ spectator_token");
+    let spectatorSessionToken = localStorage.getItem("goody_spectator_token");
     if (!spectatorSessionToken) {
       spectatorSessionToken = "aud_" + Math.random().toString(36).substring(2, 9);
       localStorage.setItem("goody_spectator_token", spectatorSessionToken);
@@ -279,6 +279,7 @@
 
     let audiencePeer = null;
     let audienceDataConn = null;
+    const otherSpectatorAvatars = {};
 
     function initAudienceWebRTC() {
       if (!isAudienceAuthorized || audiencePeer) return;
@@ -289,7 +290,6 @@
         audiencePeer.on('open', () => {
           const targetStudioId = "goody-studio-" + enteredRoomCode;
 
-          // Connect Data Connection as Audience
           audienceDataConn = audiencePeer.connect(targetStudioId, {
             metadata: {
               role: 'AUDIENCE',
@@ -323,7 +323,9 @@
               p2Index = data.p2Index;
               updatePawnNameBadge(pawn1, data.p1Name);
               updatePawnNameBadge(pawn2, data.p2Name);
-              updateStudioCameraPositions();
+              
+              pawn1.position.set(boardTileCoords[p1Index].x - 0.08, 0.52, boardTileCoords[p1Index].z);
+              pawn2.position.set(boardTileCoords[p2Index].x + 0.08, 0.52, boardTileCoords[p2Index].z);
             } else if (data.type === "SHOW_QUESTION_LOCKED") {
               activeQuestion = data.question;
               activeRecap = null;
@@ -336,11 +338,20 @@
               playHostSpeechLocally(data.text);
             } else if (data.type === "AUDIENCE_CHAT_BROADCAST") {
               addChatMessage(data.author, data.text);
+            } else if (data.type === "SPECTATOR_POS_RELAY") {
+              if (data.peerId === audiencePeer.id) return;
+              let av = otherSpectatorAvatars[data.peerId];
+              if (!av) {
+                av = createCutePlushie3D(0xff7675);
+                scene.add(av);
+                otherSpectatorAvatars[data.peerId] = av;
+              }
+              av.position.set(data.x, data.y - 3.95, data.z);
+              av.rotation.y = data.yaw;
             }
           });
         });
 
-        // Handle incoming video streams from contestants forwarded by host
         audiencePeer.on('call', (call) => {
           call.answer();
           call.on('stream', (remoteStream) => {
@@ -393,9 +404,6 @@
     const rendererJake = new THREE.WebGLRenderer({ canvas: canvasJake, antialias: true });
     const canvasJune = document.createElement('canvas'); canvasJune.width = 640; canvasJune.height = 360;
     const rendererJune = new THREE.WebGLRenderer({ canvas: canvasJune, antialias: true });
-
-    const camJake = new THREE.PerspectiveCamera(65, 16 / 9, 0.1, 100);
-    const camJune = new THREE.PerspectiveCamera(65, 16 / 9, 0.1, 100);
 
     const controls = new THREE.PointerLockControls(camera, document.body);
 
@@ -496,6 +504,83 @@
       const ctx = c.getContext('2d'); const w = 256; const h = 256;
       ctx.fillStyle = '#1e1035'; ctx.fillRect(0, 0, w, h);
       ctx.save(); ctx.beginPath(); ctx.arc(128, 128, 124, 0, Math.PI * 2); ctx.clip();
+
+      switch(countryName) {
+        case "France":
+          ctx.fillStyle = '#002654'; ctx.fillRect(0, 0, w / 3, h);
+          ctx.fillStyle = '#FFFFFF'; ctx.fillRect(w / 3, 0, w / 3, h);
+          ctx.fillStyle = '#ED2939'; ctx.fillRect((w / 3) * 2, 0, w / 3, h);
+          break;
+        case "Netherlands":
+          ctx.fillStyle = '#AE1C28'; ctx.fillRect(0, 0, w, h / 3);
+          ctx.fillStyle = '#FFFFFF'; ctx.fillRect(0, h / 3, w, h / 3);
+          ctx.fillStyle = '#21468B'; ctx.fillRect(0, (h / 3) * 2, w, h / 3);
+          break;
+        case "Canada":
+          ctx.fillStyle = '#FFFFFF'; ctx.fillRect(0, 0, w, h);
+          ctx.fillStyle = '#FF0000'; ctx.fillRect(0, 0, w * 0.28, h); ctx.fillRect(w * 0.72, 0, w * 0.28, h);
+          ctx.beginPath(); ctx.arc(128, 128, 36, 0, Math.PI * 2); ctx.fill();
+          break;
+        case "Brazil":
+          ctx.fillStyle = '#009739'; ctx.fillRect(0, 0, w, h);
+          ctx.fillStyle = '#FEDD00';
+          ctx.beginPath(); ctx.moveTo(128, 24); ctx.lineTo(236, 128); ctx.lineTo(128, 232); ctx.lineTo(20, 128); ctx.closePath(); ctx.fill();
+          ctx.fillStyle = '#012169'; ctx.beginPath(); ctx.arc(128, 128, 52, 0, Math.PI * 2); ctx.fill();
+          break;
+        case "Sweden":
+          ctx.fillStyle = '#006AA7'; ctx.fillRect(0, 0, w, h);
+          ctx.fillStyle = '#FECC00'; ctx.fillRect(75, 0, 36, h); ctx.fillRect(0, 110, w, 36);
+          break;
+        case "Italy":
+          ctx.fillStyle = '#009246'; ctx.fillRect(0, 0, w / 3, h);
+          ctx.fillStyle = '#FFFFFF'; ctx.fillRect(w / 3, 0, w / 3, h);
+          ctx.fillStyle = '#CE2B37'; ctx.fillRect((w / 3) * 2, 0, w / 3, h);
+          break;
+        case "Denmark":
+          ctx.fillStyle = '#C60C30'; ctx.fillRect(0, 0, w, h);
+          ctx.fillStyle = '#FFFFFF'; ctx.fillRect(80, 0, 34, h); ctx.fillRect(0, 111, w, 34);
+          break;
+        case "Australia":
+          ctx.fillStyle = '#00008B'; ctx.fillRect(0, 0, w, h);
+          ctx.fillStyle = '#FFFFFF'; ctx.fillRect(0, 0, 120, 120);
+          ctx.fillStyle = '#CC0000'; ctx.fillRect(48, 0, 24, 120); ctx.fillRect(0, 48, 120, 24);
+          break;
+        case "Spain":
+          ctx.fillStyle = '#AA151B'; ctx.fillRect(0, 0, w, h);
+          ctx.fillStyle = '#F1BF00'; ctx.fillRect(0, h * 0.25, w, h * 0.5);
+          break;
+        case "Germany":
+          ctx.fillStyle = '#000000'; ctx.fillRect(0, 0, w, h / 3);
+          ctx.fillStyle = '#DD0000'; ctx.fillRect(0, h / 3, w, h / 3);
+          ctx.fillStyle = '#FFCE00'; ctx.fillRect(0, (h / 3) * 2, w, h / 3);
+          break;
+        case "UK":
+          ctx.fillStyle = '#012169'; ctx.fillRect(0, 0, w, h);
+          ctx.strokeStyle = '#FFFFFF'; ctx.lineWidth = 36;
+          ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(w, h); ctx.moveTo(w, 0); ctx.lineTo(0, h); ctx.stroke();
+          ctx.strokeStyle = '#C8102E'; ctx.lineWidth = 14;
+          ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(w, h); ctx.moveTo(w, 0); ctx.lineTo(0, h); ctx.stroke();
+          break;
+        case "Nigeria":
+          ctx.fillStyle = '#008751'; ctx.fillRect(0, 0, w, h / 3);
+          ctx.fillStyle = '#FFFFFF'; ctx.fillRect(w / 3, 0, w / 3, h);
+          ctx.fillStyle = '#008751'; ctx.fillRect((w / 3) * 2, 0, w / 3, h);
+          break;
+        case "United States":
+          ctx.fillStyle = '#FFFFFF'; ctx.fillRect(0, 0, w, h);
+          for (let s = 0; s < 13; s++) {
+            if (s % 2 === 0) { ctx.fillStyle = '#B22234'; ctx.fillRect(0, s * (h / 13), w, Math.ceil(h / 13)); }
+          }
+          ctx.fillStyle = '#3C3B6E'; ctx.fillRect(0, 0, w * 0.48, h * 0.54);
+          break;
+        case "Belgium":
+          ctx.fillStyle = '#000000'; ctx.fillRect(0, 0, w / 3, h);
+          ctx.fillStyle = '#FDDA24'; ctx.fillRect(w / 3, 0, w / 3, h);
+          ctx.fillStyle = '#EF3340'; ctx.fillRect((w / 3) * 2, 0, w / 3, h);
+          break;
+        default:
+          ctx.fillStyle = '#22143b'; ctx.fillRect(0, 0, w, h);
+      }
       ctx.restore();
       ctx.strokeStyle = '#e6c875'; ctx.lineWidth = 8; ctx.beginPath(); ctx.arc(128, 128, 123, 0, Math.PI * 2); ctx.stroke();
       const tex = new THREE.CanvasTexture(c); tex.needsUpdate = true; return tex;
@@ -569,7 +654,17 @@
         qBoardCtx.fillStyle = '#ffda66'; qBoardCtx.font = 'bold 18px monospace'; qBoardCtx.textAlign = 'left';
         qBoardCtx.fillText(` ${activeQuestion.country.toUpperCase()} QUESTION`, 20, 36);
         qBoardCtx.fillStyle = '#ffffff'; qBoardCtx.font = '15px sans-serif';
-        qBoardCtx.fillText(activeQuestion.q, 20, 80);
+        qBoardCtx.fillText(activeQuestion.q, 20, 72);
+
+        const letters = ["A", "B", "C", "D"];
+        activeQuestion.options.forEach((opt, idx) => {
+          const optY = 160 + (idx * 45);
+          qBoardCtx.fillStyle = '#220f3d'; qBoardCtx.strokeStyle = '#a29bfe';
+          qBoardCtx.fillRect(20, optY - 24, 472, 36);
+          qBoardCtx.strokeRect(20, optY - 24, 472, 36);
+          qBoardCtx.fillStyle = '#ffda66'; qBoardCtx.font = 'bold 16px monospace';
+          qBoardCtx.fillText(`${letters[idx]}) ${opt}`, 30, optY - 2);
+        });
       } else {
         qBoardCtx.fillStyle = '#ffda66'; qBoardCtx.font = 'bold 26px sans-serif'; qBoardCtx.textAlign = 'center';
         qBoardCtx.fillText("THE GOODY TONIGHT SHOW", 256, 140);
@@ -618,9 +713,44 @@
     const podiumTrim = new THREE.Mesh(new THREE.CylinderGeometry(0.46, 0.46, 0.05, 20), silverMetalMat); podiumTrim.position.y = 1.02; miniGoody.add(podiumTrim);
     const gBody = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.5, 0.4), silverMetalMat); gBody.position.y = 1.34; miniGoody.add(gBody);
     const gHead = new THREE.Mesh(new THREE.BoxGeometry(0.46, 0.35, 0.35), silverMetalMat); gHead.position.y = 1.82; miniGoody.add(gHead);
+    const gAntennaStem = new THREE.Mesh(new THREE.CylinderGeometry(0.015, 0.015, 0.22, 8), silverMetalMat); gAntennaStem.position.y = 2.08; miniGoody.add(gAntennaStem);
+    const gAntOrb = new THREE.Mesh(new THREE.SphereGeometry(0.05, 8, 8), new THREE.MeshBasicMaterial({ color: 0x39ff14 }));
+    gAntOrb.position.y = 2.20; miniGoody.add(gAntOrb);
+
+    const faceCanvas = document.createElement('canvas'); faceCanvas.width = 128; faceCanvas.height = 128;
+    const fctx = faceCanvas.getContext('2d'); fctx.fillStyle = '#030108'; fctx.fillRect(0, 0, 128, 128);
+    const faceTex = new THREE.CanvasTexture(faceCanvas);
+    const gFace = new THREE.Mesh(new THREE.PlaneGeometry(0.35, 0.25), new THREE.MeshBasicMaterial({ map: faceTex }));
+    gFace.position.set(0, 1.82, 0.19); miniGoody.add(gFace);
+
     miniGoody.position.set(0, 0, -2.6); miniDiorama.add(miniGoody);
 
-    scene.add(miniDiorama);
+    function renderGoodyFace(time) {
+      fctx.fillStyle = '#030108'; fctx.fillRect(0, 0, 128, 128);
+      fctx.fillStyle = '#39ff14'; fctx.strokeStyle = '#39ff14'; fctx.lineWidth = 4;
+      fctx.beginPath(); fctx.moveTo(28, 56); fctx.lineTo(44, 38); fctx.lineTo(60, 56); fctx.stroke();
+      fctx.beginPath(); fctx.moveTo(68, 56); fctx.lineTo(84, 38); fctx.lineTo(100, 56); fctx.stroke();
+
+      if (isGoodySpeaking) {
+        const mouthOpen = (Math.sin(time * 0.022) + 1.0) * 0.5;
+        fctx.fillStyle = '#220033'; fctx.beginPath(); fctx.ellipse(64, 88, 20, 10 + mouthOpen * 10, 0, 0, Math.PI * 2); fctx.fill(); fctx.stroke();
+      } else {
+        fctx.beginPath(); fctx.arc(64, 78, 16, 0.2, Math.PI - 0.2, false); fctx.stroke();
+      }
+      faceTex.needsUpdate = true;
+    }
+
+    function createCutePlushie3D(color, transparent = false) {
+      const pGroup = new THREE.Group();
+      const pMat = new THREE.MeshStandardMaterial({ color: color, roughness: 0.95, transparent: transparent, opacity: transparent ? 0.45 : 1.0 });
+      const pBody = new THREE.Mesh(new THREE.SphereGeometry(0.28, 14, 14), pMat); pBody.position.y = 0.28; pGroup.add(pBody);
+      const pHead = new THREE.Mesh(new THREE.SphereGeometry(0.22, 14, 14), pMat); pHead.position.y = 0.58; pGroup.add(pHead);
+      return pGroup;
+    }
+
+    // Local transparent spectator avatar
+    const localPlushieAvatar = createCutePlushie3D(0x00f0ff, true);
+    scene.add(localPlushieAvatar);
 
     const move = { forward: false, backward: false, left: false, right: false };
     const velocity = new THREE.Vector3();
@@ -647,6 +777,7 @@
       const delta = Math.min((time - prevTime) / 1000, 0.1);
 
       renderBackstageScreens();
+      renderGoodyFace(time);
 
       if (pawn1 && pawn1.userData && pawn1.userData.badgeMesh) pawn1.userData.badgeMesh.quaternion.copy(camera.quaternion);
       if (pawn2 && pawn2.userData && pawn2.userData.badgeMesh) pawn2.userData.badgeMesh.quaternion.copy(camera.quaternion);
@@ -657,7 +788,27 @@
         if (move.forward || move.backward) velocity.z -= (Number(move.forward) - Number(move.backward)) * speed * delta;
         if (move.left || move.right) velocity.x -= (Number(move.right) - Number(move.left)) * speed * delta;
         controls.moveRight(-velocity.x * delta); controls.moveForward(-velocity.z * delta);
+
+        // Broadcast spectator movement
+        if (audienceDataConn && audienceDataConn.open && audiencePeer) {
+          audienceDataConn.send({
+            type: "SPECTATOR_MOVE",
+            peerId: audiencePeer.id,
+            name: spectatorName,
+            x: camera.position.x,
+            y: camera.position.y,
+            z: camera.position.z,
+            yaw: camera.rotation.y
+          });
+        }
       }
+
+      // Position local transparent plushie right in front of camera view
+      const camDir = new THREE.Vector3();
+      camera.getWorldDirection(camDir);
+      localPlushieAvatar.position.copy(camera.position).add(camDir.multiplyScalar(2.0));
+      localPlushieAvatar.position.y -= 0.8;
+      localPlushieAvatar.rotation.y = camera.rotation.y;
 
       prevTime = time;
       renderer.render(scene, camera);
