@@ -46,7 +46,7 @@
       font-family: monospace; font-size: 0.78rem; border: 1px solid #331555; flex-shrink: 0;
     }
     #stage-viewport {
-      width: 100%; width: 100%; aspect-ratio: 16 / 9; background: #000;
+      width: 100%; aspect-ratio: 16 / 9; background: #000;
       border: 2px solid #ffda66; border-radius: 10px; overflow: hidden;
       position: relative; flex-shrink: 0;
     }
@@ -211,19 +211,20 @@
           }
         });
 
-        // Guard against duplicate calls by closing any existing active call
         peer.on('call', (incomingCall) => {
-          if (activeCall) activeCall.close();
           activeCall = incomingCall;
-
           incomingCall.answer();
           
           incomingCall.on('stream', (remoteStream) => {
+            if (studioFeed.srcObject === remoteStream) return;
+
             studioFeed.srcObject = remoteStream;
             studioFeed.play().then(() => {
               console.log("Video rendering active.");
             }).catch(err => {
-              console.error("Autoplay error:", err);
+              if (err.name !== 'AbortError') {
+                console.error("Autoplay error:", err);
+              }
             });
           });
         });
