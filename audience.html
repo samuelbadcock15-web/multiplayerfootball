@@ -618,16 +618,30 @@
       const pHead = new THREE.Mesh(new THREE.SphereGeometry(0.22, 14, 14), pMat); pHead.position.y = 0.58; pGroup.add(pHead);
       
       if (!transparent) {
+        // Cute facial features facing forward (+Z direction)
         const eyeMat = new THREE.MeshBasicMaterial({ color: 0x05010a });
         const leftEye = new THREE.Mesh(new THREE.SphereGeometry(0.035, 8, 8), eyeMat);
         leftEye.position.set(-0.08, 0.64, 0.18); pGroup.add(leftEye);
         const rightEye = new THREE.Mesh(new THREE.SphereGeometry(0.035, 8, 8), eyeMat);
         rightEye.position.set(0.08, 0.64, 0.18); pGroup.add(rightEye);
+
+        const blushMat = new THREE.MeshBasicMaterial({ color: 0xff7675, transparent: true, opacity: 0.75 });
+        const leftBlush = new THREE.Mesh(new THREE.CircleGeometry(0.03, 8), blushMat);
+        leftBlush.position.set(-0.13, 0.58, 0.182); pGroup.add(leftBlush);
+        const rightBlush = new THREE.Mesh(new THREE.CircleGeometry(0.03, 8), blushMat);
+        rightBlush.position.set(0.13, 0.58, 0.182); pGroup.add(rightBlush);
+
+        const smileGeo = new THREE.TorusGeometry(0.04, 0.012, 6, 12, Math.PI);
+        const smileMat = new THREE.MeshBasicMaterial({ color: 0x05010a });
+        const smile = new THREE.Mesh(smileGeo, smileMat);
+        smile.position.set(0, 0.53, 0.18);
+        smile.rotation.x = Math.PI;
+        pGroup.add(smile);
       }
       return pGroup;
     }
 
-    // Crescent-shaped audience seating matching Index/Contestant views
+    // Crescent-shaped audience seating with faces pointing inward toward the center stage (0, 0, 1.8)
     const plushColors = [0xff69b4, 0x00ffff, 0xffda66, 0x39ff14, 0xff7675, 0xa29bfe, 0x00b894, 0xfd79a8];
     for (let i = 0; i < 14; i++) {
       const angle = 0.2 + (i / 13) * (Math.PI - 0.4);
@@ -637,6 +651,8 @@
       const plush = createCutePlushie3D(plushColors[i % plushColors.length]);
       plush.position.set(px, 0.44, pz);
       plush.scale.set(1.8, 1.8, 1.8);
+      // Face inward toward the center stage (0, 1.8)
+      plush.lookAt(0, 0.44, 1.8);
       miniDiorama.add(plush);
     }
 
@@ -689,7 +705,6 @@
         qBoardCtx.fillStyle = '#00f0ff'; qBoardCtx.fillRect(36, 88, 440, 2);
         qBoardCtx.fillStyle = '#ffffff'; qBoardCtx.font = '14px sans-serif';
         
-        // Word wrap support for recap text
         const words = activeRecap.text.split(' ');
         let line = ''; let y = 125;
         for(let n = 0; n < words.length; n++) {
@@ -710,7 +725,6 @@
         qBoardCtx.fillText(`${activeQuestion.country.toUpperCase()} QUESTION`, 24, 34);
         qBoardCtx.fillStyle = '#ffffff'; qBoardCtx.font = '14px sans-serif';
         
-        // Word wrap for question text
         const words = activeQuestion.q.split(' ');
         let line = ''; let y = 64;
         for(let n = 0; n < words.length; n++) {
