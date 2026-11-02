@@ -329,9 +329,16 @@
             } else if (data.type === "SHOW_QUESTION_LOCKED") {
               activeQuestion = data.question;
               activeRecap = null;
+              stageSelectedOption = null;
+              stageOptionStatus = null;
+              renderStageQuestionBoard();
+            } else if (data.type === "CONTESTANT_OPTION_HIGHLIGHT") {
+              stageSelectedOption = data.optionIndex;
+              stageOptionStatus = 'selected';
               renderStageQuestionBoard();
             } else if (data.type === "EVALUATION_RESULT") {
               activeRecap = { country: data.country, text: data.recap, isCorrect: data.isCorrect };
+              stageOptionStatus = data.isCorrect ? 'correct' : 'incorrect';
               activeQuestion = null;
               renderStageQuestionBoard();
             } else if (data.type === "HOST_SPEAK") {
@@ -474,8 +481,6 @@
     scene.add(bedroomGroup);
 
     const miniDiorama = new THREE.Group(); miniDiorama.position.set(0, 3.95, -9);
-    
-    // CRITICAL FIX: ADD miniDiorama TO THE SCENE!
     scene.add(miniDiorama);
 
     const feltCarpet = new THREE.Mesh(new THREE.CylinderGeometry(7.0, 7.0, 0.08, 48), new THREE.MeshStandardMaterial({ color: 0x271147 }));
@@ -611,12 +616,21 @@
       const pMat = new THREE.MeshStandardMaterial({ color: color, roughness: 0.95, transparent: transparent, opacity: transparent ? 0.45 : 1.0 });
       const pBody = new THREE.Mesh(new THREE.SphereGeometry(0.28, 14, 14), pMat); pBody.position.y = 0.28; pGroup.add(pBody);
       const pHead = new THREE.Mesh(new THREE.SphereGeometry(0.22, 14, 14), pMat); pHead.position.y = 0.58; pGroup.add(pHead);
+      
+      if (!transparent) {
+        const eyeMat = new THREE.MeshBasicMaterial({ color: 0x05010a });
+        const leftEye = new THREE.Mesh(new THREE.SphereGeometry(0.035, 8, 8), eyeMat);
+        leftEye.position.set(-0.08, 0.64, 0.18); pGroup.add(leftEye);
+        const rightEye = new THREE.Mesh(new THREE.SphereGeometry(0.035, 8, 8), eyeMat);
+        rightEye.position.set(0.08, 0.64, 0.18); pGroup.add(rightEye);
+      }
       return pGroup;
     }
 
+    // Crescent-shaped audience seating matching Index/Contestant views
     const plushColors = [0xff69b4, 0x00ffff, 0xffda66, 0x39ff14, 0xff7675, 0xa29bfe, 0x00b894, 0xfd79a8];
-    for (let i = 0; i < 18; i++) {
-      const angle = (i / 18) * Math.PI * 2;
+    for (let i = 0; i < 14; i++) {
+      const angle = 0.2 + (i / 13) * (Math.PI - 0.4);
       const radius = 6.2;
       const px = Math.cos(angle) * radius;
       const pz = 1.8 + (Math.sin(angle) * radius);
@@ -625,26 +639,6 @@
       plush.scale.set(1.8, 1.8, 1.8);
       miniDiorama.add(plush);
     }
-
-    const rulesCanvas = document.createElement('canvas'); rulesCanvas.width = 512; rulesCanvas.height = 384;
-    const rCtx = rulesCanvas.getContext('2d');
-    rCtx.fillStyle = '#120726'; rCtx.fillRect(0, 0, 512, 384);
-    rCtx.strokeStyle = '#00f0ff'; rCtx.lineWidth = 6; rCtx.strokeRect(3, 3, 506, 378);
-    rCtx.fillStyle = '#ffda66'; rCtx.font = 'bold 20px sans-serif'; rCtx.textAlign = 'center';
-    rCtx.fillText("OFFICIAL GAME RULES", 256, 45);
-    rCtx.fillStyle = '#ffffff'; rCtx.font = '14px sans-serif'; rCtx.textAlign = 'left';
-    const rulesText = [
-      "1. Host has 30 seconds to read the active trivia action.",
-      "2. Land on a tile to trigger that country's trivia.",
-      "3. You have 30 seconds to answer the country's trivia.",
-      "4. Correct answer advances your position on the tile.",
-      "5. Incorrect answer or timeout hands turn to opponent.",
-      "6. Reach tile 32 or be furthest ahead at 20:00!"
-    ];
-    rulesText.forEach((r, idx) => { rCtx.fillText(r, 30, 90 + (idx * 40)); });
-    const rulesTex = new THREE.CanvasTexture(rulesCanvas);
-    const rulesMesh = new THREE.Mesh(new THREE.PlaneGeometry(3.6, 2.7), new THREE.MeshBasicMaterial({ map: rulesTex }));
-    rulesMesh.position.set(-5.5, 3.8, 0.5); rulesMesh.rotation.y = 0.6; miniDiorama.add(rulesMesh);
 
     function updatePawnNameBadge(pawnGroup, displayName) {
       if (!pawnGroup || !pawnGroup.userData || !pawnGroup.userData.badgeCanvas) return;
@@ -688,33 +682,69 @@
 
       if (activeRecap) {
         qBoardCtx.fillStyle = activeRecap.isCorrect ? '#00b894' : '#ff7675';
-        qBoardCtx.font = 'bold 22px sans-serif'; qBoardCtx.textAlign = 'center';
-        qBoardCtx.fillText(activeRecap.isCorrect ? " CORRECT! WHAT WE LEARNED:" : " INCORRECT! WHAT WE LEARNED:", 256, 44);
-        qBoardCtx.fillStyle = '#ffda66'; qBoardCtx.font = 'bold 16px monospace';
-        qBoardCtx.fillText(` COUNTRY: ${activeRecap.country.toUpperCase()}`, 256, 78);
-        qBoardCtx.fillStyle = '#00f0ff'; qBoardCtx.fillRect(36, 94, 440, 2);
-        qBoardCtx.fillStyle = '#ffffff'; qBoardCtx.font = '16px sans-serif';
-        qBoardCtx.fillText(activeRecap.text, 256, 160);
+        qBoardCtx.font = 'bold 20px sans-serif'; qBoardCtx.textAlign = 'center';
+        qBoardCtx.fillText(activeRecap.isCorrect ? "CORRECT! WHAT WE LEARNED:" : "INCORRECT! WHAT WE LEARNED:", 256, 44);
+        qBoardCtx.fillStyle = '#ffda66'; qBoardCtx.font = 'bold 15px monospace';
+        qBoardCtx.fillText(`COUNTRY: ${activeRecap.country.toUpperCase()}`, 256, 74);
+        qBoardCtx.fillStyle = '#00f0ff'; qBoardCtx.fillRect(36, 88, 440, 2);
+        qBoardCtx.fillStyle = '#ffffff'; qBoardCtx.font = '14px sans-serif';
+        
+        // Word wrap support for recap text
+        const words = activeRecap.text.split(' ');
+        let line = ''; let y = 125;
+        for(let n = 0; n < words.length; n++) {
+          let testLine = line + words[n] + ' ';
+          let metrics = qBoardCtx.measureText(testLine);
+          if (metrics.width > 440 && n > 0) {
+            qBoardCtx.fillText(line, 256, y);
+            line = words[n] + ' ';
+            y += 24;
+          } else {
+            line = testLine;
+          }
+        }
+        qBoardCtx.fillText(line, 256, y);
+
       } else if (activeQuestion) {
-        qBoardCtx.fillStyle = '#ffda66'; qBoardCtx.font = 'bold 18px monospace'; qBoardCtx.textAlign = 'left';
-        qBoardCtx.fillText(` ${activeQuestion.country.toUpperCase()} QUESTION`, 20, 36);
-        qBoardCtx.fillStyle = '#ffffff'; qBoardCtx.font = '15px sans-serif';
-        qBoardCtx.fillText(activeQuestion.q, 20, 72);
+        qBoardCtx.fillStyle = '#ffda66'; qBoardCtx.font = 'bold 16px monospace'; qBoardCtx.textAlign = 'left';
+        qBoardCtx.fillText(`${activeQuestion.country.toUpperCase()} QUESTION`, 24, 34);
+        qBoardCtx.fillStyle = '#ffffff'; qBoardCtx.font = '14px sans-serif';
+        
+        // Word wrap for question text
+        const words = activeQuestion.q.split(' ');
+        let line = ''; let y = 64;
+        for(let n = 0; n < words.length; n++) {
+          let testLine = line + words[n] + ' ';
+          let metrics = qBoardCtx.measureText(testLine);
+          if (metrics.width > 460 && n > 0) {
+            qBoardCtx.fillText(line, 24, y);
+            line = words[n] + ' ';
+            y += 22;
+          } else {
+            line = testLine;
+          }
+        }
+        qBoardCtx.fillText(line, 24, y);
 
         const letters = ["A", "B", "C", "D"];
         activeQuestion.options.forEach((opt, idx) => {
-          const optY = 160 + (idx * 45);
-          qBoardCtx.fillStyle = '#220f3d'; qBoardCtx.strokeStyle = '#a29bfe';
-          qBoardCtx.fillRect(20, optY - 24, 472, 36);
-          qBoardCtx.strokeRect(20, optY - 24, 472, 36);
-          qBoardCtx.fillStyle = '#ffda66'; qBoardCtx.font = 'bold 16px monospace';
-          qBoardCtx.fillText(`${letters[idx]}) ${opt}`, 30, optY - 2);
+          const optY = 155 + (idx * 50);
+          if (stageSelectedOption === idx) {
+            qBoardCtx.fillStyle = stageOptionStatus === 'correct' ? '#00b894' : (stageOptionStatus === 'incorrect' ? '#ff7675' : '#0984e3');
+          } else {
+            qBoardCtx.fillStyle = '#220f3d';
+          }
+          qBoardCtx.strokeStyle = '#a29bfe'; qBoardCtx.lineWidth = 2;
+          qBoardCtx.fillRect(24, optY - 22, 464, 40);
+          qBoardCtx.strokeRect(24, optY - 22, 464, 40);
+          qBoardCtx.fillStyle = '#ffda66'; qBoardCtx.font = 'bold 15px monospace';
+          qBoardCtx.fillText(`${letters[idx]}) ${opt}`, 36, optY + 3);
         });
       } else {
-        qBoardCtx.fillStyle = '#ffda66'; qBoardCtx.font = 'bold 26px sans-serif'; qBoardCtx.textAlign = 'center';
-        qBoardCtx.fillText("THE GOODY TONIGHT SHOW", 256, 140);
-        qBoardCtx.fillStyle = '#39ff14'; qBoardCtx.font = 'bold 16px monospace';
-        qBoardCtx.fillText("STUDIO GALLERY SPECTATOR MODE", 256, 200);
+        qBoardCtx.fillStyle = '#ffda66'; qBoardCtx.font = 'bold 24px sans-serif'; qBoardCtx.textAlign = 'center';
+        qBoardCtx.fillText("THE GOODY TONIGHT SHOW", 256, 150);
+        qBoardCtx.fillStyle = '#39ff14'; qBoardCtx.font = 'bold 15px monospace';
+        qBoardCtx.fillText("STUDIO GALLERY SPECTATOR MODE", 256, 210);
       }
       qBoardTex.needsUpdate = true;
     }
