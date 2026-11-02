@@ -391,7 +391,6 @@
     scene.background = new THREE.Color(0x040208);
     scene.fog = new THREE.FogExp2(0x040208, 0.015);
 
-    // EXACT camera position matching your main host view overlooking the diorama
     const camera = new THREE.PerspectiveCamera(65, window.innerWidth / window.innerHeight, 0.1, 150);
     camera.position.set(0, 7.5, 5.5);
     camera.rotation.x = -0.35;
@@ -475,6 +474,10 @@
     scene.add(bedroomGroup);
 
     const miniDiorama = new THREE.Group(); miniDiorama.position.set(0, 3.95, -9);
+    
+    // CRITICAL FIX: ADD miniDiorama TO THE SCENE!
+    scene.add(miniDiorama);
+
     const feltCarpet = new THREE.Mesh(new THREE.CylinderGeometry(7.0, 7.0, 0.08, 48), new THREE.MeshStandardMaterial({ color: 0x271147 }));
     feltCarpet.position.y = 0.44; miniDiorama.add(feltCarpet);
 
@@ -611,7 +614,6 @@
       return pGroup;
     }
 
-    // Build the surrounding giant spectator plushies ring in the studio
     const plushColors = [0xff69b4, 0x00ffff, 0xffda66, 0x39ff14, 0xff7675, 0xa29bfe, 0x00b894, 0xfd79a8];
     for (let i = 0; i < 18; i++) {
       const angle = (i / 18) * Math.PI * 2;
@@ -624,7 +626,6 @@
       miniDiorama.add(plush);
     }
 
-    // Rules Board
     const rulesCanvas = document.createElement('canvas'); rulesCanvas.width = 512; rulesCanvas.height = 384;
     const rCtx = rulesCanvas.getContext('2d');
     rCtx.fillStyle = '#120726'; rCtx.fillRect(0, 0, 512, 384);
