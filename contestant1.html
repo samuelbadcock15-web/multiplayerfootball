@@ -6,7 +6,7 @@
   <title>Goody Tonight Show - Contestant 1</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-user-select: none; }
-    
+   
     html, body {
       width: 100%;
       height: 100%;
@@ -263,7 +263,7 @@
   <div id="setup-card">
     <div class="badge-podium">PODIUM 1</div>
     <h2 style="color: #ffda66; margin-bottom: 12px; font-size: 1.25rem;">The Goody Tonight Show</h2>
-    
+   
     <div class="form-group">
       <span class="input-label">Host Screen 4-Digit Code:</span>
       <input type="text" id="passcode-input" maxlength="4" placeholder="0000" inputmode="numeric" pattern="[0-9]*" autocomplete="off" />
@@ -374,6 +374,7 @@
     let isTieBreaker = false;
     let mobileAudioUnlocked = false;
     let activeTriviaCardEl = null;
+    let audienceVoteCounts = [0, 0, 0, 0];
 
     const passcodeInput = document.getElementById('passcode-input');
     const nameInput = document.getElementById('name-input');
@@ -516,10 +517,7 @@
         peer = new Peer();
 
         peer.on('open', () => {
-          // Connect to the unique dynamic studio ID
-          const targetStudioId = "goody-studio-" + enteredCode;
-
-          mediaCall = peer.call(targetStudioId, localStream, {
+          mediaCall = peer.call("goody-main-studio", localStream, {
             metadata: {
               contestant: CONTESTANT_ID,
               name: contestantName,
@@ -535,7 +533,7 @@
             studioStreamVideo.play().catch(console.error);
           });
 
-          dataConn = peer.connect(targetStudioId, {
+          dataConn = peer.connect("goody-main-studio", {
             metadata: {
               contestant: CONTESTANT_ID,
               name: contestantName,
@@ -575,14 +573,6 @@
               choiceCard.style.display = 'none';
               btnRollDice.style.display = 'block';
               startTenSecondRoll();
-            } else if (data.type === "DICE_RESULT_CONFIRMED") {
-              // Host-authoritative roll feedback
-              if (data.contestant === CONTESTANT_ID) {
-                statusPill.textContent = `🎲 You rolled: ${data.roll}!`;
-                btnRollDice.textContent = `ROLLED A ${data.roll}!`;
-              } else {
-                statusPill.textContent = `Opponent rolled: ${data.roll}!`;
-              }
             } else if (data.type === "SYNC_MATCH_TIMER") {
               matchTimerBadge.textContent = ` ${data.timeStr}`;
               c1ChatClock.textContent = data.timeStr;
@@ -624,6 +614,7 @@
               setLocalMicEnabled(false);
               choiceCard.style.display = 'none';
               isTieBreaker = false;
+              audienceVoteCounts = [0, 0, 0, 0];
               const isMe = data.activeContestantId === CONTESTANT_ID;
               updateTurnBanner(isMe, `${data.activeContestantName}'S QUESTION`);
               injectTriviaCardIntoChat(data.question, isMe, data.activeContestantName);
@@ -777,14 +768,17 @@
 
       btnRollDice.disabled = true;
       btnRollDice.classList.remove('active-roll');
-      btnRollDice.textContent = "ROLLING...";
-      statusPill.textContent = "Rolling dice on studio board...";
+      btnRollDice.textContent = "DICE ROLLED!";
 
-      // HOST-AUTHORITATIVE: We only send the request to roll
+      const rollValue = Math.floor(Math.random() * 6) + 1;
+      statusPill.textContent = ` You rolled: ${rollValue}!`;
+
       if (dataConn && dataConn.open) {
         dataConn.send({
-          type: "REQUEST_ROLL",
-          contestant: CONTESTANT_ID
+          type: "PLAYER_ROLLED_DICE",
+          contestant: CONTESTANT_ID,
+          name: contestantName,
+          roll: rollValue
         });
       }
     }
