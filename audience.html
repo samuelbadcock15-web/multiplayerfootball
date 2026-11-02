@@ -392,7 +392,8 @@
     scene.fog = new THREE.FogExp2(0x040208, 0.015);
 
     const camera = new THREE.PerspectiveCamera(65, window.innerWidth / window.innerHeight, 0.1, 150);
-    camera.position.set(0, 5.5, 9);
+    camera.position.set(0, 7.5, 5.5);
+    camera.rotation.x = -0.35;
 
     const canvas = document.getElementById('canvas3d');
     const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, preserveDrawingBuffer: true });
@@ -748,7 +749,6 @@
       return pGroup;
     }
 
-    // Local transparent spectator avatar
     const localPlushieAvatar = createCutePlushie3D(0x00f0ff, true);
     scene.add(localPlushieAvatar);
 
@@ -789,7 +789,6 @@
         if (move.left || move.right) velocity.x -= (Number(move.right) - Number(move.left)) * speed * delta;
         controls.moveRight(-velocity.x * delta); controls.moveForward(-velocity.z * delta);
 
-        // Broadcast spectator movement
         if (audienceDataConn && audienceDataConn.open && audiencePeer) {
           audienceDataConn.send({
             type: "SPECTATOR_MOVE",
@@ -803,11 +802,10 @@
         }
       }
 
-      // Position local transparent plushie right in front of camera view
       const camDir = new THREE.Vector3();
       camera.getWorldDirection(camDir);
-      localPlushieAvatar.position.copy(camera.position).add(camDir.multiplyScalar(2.0));
-      localPlushieAvatar.position.y -= 0.8;
+      localPlushieAvatar.position.copy(camera.position).add(camDir.multiplyScalar(3.5));
+      localPlushieAvatar.position.y -= 1.8;
       localPlushieAvatar.rotation.y = camera.rotation.y;
 
       prevTime = time;
