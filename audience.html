@@ -2,356 +2,1632 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>The Goody Tonight Show - Audience & Contestant Portal</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Goody Tonight Show - Live Audience Experience</title>
   <style>
-    body, html {
-      margin: 0; padding: 0; width: 100%; height: 100%;
-      background-color: #06020f; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      color: #fff; display: flex; flex-direction: column; justify-content: center; align-items: center;
-      overflow: hidden;
+    * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-user-select: none; }
+    html, body {
+      width: 100%; height: 100%; height: 100dvh;
+      overflow: hidden; background: #06020c; color: #fff;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     }
-    .portal-box {
-      background: #140727; border: 2.5px solid #00f0ff; border-radius: 18px;
-      padding: 24px 32px; box-shadow: 0 0 40px rgba(0, 240, 255, 0.35);
-      text-align: center; max-width: 420px; width: 90%; z-index: 10;
+    #canvas3d { width: 100%; height: 100%; display: block; position: absolute; top: 0; left: 0; z-index: 1; }
+
+    /* ENTRY MODAL */
+    #entry-modal {
+      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(6, 2, 14, 0.95); display: flex; flex-direction: column;
+      justify-content: center; align-items: center; z-index: 100; padding: 16px;
     }
-    h2 { color: #ffda66; margin-top: 0; font-size: 1.4rem; letter-spacing: 1px; }
-    p { color: #ebdcf9; font-size: 0.88rem; line-height: 1.4; margin: 8px 0; }
-    input, select {
-      width: 100%; box-sizing: border-box; padding: 10px; font-size: 1rem;
-      background: #070212; color: #fff; border: 2px solid #a29bfe;
-      border-radius: 8px; outline: none; margin-bottom: 12px; text-align: center;
+    .entry-card {
+      background: #17072b; border: 2.5px solid #d4af37; border-radius: 18px;
+      padding: 26px 22px; width: 100%; max-width: 380px; text-align: center;
+      box-shadow: 0 0 30px rgba(212, 175, 55, 0.35);
     }
-    input:focus { border-color: #39ff14; box-shadow: 0 0 10px rgba(57, 255, 20, 0.4); }
+    .badge-audience {
+      display: inline-block; padding: 4px 14px; background: #99001a; color: #ffda66;
+      font-family: monospace; font-weight: 900; font-size: 0.82rem; border-radius: 6px;
+      margin-bottom: 12px; letter-spacing: 1.5px; border: 1px solid #d4af37;
+    }
+    .text-field {
+      width: 100%; padding: 12px; font-size: 1.05rem; font-weight: bold; background: #090314;
+      color: #00f0ff; border: 2px solid #a29bfe; border-radius: 10px; outline: none;
+      margin-bottom: 14px; text-align: center;
+    }
+    .text-field:focus { border-color: #00f0ff; }
     .btn-join {
-      width: 100%; padding: 12px; background: linear-gradient(180deg, #39ff14, #27ae60);
-      border: none; border-radius: 8px; font-size: 1rem; font-weight: 900;
-      color: #06020f; text-transform: uppercase; cursor: pointer; letter-spacing: 1px;
+      width: 100%; padding: 14px; border-radius: 12px; border: none; font-size: 1.05rem;
+      font-weight: 900; text-transform: uppercase; cursor: pointer; color: #fff;
+      background: linear-gradient(180deg, #d4af37, #b8860b); box-shadow: 0 3px 0 #6e5200;
     }
-    .btn-join:hover { background: #00f0ff; }
-    
-    #live-stage {
-      display: none; width: 100%; height: 100%; flex-direction: column; position: relative;
-    }
-    #video-container {
-      flex: 1; background: #000; display: flex; justify-content: center; align-items: center; position: relative;
-    }
-    video { width: 100%; height: 100%; object-fit: contain; }
+    .btn-join:active { transform: scale(0.98); }
 
-    /* HUD TOP BAR */
-    #client-hud {
-      position: absolute; top: 15px; left: 15px; background: rgba(18, 7, 38, 0.85);
-      border: 1.5px solid #ff79b0; border-radius: 10px; padding: 10px 14px;
-      font-family: monospace; font-size: 0.8rem; z-index: 25; pointer-events: none;
+    /* BROADCAST CAMERAMAN LENS CUTSCENE OVERLAY */
+    #lens-overlay {
+      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+      pointer-events: none; z-index: 50; display: none;
     }
-    #match-clock { color: #00f0ff; font-weight: bold; margin-top: 3px; }
+    .letterbox-bar {
+      position: absolute; left: 0; width: 100%; height: 10%;
+      background: #000; transition: transform 0.8s ease-in-out;
+    }
+    #bar-top { top: 0; transform: translateY(0); }
+    #bar-bottom { bottom: 0; transform: translateY(0); }
+    .lens-ui {
+      position: absolute; top: 12%; left: 4%; right: 4%;
+      display: flex; justify-content: space-between; font-family: monospace; font-size: 0.8rem;
+    }
+    .rec-indicator { color: #ff3838; font-weight: bold; animation: blinkRec 1s infinite alternate; }
+    @keyframes blinkRec { from { opacity: 1; } to { opacity: 0.2; } }
 
-    /* CHAT OVERLAY */
-    #chat-overlay {
-      position: absolute; bottom: 15px; left: 15px; width: 340px; height: 200px;
-      background: rgba(10, 3, 20, 0.85); border: 1.5px solid #00f0ff; border-radius: 10px;
-      display: flex; flex-direction: column; backdrop-filter: blur(4px); z-index: 20;
+    /* IN-GAME HUD */
+    #spectator-ui {
+      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+      display: none; flex-direction: column; justify-content: space-between;
+      pointer-events: none; z-index: 10; padding: 8px;
     }
-    #chat-messages { flex: 1; overflow-y: auto; padding: 6px; font-size: 0.75rem; display: flex; flex-direction: column; gap: 4px; }
-    #chat-input-row { display: flex; padding: 4px; border-top: 1px solid #331555; background: #070212; border-bottom-left-radius: 10px; border-bottom-right-radius: 10px; }
-    #chat-input { flex: 1; margin: 0; padding: 6px; font-size: 0.75rem; text-align: left; background: transparent; border: none; color: #fff; outline: none; }
-    #btn-send-chat { padding: 6px 12px; background: #00f0ff; border: none; font-weight: bold; cursor: pointer; border-radius: 4px; margin-left: 4px; color: #06020f; font-size: 0.75rem; }
-    #btn-send-chat:hover { background: #39ff14; }
+    .top-bar {
+      display: flex; justify-content: space-between; align-items: center;
+      background: rgba(18, 7, 36, 0.90); border: 1.5px solid #d4af37; border-radius: 8px;
+      padding: 6px 12px; font-family: monospace; font-size: 0.78rem; pointer-events: auto;
+    }
+    #location-pill { color: #39ff14; font-weight: bold; }
 
-    /* TRIVIA QUESTION & ACTION OVERLAY */
-    #interaction-overlay {
-      position: absolute; top: 20px; right: 20px; width: 360px;
-      background: rgba(18, 7, 38, 0.95); border: 2.5px solid #ffda66; border-radius: 14px;
-      padding: 16px; color: #fff; display: none; z-index: 30; box-shadow: 0 0 30px rgba(255, 218, 102, 0.3);
+    /* PROMPTS */
+    #interaction-prompt {
+      position: absolute; top: 20%; left: 50%; transform: translateX(-50%);
+      background: rgba(18, 7, 36, 0.94); border: 2px solid #fdcb6e; border-radius: 10px;
+      padding: 8px 18px; color: #ffda66; font-family: monospace; font-weight: bold;
+      font-size: 0.82rem; display: none; pointer-events: auto; text-align: center;
+      box-shadow: 0 0 18px rgba(253, 203, 110, 0.45);
     }
-    .q-title { font-family: monospace; font-size: 0.75rem; color: #ffda66; font-weight: bold; margin-bottom: 6px; display: flex; justify-content: space-between; }
-    .q-text { font-size: 0.9rem; font-weight: bold; margin-bottom: 12px; line-height: 1.4; }
-    .opt-btn {
-      width: 100%; text-align: left; background: #240f45; border: 1.5px solid #a29bfe; color: #fff;
-      padding: 8px 10px; border-radius: 6px; margin-bottom: 6px; cursor: pointer; font-size: 0.82rem;
-    }
-    .opt-btn:hover { background: #6c5ce7; border-color: #ffda66; }
-    .opt-btn.selected-correct { background: #00b894 !important; border-color: #55efc4 !important; }
-    .opt-btn.selected-wrong { background: #d63031 !important; border-color: #ff7675 !important; }
 
-    /* DICE ROLL ACTION PANEL */
-    #action-panel {
-      position: absolute; bottom: 25px; right: 20px; background: rgba(18, 7, 38, 0.92);
-      border: 2px solid #39ff14; border-radius: 12px; padding: 14px 20px; text-align: center;
-      display: none; z-index: 30; font-family: monospace;
+    /* IN-CHAT TRIVIA BOX */
+    #chat-container {
+      width: 100%; max-width: 420px; background: rgba(13, 5, 26, 0.92);
+      border: 1.5px solid #d4af37; border-radius: 10px; display: flex; flex-direction: column;
+      pointer-events: auto; margin-bottom: 6px; backdrop-filter: blur(4px);
     }
-    .btn-action {
-      background: linear-gradient(180deg, #39ff14, #27ae60); border: none; padding: 10px 20px;
-      font-size: 0.9rem; font-weight: bold; color: #06020f; border-radius: 8px; cursor: pointer; text-transform: uppercase; margin-top: 6px;
+    #chat-header {
+      padding: 6px 10px; background: #230a42; border-top-left-radius: 8px; border-top-right-radius: 8px;
+      font-size: 0.75rem; font-weight: bold; color: #ffda66; display: flex; justify-content: space-between;
+      align-items: center; cursor: pointer;
     }
-    .btn-action:hover { background: #00f0ff; }
+    #chat-messages {
+      height: 190px; overflow-y: auto; padding: 6px 8px; display: flex; flex-direction: column;
+      gap: 6px; font-size: 0.78rem;
+    }
+    .chat-msg { word-break: break-word; line-height: 1.25; }
+    .chat-author { font-weight: bold; color: #39ff14; font-family: monospace; }
+    .chat-author.is-self { color: #00f0ff; }
+    .chat-author.is-host { color: #ff7675; }
 
-    /* MIC LIVE PILL */
-    #mic-pill {
-      position: absolute; top: 15px; left: 50%; transform: translateX(-50%);
-      background: rgba(214, 48, 49, 0.9); border: 2px solid #ff7675; color: #fff;
-      padding: 6px 16px; border-radius: 20px; font-family: monospace; font-size: 0.8rem;
-      font-weight: bold; display: none; z-index: 40; box-shadow: 0 0 15px rgba(255, 118, 117, 0.6);
+    /* IN-CHAT INTERACTIVE TRIVIA STYLING */
+    .chat-trivia-card {
+      background: #1c0a35; border: 2px solid #00f0ff; border-radius: 8px; padding: 8px; margin: 4px 0;
+      box-shadow: 0 0 12px rgba(0, 240, 255, 0.25);
+    }
+    .chat-trivia-country { font-size: 0.68rem; font-family: monospace; color: #ffda66; font-weight: bold; margin-bottom: 2px; }
+    .chat-trivia-text { font-size: 0.76rem; color: #fff; font-weight: 600; margin-bottom: 6px; line-height: 1.2; }
+    .chat-options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; }
+    .chat-opt-btn {
+      background: #2b1154; border: 1.5px solid #a29bfe; border-radius: 5px; color: #fff;
+      padding: 5px 6px; font-size: 0.7rem; font-weight: bold; text-align: left; cursor: pointer;
+      display: flex; justify-content: space-between; align-items: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .chat-opt-btn:hover:not(:disabled) { background: #6c5ce7; border-color: #00f0ff; }
+    .chat-opt-btn.selected { background: #0984e3 !important; border-color: #00f0ff !important; box-shadow: 0 0 6px rgba(9,132,227,0.6); }
+    .chat-opt-btn.contestant-picked { border: 2.5px dashed #ffda66 !important; }
+    .chat-opt-btn.correct { background: #00b894 !important; border-color: #55efc4 !important; }
+    .chat-opt-btn.wrong { background: #d63031 !important; border-color: #ff7675 !important; }
+    .chat-opt-btn:disabled { cursor: default; opacity: 0.9; }
+    .majority-badge { font-size: 0.6rem; font-family: monospace; background: rgba(0,0,0,0.5); padding: 1px 3px; border-radius: 3px; color: #ffda66; }
+    .chat-trivia-status { margin-top: 4px; font-size: 0.68rem; font-family: monospace; color: #39ff14; font-weight: bold; text-align: center; }
+
+    .chat-input-row { display: flex; border-top: 1px solid #442266; padding: 4px; gap: 4px; }
+    #chat-text-input {
+      flex: 1; background: #080313; border: 1px solid #a29bfe; border-radius: 6px;
+      color: #fff; padding: 6px 8px; font-size: 0.82rem; outline: none;
+    }
+    #btn-send-chat {
+      background: #d4af37; border: none; border-radius: 6px; color: #111; font-weight: bold;
+      font-size: 0.75rem; padding: 0 12px; cursor: pointer;
+    }
+
+    /* CONTROLS BAR: D-PAD (LEFT) & LOOK PAD (RIGHT) */
+    .controls-wrapper {
+      display: flex; justify-content: space-between; align-items: flex-end;
+      width: 100%; pointer-events: none; padding: 0 4px;
+    }
+    .dpad-section {
+      background: rgba(20, 7, 40, 0.90); border: 1.5px solid #d4af37; border-radius: 10px;
+      padding: 4px; pointer-events: auto; display: flex; flex-direction: column; align-items: center;
+    }
+    .dpad-sublabel { font-size: 0.60rem; font-family: monospace; color: #ffda66; margin-top: 2px; }
+    .dpad-grid { display: grid; grid-template-columns: 44px 44px 44px; grid-template-rows: 32px 32px; gap: 4px; }
+    .dpad-btn {
+      background: #2b1154; border: 1.5px solid #d4af37; border-radius: 6px; color: #fff;
+      font-size: 1rem; font-weight: bold; display: flex; justify-content: center; align-items: center;
+      cursor: pointer; transition: background 0.1s;
+    }
+    .dpad-btn:active, .dpad-btn.pressed { background: #6c5ce7; }
+
+    #look-pad {
+      width: 110px; height: 90px; background: rgba(18, 7, 38, 0.90);
+      border: 1.5px solid #00f0ff; border-radius: 12px; pointer-events: auto;
+      cursor: grab; display: flex; flex-direction: column; justify-content: center;
+      align-items: center; position: relative; box-shadow: 0 0 12px rgba(0, 240, 255, 0.25);
+      touch-action: none;
+    }
+    #look-pad:active { cursor: grabbing; border-color: #ffda66; }
+    #look-pad-knob {
+      width: 32px; height: 32px; border-radius: 50%; background: #00f0ff;
+      opacity: 0.85; pointer-events: none; transition: transform 0.05s linear;
+      box-shadow: 0 0 8px #00f0ff;
+    }
+    #look-pad-label {
+      font-size: 0.62rem; font-family: monospace; color: #00f0ff;
+      margin-top: 4px; pointer-events: none; font-weight: bold;
     }
   </style>
 </head>
 <body>
+  <canvas id="canvas3d"></canvas>
 
-  <div id="mic-pill">🎙️ MIC LIVE: THINKING OUT LOUD</div>
-
-  <div class="portal-box" id="login-portal">
-    <h2>The Goody Tonight Show</h2>
-    <p>Join the studio audience or step into the hot seat as a contestant!</p>
-    <input type="text" id="input-name" placeholder="Your Name / Handle" maxlength="16" />
-    <input type="text" id="input-city" placeholder="Your City" maxlength="16" />
-    <input type="text" id="input-room" placeholder="Studio Room Code (4 digits)" maxlength="4" inputmode="numeric" pattern="[0-9]*" />
-    <select id="input-role">
-      <option value="AUDIENCE">Join as Studio Audience / Spectator</option>
-      <option value="goody-contestant-1">Contestant 1 (Podium 1)</option>
-      <option value="goody-contestant-2">Contestant 2 (Podium 2)</option>
-    </select>
-    <button class="btn-join" id="btn-connect">Connect to Studio</button>
-  </div>
-
-  <div id="live-stage">
-    <div id="client-hud">
-      <div id="hud-room">ROOM: ----</div>
-      <div id="match-clock">SHOW CLOCK: 20:00</div>
-    </div>
-
-    <div id="video-container">
-      <video id="host-video" autoplay playsinline></video>
-    </div>
-
-    <div id="chat-overlay">
-      <div style="padding: 4px 8px; font-size: 0.7rem; color: #ffda66; font-family: monospace; border-bottom: 1px solid #331555; display: flex; justify-content: space-between;">
-        <span>LIVE STUDIO CHAT</span>
-        <span style="color:#39ff14;">● ON AIR</span>
-      </div>
-      <div id="chat-messages"></div>
-      <div id="chat-input-row">
-        <input type="text" id="chat-input" placeholder="Say something to the studio..." maxlength="120" />
-        <button id="btn-send-chat" onclick="sendChatMessage()">Send</button>
-      </div>
-    </div>
-
-    <div id="interaction-overlay">
-      <div class="q-title"><span id="q-country-lbl">TRIVIA QUESTION</span></div>
-      <div class="q-text" id="q-text-lbl">Loading question...</div>
-      <div id="q-options-box"></div>
-    </div>
-
-    <div id="action-panel">
-      <div id="action-title" style="color: #ffda66; font-size: 0.85rem; margin-bottom: 6px; font-weight: bold;">YOUR TURN TO ROLL!</div>
-      <button class="btn-action" id="btn-roll-dice" onclick="sendRollRequest()">Roll Dice Now</button>
+  <div id="entry-modal">
+    <div class="entry-card">
+      <div class="badge-audience">VIP PASS</div>
+      <h2 style="color: #ffda66; font-size: 1.35rem; margin-bottom: 8px;">The Goody Tonight Show</h2>
+      <p style="color: #ebdcf9; font-size: 0.85rem; margin-bottom: 16px;">
+        Step out of the white stretch limo onto the red carpet, visit the refreshments bar & restrooms, and ride the elevator to the live taping!
+      </p>
+      <input type="text" id="audience-name-input" class="text-field" maxlength="14" placeholder="Your Name" autocomplete="off" />
+      <button class="btn-join" id="btn-join-studio">Arrive in Limousine</button>
     </div>
   </div>
 
+  <div id="lens-overlay">
+    <div class="letterbox-bar" id="bar-top"></div>
+    <div class="letterbox-bar" id="bar-bottom"></div>
+    <div class="lens-ui">
+      <div class="rec-indicator">● LIVE FEED [CAM 04]</div>
+      <div style="color: #ffda66;">STUDIO VIP ARRIVAL CURB</div>
+    </div>
+  </div>
+
+  <main id="spectator-ui">
+    <div class="top-bar">
+      <span id="user-display-name" style="color:#00f0ff;">SPECTATOR</span>
+      <span id="location-pill">LOCATION: STREET CURBSIDE</span>
+      <span id="show-clock-pill" style="color:#ffda66;">SHOW: 20:00</span>
+    </div>
+
+    <div id="interaction-prompt">PRESS [ W / ▲ ] TO TAKE ELEVATOR</div>
+
+    <div style="display:flex; flex-direction:column; align-items:center; width:100%;">
+      <div id="chat-container">
+        <div id="chat-header">
+          <span>COMMUNAL CHAT & TRIVIA [CLOCK: <span id="aud-chat-clock" style="color:#ffda66;">20:00</span>]</span>
+          <span id="chat-toggle-icon">▼</span>
+        </div>
+        <div id="chat-messages">
+          <div class="chat-msg" style="color:#aaa; font-style:italic;">Welcome to the studios! Have a great taping.</div>
+        </div>
+        <div class="chat-input-row">
+          <input type="text" id="chat-text-input" maxlength="120" placeholder="Say something..." autocomplete="off" />
+          <button id="btn-send-chat">SEND</button>
+        </div>
+      </div>
+
+      <div class="controls-wrapper">
+        <div class="dpad-section">
+          <div class="dpad-grid">
+            <div></div>
+            <button class="dpad-btn" id="dpad-fwd">▲</button>
+            <div></div>
+            <button class="dpad-btn" id="dpad-left">◀</button>
+            <button class="dpad-btn" id="dpad-back">▼</button>
+            <button class="dpad-btn" id="dpad-right">▶</button>
+          </div>
+          <span class="dpad-sublabel">WASD / ARROWS</span>
+        </div>
+
+        <div id="look-pad">
+          <div id="look-pad-knob"></div>
+          <div id="look-pad-label">DRAG TO LOOK</div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
   <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
+
   <script>
-    const sessionToken = 'token_' + Math.random().toString(36).substring(2, 11);
-    let hardwareId = localStorage.getItem('goody_hw_id');
-    if (!hardwareId) {
-      hardwareId = 'hw_' + Math.random().toString(36).substring(2, 11);
-      localStorage.setItem('goody_hw_id', hardwareId);
+    function generateDeviceFingerprint() {
+      try {
+        const c = document.createElement('canvas');
+        const gl = c.getContext('webgl') || c.getContext('experimental-webgl');
+        const d = gl ? gl.getExtension('WEBGL_debug_renderer_info') : null;
+        const rend = d && gl ? gl.getParameter(d.UNMASKED_RENDERER_WEBGL) : 'gpu';
+        const str = `${rend}|${window.screen.width}x${window.screen.height}|${navigator.hardwareConcurrency || 4}`;
+        let h = 0;
+        for (let i = 0; i < str.length; i++) { h = ((h << 5) - h) + str.charCodeAt(i); h |= 0; }
+        return 'hw_' + Math.abs(h).toString(16);
+      } catch (e) {
+        return 'hw_' + Math.random().toString(36).substring(2, 9);
+      }
+    }
+    const deviceHardwareId = generateDeviceFingerprint();
+
+    let spectatorSessionToken = localStorage.getItem('goody_audience_token');
+    if (!spectatorSessionToken) {
+      spectatorSessionToken = 'aud_' + Math.random().toString(36).substring(2, 10);
+      localStorage.setItem('goody_audience_token', spectatorSessionToken);
     }
 
-    const loginPortal = document.getElementById('login-portal');
-    const liveStage = document.getElementById('live-stage');
-    const hostVideo = document.getElementById('host-video');
-    const chatMessages = document.getElementById('chat-messages');
-    const chatInput = document.getElementById('chat-input');
-    const interactionOverlay = document.getElementById('interaction-overlay');
-    const actionPanel = document.getElementById('action-panel');
-    const micPill = document.getElementById('mic-pill');
+    let audioCtx = null;
+    let audioUnlocked = false;
 
-    let clientPeer = null;
-    let dataConn = null;
-    let localStream = null;
-    let assignedSlot = null;
-    let myName = "Guest";
+    function unlockAudio() {
+      if (audioUnlocked) return;
+      audioUnlocked = true;
+      try {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+      } catch (e) {}
 
-    document.getElementById('btn-connect').addEventListener('click', () => {
-      myName = document.getElementById('input-name').value.trim() || "Guest";
-      const city = document.getElementById('input-city').value.trim() || "Earth";
-      const roomCode = document.getElementById('input-room').value.trim();
-      const role = document.getElementById('input-role').value;
+      if (videoJake && videoJake.paused) videoJake.play().catch(() => {});
+      if (videoJune && videoJune.paused) videoJune.play().catch(() => {});
 
-      if (!roomCode || roomCode.length !== 4) {
-        alert("Please enter a valid 4-digit studio room code.");
-        return;
+      if ('speechSynthesis' in window) {
+        try {
+          const prime = new SpeechSynthesisUtterance('');
+          prime.volume = 0;
+          window.speechSynthesis.speak(prime);
+        } catch (e) {}
       }
+    }
 
-      loginPortal.style.display = 'none';
-      liveStage.style.display = 'flex';
-      document.getElementById('hud-room').textContent = `ROOM: ${roomCode}`;
+    function playTone(freq, type, duration, gainVal = 0.05) {
+      if (!audioCtx) return;
+      try {
+        const osc = audioCtx.createOscillator();
+        const g = audioCtx.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+        g.gain.setValueAtTime(gainVal, audioCtx.currentTime);
+        g.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + duration);
+        osc.connect(g);
+        g.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + duration);
+      } catch (e) {}
+    }
 
-      const studioId = "goody-studio-" + roomCode;
-      assignedSlot = role;
-      clientPeer = new Peer();
+    function playHostSpeechLocally(text) {
+      if (!('speechSynthesis' in window)) return;
+      try {
+        window.speechSynthesis.cancel();
+        const utt = new SpeechSynthesisUtterance(text);
+        utt.rate = 0.95;
+        utt.pitch = 1.25;
+        utt.onboundary = () => playTone(460 + Math.random() * 200, 'triangle', 0.05, 0.02);
+        window.speechSynthesis.speak(utt);
+      } catch (e) {}
+    }
 
-      clientPeer.on('open', () => {
-        const metadata = {
-          role: role === 'AUDIENCE' ? 'AUDIENCE' : 'CONTESTANT',
-          contestant: role,
-          name: myName,
-          city: city,
-          passcode: roomCode,
-          sessionToken: sessionToken,
-          hardwareId: hardwareId
-        };
+    const entryModal = document.getElementById('entry-modal');
+    const audienceNameInput = document.getElementById('audience-name-input');
+    const btnJoinStudio = document.getElementById('btn-join-studio');
+    const spectatorUi = document.getElementById('spectator-ui');
+    const userDisplayName = document.getElementById('user-display-name');
+    const locationPill = document.getElementById('location-pill');
+    const showClockPill = document.getElementById('show-clock-pill');
+    const audChatClock = document.getElementById('aud-chat-clock');
+    const interactionPrompt = document.getElementById('interaction-prompt');
 
-        dataConn = clientPeer.connect(studioId, { metadata: metadata });
+    const lensOverlay = document.getElementById('lens-overlay');
+    const barTop = document.getElementById('bar-top');
+    const barBottom = document.getElementById('bar-bottom');
 
-        dataConn.on('open', () => {
-          appendSystemMessage("Connected to studio master!");
-        });
+    const chatContainer = document.getElementById('chat-container');
+    const chatHeader = document.getElementById('chat-header');
+    const chatMessages = document.getElementById('chat-messages');
+    const chatTextInput = document.getElementById('chat-text-input');
+    const btnSendChat = document.getElementById('btn-send-chat');
 
-        dataConn.on('data', (data) => {
-          if (data.type === 'AUTH_FAILED' || data.type === 'AUTH_SUCCESS') {
-            if (data.type === 'AUTH_FAILED') {
-              alert("Authentication failed: " + data.message);
-              window.location.reload();
-            }
-          } else if (data.type === 'SLOT_TAKEN') {
-            alert(`Slot ${data.takenNum} (${data.slotName}) is already occupied! Try joining as Contestant ${data.altNum} (${data.altSlotName}) or as Audience.`);
-            window.location.reload();
-          } else if (data.type === 'HOST_SPEAK') {
-            appendSystemMessage(`[GOODY]: ${data.text}`);
-          } else if (data.type === 'AUDIENCE_CHAT_BROADCAST') {
-            appendChatMessage(data.author, data.text);
-          } else if (data.type === 'SYNC_MATCH_TIMER') {
-            document.getElementById('match-clock').textContent = `SHOW CLOCK: ${data.timeStr}`;
-          } else if (data.type === 'START_DICE_COUNTDOWN' || data.type === 'ENABLE_TURN_ROLL') {
-            actionPanel.style.display = 'block';
-          } else if (data.type === 'SHOW_QUESTION_LOCKED' || data.type === 'UNLOCK_QUESTION_INPUT') {
-            actionPanel.style.display = 'none';
-            presentQuestion(data.question || activeQuestionCache);
-          } else if (data.type === 'EVALUATION_RESULT') {
-            handleEvaluationResult(data);
-          } else if (data.type === 'SET_MIC_STATE') {
-            micPill.style.display = data.enabled ? 'block' : 'none';
-            if (data.promptText) micPill.textContent = data.promptText;
-          } else if (data.type === 'HOST_EJECTED_PLAYER' || data.type === 'HOST_EJECTED_SPECTATOR') {
-            alert(data.message || "You were disconnected by the director.");
-            window.location.reload();
+    let audienceNickname = "Guest " + Math.floor(100 + Math.random() * 900);
+    let peer = null;
+    let dataConn = null;
+    let lastMessageSentTime = 0;
+    let isGoodySpeaking = false;
+    let studioPower = true;
+    let isSpectatorControlsLocked = true;
+    let currentZone = "STREET";
+
+    let p1ContestantName = "Jake";
+    let p2ContestantName = "June";
+    let p1ContestantCity = "London";
+    let p2ContestantCity = "Nottingham";
+    let p1Index = 0;
+    let p2Index = 0;
+    let audienceIndex = 0;
+    let audiencePawnIdx = 0;
+
+    let activeQuestion = null;
+    let activeRecap = null;
+    let audienceSelectedOption = null;
+    let audienceHasAnswered = false;
+    let activeTriviaCardEl = null;
+    let audienceVoteCounts = [0, 0, 0, 0];
+
+    const videoJake = document.createElement('video');
+    videoJake.autoplay = true; videoJake.playsInline = true; videoJake.muted = false;
+    const videoJune = document.createElement('video');
+    videoJune.autoplay = true; videoJune.playsInline = true; videoJune.muted = false;
+    let hasLiveJakeStream = false;
+    let hasLiveJuneStream = false;
+
+    const peerPlushies = new Map();
+
+    btnJoinStudio.addEventListener('click', () => {
+      unlockAudio();
+      const entered = audienceNameInput.value.trim();
+      if (entered.length > 0) audienceNickname = entered;
+      userDisplayName.textContent = audienceNickname.toUpperCase();
+      entryModal.style.display = 'none';
+      connectToStudio();
+      startLimoArrivalCutscene();
+    });
+
+    // WEBRTC CONNECTION & STREAM RECEIVER
+    function connectToStudio() {
+      peer = new Peer();
+      peer.on('open', () => {
+        dataConn = peer.connect('goody-main-studio', {
+          metadata: {
+            role: 'AUDIENCE',
+            name: audienceNickname,
+            sessionToken: spectatorSessionToken,
+            hardwareId: deviceHardwareId
           }
         });
 
-        if (role !== 'AUDIENCE') {
-          navigator.mediaDevices.getUserMedia({ video: true, audio: true }).then(stream => {
-            localStream = stream;
-            const call = clientPeer.call(studioId, stream, { metadata: metadata });
-            call.on('stream', (remoteStream) => {
-              hostVideo.srcObject = remoteStream;
-            });
-          }).catch(err => {
-            alert("Camera and Microphone access are required for contestants.");
-            console.error(err);
-          });
-        } else {
-          const call = clientPeer.call(studioId, null, { metadata: metadata });
+        dataConn.on('open', () => {
+          addChatMessage('System', 'Connected to live studio relay!', 'is-host');
+        });
+
+        dataConn.on('data', (data) => {
+          if (data.type === 'SYNC_MATCH_TIMER') {
+            showClockPill.textContent = `SHOW: ${data.timeStr}`;
+            audChatClock.textContent = data.timeStr;
+            renderWallClockTexture(data.timeStr);
+          } else if (data.type === 'SYNC_BOARD_STATE') {
+            studioPower = data.studioPower;
+            updateStudioPowerVisuals(data.studioPower);
+            if (data.p1Name) { p1ContestantName = data.p1Name; updatePawnNameBadge(pawn1, data.p1Name); }
+            if (data.p2Name) { p2ContestantName = data.p2Name; updatePawnNameBadge(pawn2, data.p2Name); }
+           
+            if (data.p1Index !== undefined && data.p1Index !== p1Index) {
+              const old = p1Index; p1Index = data.p1Index;
+              animatePawnHop(pawn1, old, p1Index, -0.08);
+            }
+            if (data.p2Index !== undefined && data.p2Index !== p2Index) {
+              const old = p2Index; p2Index = data.p2Index;
+              animatePawnHop(pawn2, old, p2Index, 0.08);
+            }
+            renderStageQuestionBoard();
+          } else if (data.type === 'SHOW_QUESTION_LOCKED') {
+            activeQuestion = data.question; activeRecap = null;
+            audienceSelectedOption = null;
+            audienceHasAnswered = false;
+            audienceVoteCounts = [0, 0, 0, 0];
+            renderStageQuestionBoard();
+            injectTriviaCardIntoChat(data.question);
+          } else if (data.type === 'OPPONENT_ANSWERED') {
+            highlightContestantAnswerInChat(data.chosenAnswer);
+          } else if (data.type === 'EVALUATION_RESULT') {
+            handleAudienceEvaluationInChat(data);
+
+            setTimeout(() => {
+              activeRecap = { country: data.country, text: data.recap, isCorrect: data.isCorrect };
+              activeQuestion = null;
+              renderStageRecap(data.recap, data.country);
+              replaceTriviaCardWithRecapInChat(data.recap, data.country);
+            }, 1400);
+          } else if (data.type === 'HOST_SPEAK') {
+            isGoodySpeaking = true;
+            playHostSpeechLocally(data.text);
+            setTimeout(() => { isGoodySpeaking = false; }, 3200);
+          } else if (data.type === 'AUDIENCE_CHAT_BROADCAST') {
+            addChatMessage(data.author, data.text, data.isHost ? 'is-host' : '');
+          } else if (data.type === 'SPECTATOR_POS_RELAY') {
+            handleRemoteSpectatorMovement(data);
+          } else if (data.type === 'HOST_EJECTED_SPECTATOR') {
+            alert(data.message || "You have been removed from the studio by the director.");
+            if (dataConn) { try { dataConn.close(); } catch(e){} }
+            if (peer) { try { peer.destroy(); } catch(e){} }
+            spectatorUi.style.display = 'none';
+            entryModal.style.display = 'flex';
+          }
+        });
+
+        peer.on('call', (call) => {
+          call.answer();
           call.on('stream', (remoteStream) => {
-            hostVideo.srcObject = remoteStream;
+            const contestantSlot = call.metadata ? call.metadata.contestant : null;
+            if (contestantSlot === "goody-contestant-2") {
+              videoJune.srcObject = remoteStream;
+              videoJune.muted = false;
+              videoJune.play().catch(() => {});
+              hasLiveJuneStream = true;
+            } else {
+              videoJake.srcObject = remoteStream;
+              videoJake.muted = false;
+              videoJake.play().catch(() => {});
+              hasLiveJakeStream = true;
+            }
           });
-        }
+        });
+
+        dataConn.on('close', () => {
+          addChatMessage('System', 'Disconnected from studio. Reconnecting...', 'is-host');
+          setTimeout(connectToStudio, 4000);
+        });
       });
-    });
 
-    let activeQuestionCache = null;
-    function presentQuestion(qObj) {
-      if (!qObj) return;
-      activeQuestionCache = qObj;
-      document.getElementById('q-country-lbl').textContent = (qObj.country || "TRIVIA").toUpperCase() + " QUESTION";
-      document.getElementById('q-text-lbl').textContent = qObj.q;
+      peer.on('error', () => setTimeout(connectToStudio, 4000));
+    }
 
-      const box = document.getElementById('q-options-box');
-      box.innerHTML = "";
-      qObj.options.forEach((opt) => {
+    // --- IN-CHAT TRIVIA & MAJORITY TALLY SYSTEM ---
+    function injectTriviaCardIntoChat(qData) {
+      if (activeTriviaCardEl && activeTriviaCardEl.parentNode) {
+        activeTriviaCardEl.parentNode.removeChild(activeTriviaCardEl);
+      }
+
+      const card = document.createElement('div');
+      card.className = 'chat-trivia-card';
+      card.id = 'active-chat-trivia-card';
+
+      const countryTag = document.createElement('div');
+      countryTag.className = 'chat-trivia-country';
+      countryTag.textContent = `⚡ LIVE TRIVIA: ${qData.country.toUpperCase()}`;
+      card.appendChild(countryTag);
+
+      const qTextEl = document.createElement('div');
+      qTextEl.className = 'chat-trivia-text';
+      qTextEl.textContent = qData.text || qData.q;
+      card.appendChild(qTextEl);
+
+      const grid = document.createElement('div');
+      grid.className = 'chat-options-grid';
+
+      const letters = ["A", "B", "C", "D"];
+      qData.options.forEach((opt, idx) => {
         const btn = document.createElement('button');
-        btn.className = 'opt-btn';
-        btn.textContent = opt;
-        btn.onclick = () => submitAnswer(opt, btn);
-        box.appendChild(btn);
+        btn.className = 'chat-opt-btn';
+        btn.id = `chat-aud-btn-${idx}`;
+       
+        const spanText = document.createElement('span');
+        spanText.textContent = `${letters[idx]}) ${opt}`;
+        spanText.style.overflow = 'hidden';
+        spanText.style.textOverflow = 'ellipsis';
+       
+        const badge = document.createElement('span');
+        badge.className = 'majority-badge';
+        badge.id = `chat-maj-badge-${idx}`;
+        badge.textContent = '0%';
+
+        btn.appendChild(spanText);
+        btn.appendChild(badge);
+
+        btn.onclick = () => submitAudienceAnswerInChat(idx);
+        grid.appendChild(btn);
       });
-      interactionOverlay.style.display = 'block';
+      card.appendChild(grid);
+
+      const statusMsg = document.createElement('div');
+      statusMsg.className = 'chat-trivia-status';
+      statusMsg.id = 'chat-trivia-status-msg';
+      statusMsg.textContent = 'Tap an answer to vote & play along!';
+      card.appendChild(statusMsg);
+
+      chatMessages.appendChild(card);
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+      activeTriviaCardEl = card;
     }
 
-    function submitAnswer(chosenOption, btnElem) {
-      const buttons = document.querySelectorAll('.opt-btn');
-      buttons.forEach(b => b.disabled = true);
-      btnElem.style.background = '#6c5ce7';
+    function submitAudienceAnswerInChat(idx) {
+      if (audienceHasAnswered || !activeQuestion) return;
+      audienceHasAnswered = true;
+      audienceSelectedOption = idx;
 
-      if (dataConn && dataConn.open) {
-        dataConn.send({
-          type: 'PLAYER_ANSWERED',
-          contestant: assignedSlot,
-          chosenAnswer: chosenOption
-        });
-      }
-    }
+      audienceVoteCounts[idx]++;
 
-    function handleEvaluationResult(data) {
-      const buttons = document.querySelectorAll('.opt-btn');
-      buttons.forEach(b => {
-        if (b.textContent === data.chosenAnswer) {
-          b.className = data.isCorrect ? 'opt-btn selected-correct' : 'opt-btn selected-wrong';
+      for (let i = 0; i < 4; i++) {
+        const btn = document.getElementById(`chat-aud-btn-${i}`);
+        if (btn) {
+          if (i === idx) btn.classList.add('selected');
+          btn.disabled = true;
         }
-      });
-      setTimeout(() => {
-        interactionOverlay.style.display = 'none';
-      }, 2200);
+      }
+
+      const statusMsg = document.getElementById('chat-trivia-status-msg');
+      if (statusMsg) statusMsg.textContent = "Answer locked in! Tallying audience majority...";
     }
 
-    function sendRollRequest() {
-      actionPanel.style.display = 'none';
-      if (dataConn && dataConn.open) {
+    function highlightContestantAnswerInChat(chosenAnswer) {
+      if (!activeQuestion) return;
+      const cIdx = activeQuestion.options.indexOf(chosenAnswer);
+      if (cIdx !== -1) {
+        const btn = document.getElementById(`chat-aud-btn-${cIdx}`);
+        if (btn) btn.classList.add('contestant-picked');
+      }
+    }
+
+    function handleAudienceEvaluationInChat(data) {
+      if (!activeQuestion || !activeTriviaCardEl) return;
+
+      const correctAnsText = activeQuestion.ans;
+      const correctIdx = activeQuestion.options.indexOf(correctAnsText);
+
+      let totalVotes = audienceVoteCounts.reduce((a, b) => a + b, 0);
+      if (totalVotes === 0) totalVotes = 1;
+
+      for (let i = 0; i < 4; i++) {
+        const btn = document.getElementById(`chat-aud-btn-${i}`);
+        const badge = document.getElementById(`chat-maj-badge-${i}`);
+        if (btn && badge) {
+          const pct = Math.round((audienceVoteCounts[i] / totalVotes) * 100);
+          badge.textContent = `${pct}%`;
+
+          if (i === correctIdx) {
+            btn.classList.add('correct');
+          } else if (i === audienceSelectedOption && i !== correctIdx) {
+            btn.classList.add('wrong');
+          }
+        }
+      }
+
+      const userGotItRight = (audienceSelectedOption !== null && activeQuestion.options[audienceSelectedOption] === correctAnsText);
+      const statusMsg = document.getElementById('chat-trivia-status-msg');
+
+      if (userGotItRight) {
+        audienceIndex = Math.min(boardTileCoords.length - 1, audienceIndex + 1);
+        animatePawnHop(audiencePawn, audiencePawnIdx, audienceIndex, 0);
+        audiencePawnIdx = audienceIndex;
+        if (statusMsg) statusMsg.textContent = `🎉 Correct! Ghost token advanced (+1 tile)!`;
+        playTone(587, 'sine', 0.2, 0.05);
+      } else {
+        if (audiencePawnIdx > 0) {
+          animatePawnHop(audiencePawn, audiencePawnIdx, 0, 0, 100);
+          audienceIndex = 0;
+          audiencePawnIdx = 0;
+        }
+        if (statusMsg) statusMsg.textContent = `❌ Incorrect! Ghost token sent back to START (Tile 0)!`;
+        playTone(220, 'triangle', 0.2, 0.05);
+      }
+    }
+
+    function replaceTriviaCardWithRecapInChat(recapText, country) {
+      if (!activeTriviaCardEl) return;
+
+      activeTriviaCardEl.innerHTML = `
+        <div class="chat-trivia-country" style="color: #fdcb6e;">📜 RECAP: WHAT WE LEARNED (${country.toUpperCase()})</div>
+        <div class="chat-trivia-text" style="margin-bottom: 2px;">${recapText}</div>
+        <div class="chat-trivia-status" style="color: #ffda66;">Next turn starting soon...</div>
+      `;
+
+      setTimeout(() => {
+        if (activeTriviaCardEl && activeTriviaCardEl.parentNode) {
+          activeTriviaCardEl.parentNode.removeChild(activeTriviaCardEl);
+          activeTriviaCardEl = null;
+        }
+        audienceSelectedOption = null;
+      }, 5000);
+    }
+
+    function renderStageRecap(recapText, country) {}
+
+    function broadcastSpectatorMovement() {
+      if (dataConn && dataConn.open && !isSpectatorControlsLocked) {
         dataConn.send({
-          type: 'REQUEST_ROLL',
-          contestant: assignedSlot
+          type: 'SPECTATOR_MOVE',
+          peerId: peer.id,
+          name: audienceNickname,
+          x: playerPos.x,
+          y: playerPos.y,
+          z: playerPos.z,
+          yaw: playerYaw,
+          zone: currentZone
         });
       }
+    }
+
+    function handleRemoteSpectatorMovement(data) {
+      if (!peer || data.peerId === peer.id) return;
+      const shouldBeHidden = (data.zone === "STUDIO" || currentZone === "STUDIO");
+
+      let otherP = peerPlushies.get(data.peerId);
+      if (!otherP) {
+        otherP = createCutePlushie3D(0x55efc4, false, 0.75);
+        scene.add(otherP);
+        peerPlushies.set(data.peerId, otherP);
+      }
+      otherP.visible = !shouldBeHidden;
+      if (!shouldBeHidden) {
+        otherP.position.set(data.x, data.y, data.z);
+        otherP.rotation.y = data.yaw;
+      }
+    }
+
+    function addChatMessage(author, text, customClass = '') {
+      const msgEl = document.createElement('div');
+      msgEl.className = 'chat-msg';
+      const authorSpan = document.createElement('span');
+      authorSpan.className = `chat-author ${customClass}`;
+      authorSpan.textContent = author + ': ';
+      const textSpan = document.createElement('span');
+      textSpan.textContent = text;
+      msgEl.appendChild(authorSpan);
+      msgEl.appendChild(textSpan);
+      chatMessages.appendChild(msgEl);
+      chatMessages.scrollTop = chatMessages.scrollHeight;
     }
 
     function sendChatMessage() {
-      const text = chatInput.value.trim();
-      if (!text || !dataConn || !dataConn.open) return;
+      const text = chatTextInput.value.trim();
+      if (!text) return;
+      const now = performance.now();
+     
+      if (now - lastMessageSentTime < 2500) return;
+      lastMessageSentTime = now;
 
-      dataConn.send({
-        type: 'AUDIENCE_CHAT_MESSAGE',
-        author: myName,
-        text: text,
-        sessionToken: sessionToken,
-        hardwareId: hardwareId
-      });
+      addChatMessage(audienceNickname, text, 'is-self');
+      chatTextInput.value = '';
 
-      appendChatMessage(myName, text);
-      chatInput.value = '';
+      if (dataConn && dataConn.open) {
+        dataConn.send({
+          type: 'AUDIENCE_CHAT_MESSAGE',
+          author: audienceNickname,
+          text: text,
+          sessionToken: spectatorSessionToken,
+          hardwareId: deviceHardwareId
+        });
+      }
     }
+    btnSendChat.addEventListener('click', sendChatMessage);
+    chatTextInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') sendChatMessage(); });
 
-    chatInput.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') sendChatMessage();
+    chatHeader.addEventListener('click', () => {
+      const hidden = chatMessages.style.display === 'none';
+      chatMessages.style.display = hidden ? 'flex' : 'none';
+      document.querySelector('.chat-input-row').style.display = hidden ? 'flex' : 'none';
+      document.getElementById('chat-toggle-icon').textContent = hidden ? '▼' : '▲';
     });
 
-    function appendChatMessage(author, text) {
-      const div = document.createElement('div');
-      div.innerHTML = `<strong style="color:#00f0ff;">${escapeHtml(author)}:</strong> ${escapeHtml(text)}`;
-      chatMessages.appendChild(div);
-      chatMessages.scrollTop = chatMessages.scrollHeight;
+    // 3D SCENE & WORLD GENERATION
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x040208);
+    scene.fog = new THREE.FogExp2(0x040208, 0.015);
+
+    const camera = new THREE.PerspectiveCamera(65, window.innerWidth / window.innerHeight, 0.1, 150);
+    const canvas = document.getElementById('canvas3d');
+    const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(window.devicePixelRatio);
+
+    // ILLUMINATION RIG
+    const ambientLight = new THREE.AmbientLight(0x352155, 1.6); scene.add(ambientLight);
+    const ceilingLight = new THREE.PointLight(0xffecd2, 1.2, 60); ceilingLight.position.set(0, 16.0, 0); scene.add(ceilingLight);
+    const studioSpot = new THREE.SpotLight(0x00f0ff, 5.0, 30, Math.PI / 3, 0.4); studioSpot.position.set(0, 11, -9); scene.add(studioSpot);
+
+    const streetLamp1 = new THREE.PointLight(0xffe599, 3.5, 24); streetLamp1.position.set(-6, 4.2, 7.8); scene.add(streetLamp1);
+    const streetLamp2 = new THREE.PointLight(0xffe599, 3.5, 24); streetLamp2.position.set(6, 4.2, 7.8); scene.add(streetLamp2);
+    const foyerChandelier1 = new THREE.PointLight(0xffdfa9, 3.5, 20); foyerChandelier1.position.set(-3.5, 3.8, -4.5); scene.add(foyerChandelier1);
+    const foyerChandelier2 = new THREE.PointLight(0xffdfa9, 3.5, 20); foyerChandelier2.position.set(3.5, 3.8, -4.5); scene.add(foyerChandelier2);
+    const restroomVanityLight = new THREE.PointLight(0xffffff, 2.5, 12); restroomVanityLight.position.set(8.5, 3.2, -5.0); scene.add(restroomVanityLight);
+
+    // GROUND LEVEL: STREET, LOBBY, FOYER, RESTROOMS
+    const groundLevelGroup = new THREE.Group();
+
+    const streetMat = new THREE.MeshStandardMaterial({ color: 0x121216, roughness: 0.9 });
+    const street = new THREE.Mesh(new THREE.PlaneGeometry(38, 16), streetMat);
+    street.rotation.x = -Math.PI / 2; street.position.set(0, 0, 14); groundLevelGroup.add(street);
+
+    const curb = new THREE.Mesh(new THREE.BoxGeometry(38, 0.25, 3), new THREE.MeshStandardMaterial({ color: 0x484854, roughness: 0.6 }));
+    curb.position.set(0, 0.125, 6.5); groundLevelGroup.add(curb);
+
+    const foyerFloor = new THREE.Mesh(new THREE.PlaneGeometry(24, 16), new THREE.MeshStandardMaterial({ color: 0x221338, roughness: 0.25 }));
+    foyerFloor.rotation.x = -Math.PI / 2; foyerFloor.position.set(0, 0.25, -5); groundLevelGroup.add(foyerFloor);
+
+    // RED CARPET
+    const redCarpetGroup = new THREE.Group();
+    const crimsonCarpetMat = new THREE.MeshStandardMaterial({ color: 0x99001a, roughness: 0.85 });
+    const goldTrimMat = new THREE.MeshStandardMaterial({ color: 0xd4af37, metalness: 0.85, roughness: 0.2 });
+
+    const carpetRunner = new THREE.Mesh(new THREE.PlaneGeometry(3.2, 21.0), crimsonCarpetMat);
+    carpetRunner.rotation.x = -Math.PI / 2; carpetRunner.position.set(0, 0.26, -2.0);
+    redCarpetGroup.add(carpetRunner);
+
+    const goldBorderL = new THREE.Mesh(new THREE.PlaneGeometry(0.14, 21.0), goldTrimMat);
+    goldBorderL.rotation.x = -Math.PI / 2; goldBorderL.position.set(-1.67, 0.262, -2.0);
+    redCarpetGroup.add(goldBorderL);
+
+    const goldBorderR = new THREE.Mesh(new THREE.PlaneGeometry(0.14, 21.0), goldTrimMat);
+    goldBorderR.rotation.x = -Math.PI / 2; goldBorderR.position.set(1.67, 0.262, -2.0);
+    redCarpetGroup.add(goldBorderR);
+
+    [-8, -4, 0, 4].forEach(sz => {
+      [-1.9, 1.9].forEach(sx => {
+        const post = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.05, 0.9, 12), goldTrimMat);
+        post.position.set(sx, 0.7, sz);
+        const topOrb = new THREE.Mesh(new THREE.SphereGeometry(0.08, 12, 12), goldTrimMat);
+        topOrb.position.set(sx, 1.15, sz);
+        redCarpetGroup.add(post, topOrb);
+      });
+    });
+    groundLevelGroup.add(redCarpetGroup);
+
+    // Marquee Canopy
+    const marqueeGroup = new THREE.Group(); marqueeGroup.position.set(0, 4.0, 4.5);
+    const canopy = new THREE.Mesh(new THREE.BoxGeometry(10, 0.6, 4), new THREE.MeshStandardMaterial({ color: 0x110820 })); marqueeGroup.add(canopy);
+    const marqueeCanvas = document.createElement('canvas'); marqueeCanvas.width = 512; marqueeCanvas.height = 128;
+    const mctx = marqueeCanvas.getContext('2d');
+    mctx.fillStyle = '#0a0314'; mctx.fillRect(0, 0, 512, 128);
+    mctx.strokeStyle = '#d4af37'; mctx.lineWidth = 6; mctx.strokeRect(4, 4, 504, 120);
+    mctx.fillStyle = '#ffda66'; mctx.font = 'bold 24px monospace'; mctx.textAlign = 'center';
+    mctx.fillText("THE GOODY TONIGHT SHOW", 256, 48);
+    mctx.fillStyle = '#39ff14'; mctx.font = 'bold 22px monospace';
+    mctx.fillText("● TELEVISION STUDIOS ●", 256, 92);
+    const marqueeSign = new THREE.Mesh(new THREE.PlaneGeometry(8, 2), new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(marqueeCanvas) }));
+    marqueeSign.position.set(0, 0.2, 2.01); marqueeGroup.add(marqueeSign);
+    groundLevelGroup.add(marqueeGroup);
+
+    // REFRESHMENTS & SNACK BAR
+    const barGroup = new THREE.Group(); barGroup.position.set(-7.5, 0.25, -5.0);
+    const counterBase = new THREE.Mesh(new THREE.BoxGeometry(6.5, 1.1, 2.2), new THREE.MeshStandardMaterial({ color: 0x3d1a0a, roughness: 0.7 }));
+    counterBase.position.y = 0.55; barGroup.add(counterBase);
+    const marbleTop = new THREE.Mesh(new THREE.BoxGeometry(6.7, 0.1, 2.4), new THREE.MeshStandardMaterial({ color: 0xe6e6e6, roughness: 0.2 }));
+    marbleTop.position.y = 1.12; barGroup.add(marbleTop);
+
+    // Popcorn Warmer Machine
+    const popcornMachine = new THREE.Group(); popcornMachine.position.set(-1.8, 1.17, 0);
+    const pcBase = new THREE.Mesh(new THREE.BoxGeometry(1.2, 0.2, 1.0), new THREE.MeshStandardMaterial({ color: 0xc0392b })); pcBase.position.y = 0.1; popcornMachine.add(pcBase);
+    const pcGlass = new THREE.Mesh(new THREE.BoxGeometry(1.1, 1.1, 0.9), new THREE.MeshStandardMaterial({ color: 0xffffff, transparent: true, opacity: 0.35 }));
+    pcGlass.position.y = 0.75; popcornMachine.add(pcGlass);
+    const pcPopcorn = new THREE.Mesh(new THREE.BoxGeometry(0.95, 0.65, 0.75), new THREE.MeshStandardMaterial({ color: 0xfed330, roughness: 0.9 }));
+    pcPopcorn.position.y = 0.55; popcornMachine.add(pcPopcorn);
+    const pcRoof = new THREE.Mesh(new THREE.BoxGeometry(1.25, 0.25, 1.05), new THREE.MeshStandardMaterial({ color: 0xc0392b })); pcRoof.position.y = 1.35; popcornMachine.add(pcRoof);
+    const pcLight = new THREE.PointLight(0xffda77, 1.2, 4); pcLight.position.y = 1.0; popcornMachine.add(pcLight);
+    barGroup.add(popcornMachine);
+
+    // Soda Dispenser Machine
+    const sodaMachine = new THREE.Group(); sodaMachine.position.set(1.5, 1.17, 0);
+    const smBody = new THREE.Mesh(new THREE.BoxGeometry(1.4, 1.2, 1.0), new THREE.MeshStandardMaterial({ color: 0x222f3e, metalness: 0.7 }));
+    smBody.position.y = 0.6; sodaMachine.add(smBody);
+    [-0.35, 0, 0.35].forEach(sx => {
+      const nozzle = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 0.18, 8), new THREE.MeshStandardMaterial({ color: 0xcccccc, metalness: 0.9 }));
+      nozzle.position.set(sx, 0.45, 0.55); sodaMachine.add(nozzle);
+    });
+    barGroup.add(sodaMachine);
+
+    const barUsher = createCutePlushie3D(0x27ae60, true);
+    barUsher.position.set(0, 0.26, -1.5); barUsher.rotation.y = 0;
+    barGroup.add(barUsher);
+    groundLevelGroup.add(barGroup);
+
+    // WALK-IN LUXURY RESTROOM
+    const restroomGroup = new THREE.Group(); restroomGroup.position.set(8.5, 0.25, -5.0);
+    const tileMat = new THREE.MeshStandardMaterial({ color: 0xdfe6e9, roughness: 0.3 });
+    const rBackWall = new THREE.Mesh(new THREE.PlaneGeometry(6, 4), tileMat); rBackWall.position.set(0, 2, -2.5); restroomGroup.add(rBackWall);
+    const rSideWall = new THREE.Mesh(new THREE.PlaneGeometry(5, 4), tileMat); rSideWall.rotation.y = -Math.PI / 2; rSideWall.position.set(-3, 2, 0); restroomGroup.add(rSideWall);
+
+    const vanityCounter = new THREE.Mesh(new THREE.BoxGeometry(4.5, 0.85, 1.6), new THREE.MeshStandardMaterial({ color: 0x2c3e50, roughness: 0.2 }));
+    vanityCounter.position.set(0, 0.45, -1.2); restroomGroup.add(vanityCounter);
+
+    [-1.2, 1.2].forEach(vx => {
+      const sinkBowl = new THREE.Mesh(new THREE.CylinderGeometry(0.42, 0.32, 0.25, 16), new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.1 }));
+      sinkBowl.position.set(vx, 0.90, -1.2); restroomGroup.add(sinkBowl);
+      const tapNeck = new THREE.Mesh(new THREE.TorusGeometry(0.12, 0.025, 8, 16, Math.PI), new THREE.MeshStandardMaterial({ color: 0xdcdde1, metalness: 0.95 }));
+      tapNeck.position.set(vx, 1.15, -1.45); tapNeck.rotation.x = Math.PI / 2; restroomGroup.add(tapNeck);
+    });
+
+    const mirrorGlass = new THREE.Mesh(new THREE.PlaneGeometry(4.2, 1.6), new THREE.MeshStandardMaterial({ color: 0xa4b0be, metalness: 0.95, roughness: 0.05 }));
+    mirrorGlass.position.set(0, 2.3, -2.48); restroomGroup.add(mirrorGlass);
+    const mirrorFrame = new THREE.Mesh(new THREE.BoxGeometry(4.4, 1.75, 0.04), new THREE.MeshStandardMaterial({ color: 0xd4af37, metalness: 0.9 }));
+    mirrorFrame.position.set(0, 2.3, -2.49); restroomGroup.add(mirrorFrame);
+
+    const handDryer = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.6, 0.35), new THREE.MeshStandardMaterial({ color: 0xbdc3c7, metalness: 0.9, roughness: 0.2 }));
+    handDryer.position.set(2.4, 1.6, -1.2); restroomGroup.add(handDryer);
+    groundLevelGroup.add(restroomGroup);
+
+    // EXPRESS STUDIO ELEVATOR
+    const elevatorGroup = new THREE.Group(); elevatorGroup.position.set(0, 0.25, -12.5);
+    const elevOuter = new THREE.Mesh(new THREE.BoxGeometry(4.5, 4.5, 3.5), new THREE.MeshStandardMaterial({ color: 0x221338 }));
+    elevOuter.position.y = 2.25; elevatorGroup.add(elevOuter);
+    const elevDoorL = new THREE.Mesh(new THREE.PlaneGeometry(1.6, 3.2), new THREE.MeshStandardMaterial({ color: 0xd4af37, metalness: 0.85 }));
+    elevDoorL.position.set(-0.8, 1.8, 1.76); elevatorGroup.add(elevDoorL);
+    const elevDoorR = new THREE.Mesh(new THREE.PlaneGeometry(1.6, 3.2), new THREE.MeshStandardMaterial({ color: 0xd4af37, metalness: 0.85 }));
+    elevDoorR.position.set(0.8, 1.8, 1.76); elevatorGroup.add(elevDoorR);
+    groundLevelGroup.add(elevatorGroup);
+
+    scene.add(groundLevelGroup);
+
+    // ==========================================
+    // TOP LEVEL: TABLETOP BROADCAST STUDIO
+    // ==========================================
+    const bedroomGroup = new THREE.Group();
+    const deskTop = new THREE.Mesh(new THREE.BoxGeometry(22, 1.0, 16), new THREE.MeshStandardMaterial({ color: 0x331c0e }));
+    deskTop.position.set(0, 7.5, -9); bedroomGroup.add(deskTop);
+    scene.add(bedroomGroup);
+
+    const miniDiorama = new THREE.Group(); miniDiorama.position.set(0, 8.05, -9);
+    const feltCarpet = new THREE.Mesh(new THREE.CylinderGeometry(7.0, 7.0, 0.08, 48), new THREE.MeshStandardMaterial({ color: 0x271147 }));
+    feltCarpet.position.y = 0.44; miniDiorama.add(feltCarpet);
+    const miniWall = new THREE.Mesh(new THREE.CylinderGeometry(7.0, 7.0, 4.5, 32, 1, true, -Math.PI / 2, Math.PI), new THREE.MeshStandardMaterial({ color: 0x15092a, side: THREE.BackSide }));
+    miniWall.position.y = 2.65; miniDiorama.add(miniWall);
+
+    // Wall Clock
+    const wallClockCanvas = document.createElement('canvas'); wallClockCanvas.width = 256; wallClockCanvas.height = 128;
+    const wallClockCtx = wallClockCanvas.getContext('2d');
+    const wallClockTex = new THREE.CanvasTexture(wallClockCanvas);
+    function renderWallClockTexture(str) {
+      wallClockCtx.fillStyle = '#06020f'; wallClockCtx.fillRect(0, 0, 256, 128);
+      wallClockCtx.strokeStyle = '#00f0ff'; wallClockCtx.lineWidth = 4; wallClockCtx.strokeRect(4, 4, 248, 120);
+      wallClockCtx.fillStyle = '#ffda66'; wallClockCtx.font = 'bold 18px monospace'; wallClockCtx.textAlign = 'center';
+      wallClockCtx.fillText("20-MIN SHOW CLOCK", 128, 36);
+      wallClockCtx.fillStyle = '#ff7675'; wallClockCtx.font = 'bold 50px monospace';
+      wallClockCtx.fillText(str, 128, 95); wallClockTex.needsUpdate = true;
+    }
+    renderWallClockTexture("20:00");
+    const wallClockMesh = new THREE.Mesh(new THREE.PlaneGeometry(2.4, 1.2), new THREE.MeshBasicMaterial({ map: wallClockTex }));
+    wallClockMesh.position.set(0, 6.2, -4.4); miniDiorama.add(wallClockMesh);
+
+    // 14-Country Flags
+    const COUNTRIES = ["France", "Netherlands", "Canada", "Sweden", "Italy", "Denmark", "Brazil", "Australia", "Spain", "Germany", "United Kingdom", "Nigeria", "United States", "Belgium"];
+    function createCountryFlagTexture(countryName) {
+      const c = document.createElement('canvas'); c.width = 256; c.height = 256;
+      const ctx = c.getContext('2d'); const w = 256; const h = 256;
+      ctx.fillStyle = '#1e1035'; ctx.fillRect(0, 0, w, h);
+      ctx.save(); ctx.beginPath(); ctx.arc(128, 128, 124, 0, Math.PI * 2); ctx.clip();
+      switch(countryName) {
+        case "France": ctx.fillStyle = '#002654'; ctx.fillRect(0, 0, w / 3, h); ctx.fillStyle = '#FFFFFF'; ctx.fillRect(w / 3, 0, w / 3, h); ctx.fillStyle = '#ED2939'; ctx.fillRect((w / 3) * 2, 0, w / 3, h); break;
+        case "Netherlands": ctx.fillStyle = '#AE1C28'; ctx.fillRect(0, 0, w, h / 3); ctx.fillStyle = '#FFFFFF'; ctx.fillRect(0, h / 3, w, h / 3); ctx.fillStyle = '#21468B'; ctx.fillRect(0, (h / 3) * 2, w / 3, h); break;
+        case "Canada": ctx.fillStyle = '#FFFFFF'; ctx.fillRect(0, 0, w, h); ctx.fillStyle = '#FF0000'; ctx.fillRect(0, 0, w * 0.28, h); ctx.fillRect(w * 0.72, 0, w * 0.28, h); ctx.beginPath(); ctx.arc(128, 128, 36, 0, Math.PI * 2); ctx.fill(); break;
+        case "Brazil": ctx.fillStyle = '#009739'; ctx.fillRect(0, 0, w, h); ctx.fillStyle = '#FEDD00'; ctx.beginPath(); ctx.moveTo(128, 24); ctx.lineTo(236, 128); ctx.lineTo(128, 232); ctx.lineTo(20, 128); ctx.closePath(); ctx.fill(); ctx.fillStyle = '#012169'; ctx.beginPath(); ctx.arc(128, 128, 52, 0, Math.PI * 2); ctx.fill(); break;
+        case "Sweden": ctx.fillStyle = '#006AA7'; ctx.fillRect(0, 0, w, h); ctx.fillStyle = '#FECC00'; ctx.fillRect(75, 0, 36, h); ctx.fillRect(0, 110, w, 36); break;
+        case "Italy": ctx.fillStyle = '#009246'; ctx.fillRect(0, 0, w / 3, h); ctx.fillStyle = '#FFFFFF'; ctx.fillRect(w / 3, 0, w / 3, h); ctx.fillStyle = '#CE2B37'; ctx.fillRect((w / 3) * 2, 0, w / 3, h); break;
+        case "Denmark": ctx.fillStyle = '#C60C30'; ctx.fillRect(0, 0, w, h); ctx.fillStyle = '#FFFFFF'; ctx.fillRect(80, 0, 34, h); ctx.fillRect(0, 111, w, 34); break;
+        case "Australia": ctx.fillStyle = '#00008B'; ctx.fillRect(0, 0, w, h); ctx.fillStyle = '#FFFFFF'; ctx.fillRect(0, 0, 120, 120); ctx.fillStyle = '#CC0000'; ctx.fillRect(48, 0, 24, 120); ctx.fillRect(0, 48, 120, 24); break;
+        case "Spain": ctx.fillStyle = '#AA151B'; ctx.fillRect(0, 0, w, h); ctx.fillStyle = '#F1BF00'; ctx.fillRect(0, h * 0.25, w, h * 0.5); break;
+        case "Germany": ctx.fillStyle = '#000000'; ctx.fillRect(0, 0, w, h / 3); ctx.fillStyle = '#DD0000'; ctx.fillRect(0, h / 3, w, h / 3); ctx.fillStyle = '#FFCE00'; ctx.fillRect(0, (h / 3) * 2, w / 3, h); break;
+        case "United Kingdom": ctx.fillStyle = '#012169'; ctx.fillRect(0, 0, w, h); ctx.strokeStyle = '#FFFFFF'; ctx.lineWidth = 36; ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(w, h); ctx.moveTo(w, 0); ctx.lineTo(0, h); ctx.stroke(); ctx.strokeStyle = '#C8102E'; ctx.lineWidth = 14; ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(w, h); ctx.moveTo(w, 0); ctx.lineTo(0, h); ctx.stroke(); ctx.fillStyle = '#FFFFFF'; ctx.fillRect(100, 0, 56, h); ctx.fillRect(0, 100, w, 56); ctx.fillStyle = '#C8102E'; ctx.fillRect(112, 0, 32, h); ctx.fillRect(0, 112, w, 32); break;
+        case "Nigeria": ctx.fillStyle = '#008751'; ctx.fillRect(0, 0, w / 3, h); ctx.fillStyle = '#FFFFFF'; ctx.fillRect(w / 3, 0, w / 3, h); ctx.fillStyle = '#008751'; ctx.fillRect((w / 3) * 2, 0, w / 3, h); break;
+        case "United States": ctx.fillStyle = '#FFFFFF'; ctx.fillRect(0, 0, w, h); for (let s = 0; s < 13; s++) { if (s % 2 === 0) { ctx.fillStyle = '#B22234'; ctx.fillRect(0, s * (h / 13), w, Math.ceil(h / 13)); } } ctx.fillStyle = '#3C3B6E'; ctx.fillRect(0, 0, w * 0.48, h * 0.54); break;
+        case "Belgium": ctx.fillStyle = '#000000'; ctx.fillRect(0, 0, w / 3, h); ctx.fillStyle = '#FDDA24'; ctx.fillRect(w / 3, 0, w / 3, h); ctx.fillStyle = '#EF3340'; ctx.fillRect((w / 3) * 2, 0, w / 3, h); break;
+        default: ctx.fillStyle = '#22143b'; ctx.fillRect(0, 0, w, h);
+      }
+      ctx.restore();
+      ctx.strokeStyle = '#e6c875'; ctx.lineWidth = 8; ctx.beginPath(); ctx.arc(128, 128, 123, 0, Math.PI * 2); ctx.stroke();
+      const tex = new THREE.CanvasTexture(c); tex.needsUpdate = true; return tex;
     }
 
-    function appendSystemMessage(text) {
-      const div = document.createElement('div');
-      div.style.color = '#ffda66';
-      div.style.fontStyle = 'italic';
-      div.textContent = text;
-      chatMessages.appendChild(div);
-      chatMessages.scrollTop = chatMessages.scrollHeight;
+    const flagTextures = COUNTRIES.map(c => createCountryFlagTexture(c));
+    const boardTileCoords = [];
+    for (let i = 0; i < 32; i++) {
+      const angle = i * 0.48; const radius = 0.7 + (i * 0.135);
+      const x = Math.cos(angle) * radius; const z = 1.8 + (Math.sin(angle) * (radius * 0.88));
+      boardTileCoords.push({ x, z, country: COUNTRIES[i % COUNTRIES.length] });
+      const tile = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.28, 0.30, 0.08, 24),
+        [new THREE.MeshStandardMaterial({ color: 0x241e33, metalness: 0.6, roughness: 0.3 }), new THREE.MeshBasicMaterial({ map: flagTextures[i % flagTextures.length] }), new THREE.MeshBasicMaterial({ color: 0x110d1c })]
+      );
+      tile.position.set(x, 0.48, z); miniDiorama.add(tile);
     }
 
-    function escapeHtml(str) {
-      return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    // Dynamic Pawns
+    function updatePawnNameBadge(pawnGroup, displayName) {
+      if (!pawnGroup || !pawnGroup.userData || !pawnGroup.userData.badgeCanvas) return;
+      const c = pawnGroup.userData.badgeCanvas; const ctx = c.getContext('2d');
+      const w = c.width; const h = c.height; ctx.clearRect(0, 0, w, h);
+      const r = 24; ctx.fillStyle = '#0a0314'; ctx.strokeStyle = pawnGroup.userData.tagColor; ctx.lineWidth = 8;
+      ctx.beginPath(); ctx.moveTo(r, 4); ctx.lineTo(w - r, 4); ctx.quadraticCurveTo(w - 4, 4, w - 4, r);
+      ctx.lineTo(w - 4, h - r); ctx.quadraticCurveTo(w - 4, h - 4, w - r, h - 4);
+      ctx.lineTo(r, h - 4); ctx.quadraticCurveTo(4, h - 4, 4, h - r);
+      ctx.lineTo(4, r); ctx.quadraticCurveTo(4, 4, r, 4); ctx.closePath();
+      ctx.fill(); ctx.stroke();
+      ctx.fillStyle = '#ffffff'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      const cleanName = (displayName || "PLAYER").toUpperCase().trim();
+      let fontSize = cleanName.length > 12 ? 28 : (cleanName.length > 8 ? 36 : 48);
+      ctx.font = `bold ${fontSize}px sans-serif`; ctx.fillText(cleanName, w / 2, h / 2 + 2);
+      pawnGroup.userData.badgeTexture.needsUpdate = true;
     }
+
+    function createPlayerPawn(colorHex, initialName, isGhost = false) {
+      const pawn = new THREE.Group();
+      const baseMat = new THREE.MeshStandardMaterial({
+        color: colorHex, metalness: 0.6, roughness: 0.25,
+        transparent: isGhost, opacity: isGhost ? 0.45 : 1.0
+      });
+      const base = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.10, 0.04, 16), baseMat); base.position.y = 0.02; pawn.add(base);
+      const body = new THREE.Mesh(new THREE.ConeGeometry(0.07, 0.16, 16), baseMat); body.position.y = 0.12; pawn.add(body);
+      const head = new THREE.Mesh(new THREE.SphereGeometry(0.055, 16, 16), baseMat); head.position.y = 0.22; pawn.add(head);
+
+      if (!isGhost) {
+        const bCanvas = document.createElement('canvas'); bCanvas.width = 256; bCanvas.height = 96;
+        const bTex = new THREE.CanvasTexture(bCanvas);
+        const badgeMesh = new THREE.Mesh(new THREE.PlaneGeometry(0.34, 0.13), new THREE.MeshBasicMaterial({ map: bTex, transparent: true, side: THREE.DoubleSide, depthWrite: false }));
+        badgeMesh.position.set(0, 0.35, 0); pawn.add(badgeMesh);
+        pawn.userData = { badgeCanvas: bCanvas, badgeTexture: bTex, badgeMesh, tagColor: '#' + colorHex.toString(16).padStart(6, '0') };
+        updatePawnNameBadge(pawn, initialName);
+      }
+      return pawn;
+    }
+    const pawn1 = createPlayerPawn(0x00d2d3, "Jake");
+    const pawn2 = createPlayerPawn(0xff3838, "June");
+    pawn1.position.set(boardTileCoords[0].x - 0.08, 0.52, boardTileCoords[0].z);
+    pawn2.position.set(boardTileCoords[0].x + 0.08, 0.52, boardTileCoords[0].z);
+    miniDiorama.add(pawn1); miniDiorama.add(pawn2);
+
+    const audiencePawn = createPlayerPawn(0xf1c40f, "AUDIENCE", true);
+    audiencePawn.position.set(boardTileCoords[0].x, 0.52, boardTileCoords[0].z - 0.12);
+    miniDiorama.add(audiencePawn);
+
+    function animatePawnHop(pawn, fromIdx, toIdx, offsetX, hopDurationMs = 280) {
+      if (fromIdx === toIdx) return;
+      const stepDirection = toIdx > fromIdx ? 1 : -1;
+      let currentHopIdx = fromIdx;
+      function hopNextStep() {
+        if (currentHopIdx === toIdx) return;
+        const nextHopIdx = currentHopIdx + stepDirection;
+        const startPos = { x: boardTileCoords[currentHopIdx].x + offsetX, y: 0.52, z: boardTileCoords[currentHopIdx].z };
+        const endPos = { x: boardTileCoords[nextHopIdx].x + offsetX, y: 0.52, z: boardTileCoords[nextHopIdx].z };
+        const hopStartTime = performance.now();
+        playTone(320 + Math.random() * 80, 'sine', 0.06, 0.03);
+        function stepFrame(now) {
+          const elapsed = now - hopStartTime; const progress = Math.min(1.0, elapsed / hopDurationMs);
+          const jumpArc = 4.0 * 0.35 * progress * (1.0 - progress);
+          pawn.position.x = startPos.x + (endPos.x - startPos.x) * progress;
+          pawn.position.y = 0.52 + jumpArc;
+          pawn.position.z = startPos.z + (endPos.z - startPos.z) * progress;
+          if (progress < 1.0) requestAnimationFrame(stepFrame);
+          else {
+            pawn.position.set(endPos.x, 0.52, endPos.z);
+            playTone(220, 'triangle', 0.05, 0.02);
+            currentHopIdx = nextHopIdx; setTimeout(hopNextStep, 50);
+          }
+        }
+        requestAnimationFrame(stepFrame);
+      }
+      hopNextStep();
+    }
+
+    // 3D Studio Question Board
+    const qBoardCanvas = document.createElement('canvas'); qBoardCanvas.width = 512; qBoardCanvas.height = 384;
+    const qBoardCtx = qBoardCanvas.getContext('2d');
+    const qBoardTex = new THREE.CanvasTexture(qBoardCanvas);
+    function renderStageQuestionBoard() {
+      qBoardCtx.fillStyle = '#120726'; qBoardCtx.fillRect(0, 0, 512, 384);
+      qBoardCtx.strokeStyle = '#00f0ff'; qBoardCtx.lineWidth = 6; qBoardCtx.strokeRect(3, 3, 506, 378);
+
+      if (activeRecap) {
+        qBoardCtx.fillStyle = activeRecap.isCorrect ? '#00b894' : '#ff7675';
+        qBoardCtx.font = 'bold 22px sans-serif'; qBoardCtx.textAlign = 'center';
+        qBoardCtx.fillText(activeRecap.isCorrect ? " CORRECT! WHAT WE LEARNED:" : " INCORRECT! WHAT WE LEARNED:", 256, 44);
+        qBoardCtx.fillStyle = '#ffda66'; qBoardCtx.font = 'bold 16px monospace';
+        qBoardCtx.fillText(` COUNTRY: ${activeRecap.country.toUpperCase()}`, 256, 78);
+        qBoardCtx.fillStyle = '#00f0ff'; qBoardCtx.fillRect(36, 94, 440, 2);
+        qBoardCtx.fillStyle = '#ffffff'; qBoardCtx.font = '16px sans-serif';
+        const words = activeRecap.text.split(' ');
+        let line = ''; let y = 140;
+        for (let n = 0; n < words.length; n++) {
+          const testLine = line + words[n] + ' ';
+          if (qBoardCtx.measureText(testLine).width > 440 && n > 0) {
+            qBoardCtx.fillText(line, 256, y); line = words[n] + ' '; y += 28;
+          } else line = testLine;
+        }
+        qBoardCtx.fillText(line, 256, y);
+      } else if (activeQuestion) {
+        qBoardCtx.fillStyle = '#ffda66'; qBoardCtx.font = 'bold 18px monospace'; qBoardCtx.textAlign = 'left';
+        qBoardCtx.fillText(` ${activeQuestion.country.toUpperCase()} TRIVIA`, 20, 36);
+        qBoardCtx.fillStyle = '#ffffff'; qBoardCtx.font = '15px sans-serif';
+        const words = (activeQuestion.q || activeQuestion.text || "").split(' ');
+        let line = ''; let y = 72;
+        for (let n = 0; n < words.length; n++) {
+          const testLine = line + words[n] + ' ';
+          if (qBoardCtx.measureText(testLine).width > 470 && n > 0) {
+            qBoardCtx.fillText(line, 20, y); line = words[n] + ' '; y += 22;
+          } else line = testLine;
+        }
+        qBoardCtx.fillText(line, 20, y);
+
+        const letters = ["A", "B", "C", "D"];
+        activeQuestion.options.forEach((opt, idx) => {
+          const optY = 210 + (idx * 40);
+          qBoardCtx.fillStyle = '#220f3d';
+          qBoardCtx.strokeStyle = '#a29bfe';
+          qBoardCtx.fillRect(20, optY - 24, 472, 32);
+          qBoardCtx.lineWidth = 2;
+          qBoardCtx.strokeRect(20, optY - 24, 472, 32);
+
+          qBoardCtx.fillStyle = '#ffda66';
+          qBoardCtx.font = 'bold 16px monospace';
+          qBoardCtx.fillText(`${letters[idx]})`, 30, optY - 2);
+
+          qBoardCtx.fillStyle = '#ffffff';
+          qBoardCtx.font = '14px sans-serif';
+          qBoardCtx.fillText(opt.length > 48 ? opt.substring(0, 48) + "..." : opt, 64, optY - 2);
+        });
+      } else {
+        qBoardCtx.fillStyle = '#ffda66'; qBoardCtx.font = 'bold 24px sans-serif'; qBoardCtx.textAlign = 'center';
+        qBoardCtx.fillText("OFFICIAL GAME RULES", 256, 44);
+        qBoardCtx.fillStyle = '#00f0ff'; qBoardCtx.fillRect(36, 56, 440, 2);
+        const rules = [
+          " 1. You have 10 seconds to roll your dice when active.",
+          " 2. Land on a tile to trigger that country's trivia.",
+          " 3. You have 30 seconds to lock in your final answer.",
+          " 4. Correct answer secures your position on the tile.",
+          " 5. Incorrect answer or timeout sends you to START!",
+          " 6. Reach tile 32 or be furthest ahead at 20:00 to WIN!"
+        ];
+        qBoardCtx.font = '14px monospace'; qBoardCtx.textAlign = 'left';
+        rules.forEach((rule, idx) => {
+          qBoardCtx.fillStyle = idx % 2 === 0 ? '#ffffff' : '#ebdcf9';
+          qBoardCtx.fillText(rule, 26, 96 + (idx * 34));
+        });
+      }
+      qBoardTex.needsUpdate = true;
+    }
+    renderStageQuestionBoard();
+
+    const qBoardMesh = new THREE.Mesh(new THREE.PlaneGeometry(3.6, 2.7), new THREE.MeshBasicMaterial({ map: qBoardTex }));
+    qBoardMesh.position.set(-4.8, 3.4, -3.2); qBoardMesh.rotation.y = 0.8; miniDiorama.add(qBoardMesh);
+
+    // Plushie Generator with Opacity Support
+    function createCutePlushie3D(color, hasUniform = false, opacity = 1.0) {
+      const pGroup = new THREE.Group();
+      const isTransparent = opacity < 1.0;
+
+      const pMat = new THREE.MeshStandardMaterial({
+        color: color,
+        roughness: 0.95,
+        transparent: isTransparent,
+        opacity: opacity
+      });
+      const earMat = new THREE.MeshStandardMaterial({
+        color: 0xff7675,
+        roughness: 0.95,
+        transparent: isTransparent,
+        opacity: opacity
+      });
+
+      const pBody = new THREE.Mesh(new THREE.SphereGeometry(0.28, 14, 14), pMat); pBody.position.y = 0.28; pGroup.add(pBody);
+      const pHead = new THREE.Mesh(new THREE.SphereGeometry(0.22, 14, 14), pMat); pHead.position.y = 0.58; pGroup.add(pHead);
+
+      if (hasUniform) {
+        const jacket = new THREE.Mesh(
+          new THREE.CylinderGeometry(0.29, 0.30, 0.26, 16),
+          new THREE.MeshStandardMaterial({ color: 0x5a0b1d, transparent: isTransparent, opacity: opacity })
+        );
+        jacket.position.y = 0.28; pGroup.add(jacket);
+        [-0.04, 0.04].forEach(bx => {
+          const goldBtn = new THREE.Mesh(
+            new THREE.SphereGeometry(0.02, 6, 6),
+            new THREE.MeshStandardMaterial({ color: 0xd4af37, metalness: 0.9, transparent: isTransparent, opacity: opacity })
+          );
+          goldBtn.position.set(bx, 0.28, -0.29); pGroup.add(goldBtn);
+        });
+      }
+
+      const ear1 = new THREE.Mesh(new THREE.SphereGeometry(0.08, 10, 10), pMat); ear1.position.set(-0.14, 0.74, 0);
+      const ear2 = new THREE.Mesh(new THREE.SphereGeometry(0.08, 10, 10), earMat); ear2.position.set(0.14, 0.74, 0); pGroup.add(ear1, ear2);
+
+      const blushMat = new THREE.MeshBasicMaterial({ color: 0xff69b4, transparent: isTransparent, opacity: opacity });
+      const blush1 = new THREE.Mesh(new THREE.SphereGeometry(0.038, 8, 8), blushMat); blush1.position.set(-0.11, 0.54, -0.17);
+      const blush2 = new THREE.Mesh(new THREE.SphereGeometry(0.038, 8, 8), blushMat); blush2.position.set(0.11, 0.54, -0.17); pGroup.add(blush1, blush2);
+
+      const eyeBlackMat = new THREE.MeshBasicMaterial({ color: 0x111111, transparent: isTransparent, opacity: opacity });
+      const eyeWhiteMat = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: isTransparent, opacity: opacity });
+      const eyeL = new THREE.Mesh(new THREE.SphereGeometry(0.032, 8, 8), eyeBlackMat); eyeL.position.set(-0.07, 0.60, -0.19);
+      const shineL = new THREE.Mesh(new THREE.SphereGeometry(0.012, 6, 6), eyeWhiteMat); shineL.position.set(-0.08, 0.612, -0.21); pGroup.add(eyeL, shineL);
+      const eyeR = new THREE.Mesh(new THREE.SphereGeometry(0.032, 8, 8), eyeBlackMat); eyeR.position.set(0.07, 0.60, -0.19);
+      const shineR = new THREE.Mesh(new THREE.SphereGeometry(0.012, 6, 6), eyeWhiteMat); shineR.position.set(0.06, 0.612, -0.21); pGroup.add(eyeR, shineR);
+
+      const snout = new THREE.Mesh(
+        new THREE.SphereGeometry(0.042, 8, 8),
+        new THREE.MeshStandardMaterial({ color: 0xff8fab, roughness: 0.6, transparent: isTransparent, opacity: opacity })
+      );
+      snout.scale.set(1.2, 0.8, 1); snout.position.set(0, 0.56, -0.21); pGroup.add(snout);
+      const mouth = new THREE.Mesh(
+        new THREE.TorusGeometry(0.03, 0.007, 4, 8, Math.PI),
+        new THREE.MeshBasicMaterial({ color: 0x222222, transparent: isTransparent, opacity: opacity })
+      );
+      mouth.position.set(0, 0.525, -0.21); mouth.rotation.x = -Math.PI * 0.1; pGroup.add(mouth);
+
+      return pGroup;
+    }
+
+    // Audience Stands Plushies
+    const miniAudience = new THREE.Group();
+    const plushColors = [0xff7675, 0x74b9ff, 0xa29bfe, 0xffbe76, 0x55efc4, 0xfd79a8, 0xf6e58d, 0x48dbfb, 0xff9ff3];
+    [5.7, 6.4].forEach((radius, rowIdx) => {
+      const count = rowIdx === 0 ? 14 : 18;
+      for (let i = 0; i < count; i++) {
+        const theta = -Math.PI * 0.65 + (i / (count - 1)) * (Math.PI * 1.30);
+        const col = plushColors[(i + rowIdx * 3) % plushColors.length];
+        const pGroup = createCutePlushie3D(col, false, 1.0);
+        pGroup.position.set(Math.sin(theta) * radius, 0.46 + rowIdx * 0.25, Math.cos(theta) * (radius * 0.95) + 0.8);
+        const yawToStage = Math.atan2(-pGroup.position.x, -2.6 - pGroup.position.z);
+        pGroup.rotation.set(0, yawToStage + Math.PI, 0);
+        pGroup.userData = { initialY: pGroup.position.y, phase: Math.random() * Math.PI * 2 };
+        miniAudience.add(pGroup);
+      }
+    });
+    miniDiorama.add(miniAudience);
+
+    // Host Robot Goody
+    const miniGoody = new THREE.Group();
+    const silverMetalMat = new THREE.MeshStandardMaterial({ color: 0xcccccc, metalness: 0.95, roughness: 0.15 });
+    const gPodium = new THREE.Mesh(new THREE.CylinderGeometry(0.45, 0.55, 0.6, 20), new THREE.MeshStandardMaterial({ color: 0x2b154a })); gPodium.position.y = 0.74; miniGoody.add(gPodium);
+    const podiumTrim = new THREE.Mesh(new THREE.CylinderGeometry(0.46, 0.46, 0.05, 20), silverMetalMat); podiumTrim.position.y = 1.02; miniGoody.add(podiumTrim);
+    const gBody = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.5, 0.4), silverMetalMat); gBody.position.y = 1.34; miniGoody.add(gBody);
+    const gHead = new THREE.Mesh(new THREE.BoxGeometry(0.46, 0.35, 0.35), silverMetalMat); gHead.position.y = 1.82; miniGoody.add(gHead);
+    const gAntennaStem = new THREE.Mesh(new THREE.CylinderGeometry(0.015, 0.015, 0.22, 8), silverMetalMat); gAntennaStem.position.y = 2.08; miniGoody.add(gAntennaStem);
+    const gAntOrb = new THREE.Mesh(new THREE.SphereGeometry(0.05, 8, 8), new THREE.MeshBasicMaterial({ color: 0x39ff14 })); gAntOrb.position.y = 2.20; miniGoody.add(gAntOrb);
+
+    const faceCanvas = document.createElement('canvas'); faceCanvas.width = 128; faceCanvas.height = 128;
+    const fctx = faceCanvas.getContext('2d'); fctx.fillStyle = '#000'; fctx.fillRect(0, 0, 128, 128);
+    const faceTex = new THREE.CanvasTexture(faceCanvas);
+    const gFace = new THREE.Mesh(new THREE.PlaneGeometry(0.35, 0.25), new THREE.MeshBasicMaterial({ map: faceTex }));
+    gFace.position.set(0, 1.82, 0.19); miniGoody.add(gFace);
+    miniGoody.position.set(0, 0, -2.6); miniDiorama.add(miniGoody);
+
+    function renderGoodyFace(time) {
+      fctx.fillStyle = '#030108'; fctx.fillRect(0, 0, 128, 128);
+      gAntOrb.material.color.setHex(isGoodySpeaking ? 0x00f0ff : 0x39ff14);
+      fctx.fillStyle = '#39ff14'; fctx.strokeStyle = '#39ff14'; fctx.lineWidth = 4; fctx.lineCap = 'round'; fctx.lineJoin = 'round';
+      fctx.beginPath(); fctx.moveTo(28, 56); fctx.lineTo(44, 38); fctx.lineTo(60, 56); fctx.stroke();
+      fctx.beginPath(); fctx.moveTo(68, 56); fctx.lineTo(84, 38); fctx.lineTo(100, 56); fctx.stroke();
+
+      if (isGoodySpeaking) {
+        const mouthOpen = (Math.sin(time * 0.022) + 1.0) * 0.5;
+        const mouthHeight = 6 + (mouthOpen * 20); const mouthWidth = 40 + (mouthOpen * 6);
+        fctx.fillStyle = '#220033'; fctx.strokeStyle = '#39ff14'; fctx.lineWidth = 3.5;
+        fctx.beginPath(); fctx.ellipse(64, 88, mouthWidth / 2, mouthHeight / 2, 0, 0, Math.PI * 2); fctx.fill(); fctx.stroke();
+        fctx.fillStyle = '#ffffff'; fctx.fillRect(54, 88 - (mouthHeight / 2) + 2, 20, Math.min(5, mouthHeight / 2));
+      } else {
+        fctx.strokeStyle = '#39ff14'; fctx.lineWidth = 5; fctx.beginPath(); fctx.arc(64, 78, 16, 0.2, Math.PI - 0.2, false); fctx.stroke();
+      }
+      faceTex.needsUpdate = true;
+    }
+
+    // --- DICE DRAWING HELPER ---
+    function drawDiceFace(ctx, x, y, size, value) {
+      ctx.fillStyle = '#ffffff'; ctx.strokeStyle = '#222222'; ctx.lineWidth = 3;
+      ctx.fillRect(x, y, size, size); ctx.strokeRect(x, y, size, size);
+      ctx.fillStyle = '#e74c3c';
+      const dot = (dx, dy) => {
+        ctx.beginPath(); ctx.arc(x + dx * size, y + dy * size, size * 0.08, 0, Math.PI * 2); ctx.fill();
+      };
+      if (value % 2 === 1) dot(0.5, 0.5);
+      if (value > 1) { dot(0.25, 0.25); dot(0.75, 0.75); }
+      if (value > 3) { dot(0.75, 0.25); dot(0.25, 0.75); }
+      if (value === 6) { dot(0.25, 0.5); dot(0.75, 0.5); }
+    }
+
+    // Backstage Screens
+    const studioScreenCanvas = document.createElement('canvas'); studioScreenCanvas.width = 512; studioScreenCanvas.height = 256;
+    const sScreenCtx = studioScreenCanvas.getContext('2d');
+    const studioScreenTex = new THREE.CanvasTexture(studioScreenCanvas);
+   
+    function drawScreenFeed(ctx, x, y, width, height, name, city, isLive, videoElem, isGuy, currentRoll, isRolling) {
+      ctx.fillStyle = '#05020a'; ctx.fillRect(x, y, width, height);
+      ctx.strokeStyle = '#39ff14'; ctx.lineWidth = 3; ctx.strokeRect(x, y, width, height);
+
+      if (isLive && videoElem.readyState >= 2) {
+        ctx.save(); ctx.drawImage(videoElem, x + 2, y + 2, width - 4, height - 4); ctx.restore();
+      } else {
+        ctx.fillStyle = isGuy ? '#1b2a47' : '#3d1b38'; ctx.fillRect(x + 2, y + 2, width - 4, height - 4);
+        const cx = x + width / 2; const cy = y + height * 0.58;
+        ctx.fillStyle = isGuy ? '#4a69bd' : '#e84393'; ctx.beginPath(); ctx.ellipse(cx, cy + 25, 26, 32, 0, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = '#f8c291'; ctx.beginPath(); ctx.arc(cx, cy - 10, 16, 0, Math.PI * 2); ctx.fill();
+      }
+
+      const diceSize = 42;
+      const diceX = x + width - diceSize - 12;
+      const diceY = y + 12;
+
+      if (isRolling) {
+        const animVal = Math.floor((performance.now() / 80) % 6) + 1;
+        drawDiceFace(ctx, diceX, diceY, diceSize, animVal);
+      } else if (currentRoll !== null && currentRoll !== undefined) {
+        drawDiceFace(ctx, diceX, diceY, diceSize, currentRoll);
+      }
+
+      ctx.fillStyle = 'rgba(0,0,0,0.85)'; ctx.fillRect(x, y + height - 26, width, 26);
+      ctx.fillStyle = '#39ff14'; ctx.font = 'bold 11px monospace'; ctx.textAlign = 'center';
+      ctx.fillText(`${isLive ? 'LIVE' : 'CALL'} ${name.toUpperCase()} [${city.toUpperCase()}]`, x + width / 2, y + height - 8);
+    }
+
+    function renderBackstageScreens() {
+      sScreenCtx.fillStyle = '#060210'; sScreenCtx.fillRect(0, 0, 512, 256);
+      drawScreenFeed(sScreenCtx, 15, 20, 225, 215, p1ContestantName, p1ContestantCity, hasLiveJakeStream, videoJake, true, p1RollVal, isDiceRollingP1);
+      drawScreenFeed(sScreenCtx, 272, 20, 225, 215, p2ContestantName, p2ContestantCity, hasLiveJuneStream, videoJune, false, p2RollVal, isDiceRollingP2);
+      studioScreenTex.needsUpdate = true;
+    }
+    const studioBackScreenMesh = new THREE.Mesh(new THREE.PlaneGeometry(6.4, 2.8), new THREE.MeshBasicMaterial({ map: studioScreenTex }));
+    studioBackScreenMesh.position.set(0, 3.4, -4.5); miniDiorama.add(studioBackScreenMesh);
+
+    // Robotic Camera Rigs
+    function createStudioRoboticCamera(x, z) {
+      const camRig = new THREE.Group(); camRig.position.set(x, 0.44, z);
+      const darkMat = new THREE.MeshStandardMaterial({ color: 0x1f1f26 });
+      const basePlate = new THREE.Mesh(new THREE.CylinderGeometry(0.36, 0.42, 0.08, 16), darkMat); basePlate.position.y = 0.04; camRig.add(basePlate);
+      const outerCol = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.13, 0.55, 16), darkMat); outerCol.position.y = 0.35; camRig.add(outerCol);
+      const headPivot = new THREE.Group(); headPivot.position.y = 1.0;
+      const cameraBox = new THREE.Mesh(new THREE.BoxGeometry(0.28, 0.24, 0.42), darkMat); headPivot.add(cameraBox);
+      const lensBarrel = new THREE.Mesh(new THREE.CylinderGeometry(0.085, 0.095, 0.26, 16), new THREE.MeshStandardMaterial({ color: 0x0a0a0a }));
+      lensBarrel.rotation.x = Math.PI / 2; lensBarrel.position.set(0, 0, -0.24); headPivot.add(lensBarrel);
+      const frontGlass = new THREE.Mesh(new THREE.CircleGeometry(0.08, 16), new THREE.MeshBasicMaterial({ color: 0x00f0ff }));
+      frontGlass.position.set(0, 0, -0.431); headPivot.add(frontGlass);
+      const tallyLamp = new THREE.Mesh(new THREE.SphereGeometry(0.035, 8, 8), new THREE.MeshBasicMaterial({ color: 0xff0000 }));
+      tallyLamp.position.set(0, 0.15, -0.28); headPivot.add(tallyLamp);
+      camRig.add(headPivot);
+      return { camRig, headPivot };
+    }
+    const autoCam1 = createStudioRoboticCamera(-2.4, 0.3); miniDiorama.add(autoCam1.camRig);
+    const autoCam2 = createStudioRoboticCamera(2.4, 0.3); miniDiorama.add(autoCam2.camRig);
+
+    function updateCameraAlignment() {
+      if (!gHead) return;
+      const headWorldPos = new THREE.Vector3(); gHead.getWorldPosition(headWorldPos);
+      autoCam1.headPivot.lookAt(headWorldPos); autoCam1.headPivot.rotation.y += Math.PI;
+      autoCam2.headPivot.lookAt(headWorldPos); autoCam2.headPivot.rotation.y += Math.PI;
+    }
+
+    miniDiorama.position.set(0, 7.95, -9);
+    scene.add(miniDiorama);
+    updateCameraAlignment();
+
+    function updateStudioPowerVisuals(isPower) {
+      studioSpot.intensity = isPower ? 5.0 : 1.2;
+    }
+
+    // ==========================================
+    // 4. WHITE STRETCH LIMOUSINE & DOORMAN
+    // ==========================================
+    const limoGroup = new THREE.Group();
+    limoGroup.position.set(-18, 0.4, 8.5);
+
+    const whiteLimoMat = new THREE.MeshStandardMaterial({ color: 0xffffff, metalness: 0.8, roughness: 0.15 });
+    const tintedGlassMat = new THREE.MeshStandardMaterial({ color: 0x050508, roughness: 0.05 });
+    const chromeMat = new THREE.MeshStandardMaterial({ color: 0xecf0f1, metalness: 0.95, roughness: 0.1 });
+
+    const limoBody = new THREE.Mesh(new THREE.BoxGeometry(8.5, 1.4, 2.2), whiteLimoMat);
+    limoBody.position.y = 0.55; limoGroup.add(limoBody);
+
+    const limoCabin = new THREE.Mesh(new THREE.BoxGeometry(5.6, 1.0, 1.95), tintedGlassMat);
+    limoCabin.position.set(-0.4, 1.6, 0); limoGroup.add(limoCabin);
+
+    const chromeTrim = new THREE.Mesh(new THREE.BoxGeometry(8.55, 0.08, 2.22), chromeMat);
+    chromeTrim.position.y = 0.35; limoGroup.add(chromeTrim);
+
+    const headLightL = new THREE.Mesh(new THREE.CircleGeometry(0.18, 12), new THREE.MeshBasicMaterial({ color: 0xfffae6 }));
+    headLightL.rotation.y = Math.PI / 2; headLightL.position.set(4.26, 0.65, 0.7); limoGroup.add(headLightL);
+    const headLightR = new THREE.Mesh(new THREE.CircleGeometry(0.18, 12), new THREE.MeshBasicMaterial({ color: 0xfffae6 }));
+    headLightR.rotation.y = Math.PI / 2; headLightR.position.set(4.26, 0.65, -0.7); limoGroup.add(headLightR);
+
+    // Opening Passenger Door
+    const limoDoorPivot = new THREE.Group();
+    limoDoorPivot.position.set(0.5, 0.55, -1.1);
+    const doorMesh = new THREE.Mesh(new THREE.BoxGeometry(1.2, 1.3, 0.1), whiteLimoMat);
+    doorMesh.position.set(0.6, 0, 0); limoDoorPivot.add(doorMesh);
+    const doorWindow = new THREE.Mesh(new THREE.BoxGeometry(1.0, 0.6, 0.12), tintedGlassMat);
+    doorWindow.position.set(0.6, 0.55, 0); limoDoorPivot.add(doorWindow);
+    limoGroup.add(limoDoorPivot);
+
+    [-3.0, -1.0, 1.0, 3.0].forEach(wx => {
+      const wL = new THREE.Mesh(new THREE.CylinderGeometry(0.42, 0.42, 0.28, 16), chromeMat);
+      wL.rotation.x = Math.PI / 2; wL.position.set(wx, 0.2, 1.15); limoGroup.add(wL);
+      const wR = new THREE.Mesh(new THREE.CylinderGeometry(0.42, 0.42, 0.28, 16), chromeMat);
+      wR.rotation.x = Math.PI / 2; wR.position.set(wx, 0.2, -1.15); limoGroup.add(wR);
+    });
+    scene.add(limoGroup);
+
+    // Uniformed Doorman Staff Plushie
+    const doormanPlushie = createCutePlushie3D(0x2c3e50, true, 1.0);
+    doormanPlushie.position.set(1.5, 0.26, 6.2);
+    doormanPlushie.rotation.y = Math.PI;
+    scene.add(doormanPlushie);
+
+    // Spectator's Personal Plushie (75% Opacity)
+    const myPlushie = createCutePlushie3D(0xff7675, false, 0.75);
+    myPlushie.position.set(0, 0.26, 7.8);
+    myPlushie.visible = false;
+    scene.add(myPlushie);
+
+    let playerPos = { x: 0, y: 0.26, z: 7.8 };
+    let playerYaw = 0;
+    let playerPitch = -0.12;
+
+    // --- 5. ARRIVAL CUTSCENE SEQUENCER ---
+    let cutsceneActive = false;
+    let cutsceneStartTime = 0;
+
+    function startLimoArrivalCutscene() {
+      cutsceneActive = true;
+      cutsceneStartTime = performance.now();
+      lensOverlay.style.display = 'block';
+      camera.position.set(3.8, 1.8, 4.0);
+      camera.lookAt(-10, 1.0, 8.5);
+    }
+
+    function updateCutscene(now) {
+      const elapsed = (now - cutsceneStartTime) / 1000;
+
+      if (elapsed < 3.0) {
+        const t = elapsed / 3.0;
+        limoGroup.position.x = -18 + (18 * Math.sin(t * Math.PI / 2));
+        camera.lookAt(limoGroup.position.x, 1.0, 8.5);
+      } else if (elapsed < 4.5) {
+        const t = (elapsed - 3.0) / 1.5;
+        limoDoorPivot.rotation.y = -t * 1.4;
+        doormanPlushie.position.z = 6.2 + (t * 0.9);
+        doormanPlushie.rotation.y = Math.PI - (t * 0.5);
+        camera.position.set(3.2 - (t * 0.5), 1.6, 4.5);
+        camera.lookAt(0.5, 0.8, 7.5);
+      } else if (elapsed < 6.5) {
+        myPlushie.visible = true;
+        const t = (elapsed - 4.5) / 2.0;
+        myPlushie.position.set(0, 0.26, 8.2 - (t * 1.6));
+        playerPos.z = myPlushie.position.z;
+
+        camera.position.lerp(new THREE.Vector3(playerPos.x, playerPos.y + 0.85, playerPos.z + 1.35), 0.08);
+        camera.lookAt(playerPos.x, playerPos.y + 0.6, playerPos.z - 4.0);
+      } else if (elapsed < 7.2) {
+        const t = (elapsed - 6.5) / 0.7;
+        limoDoorPivot.rotation.y = -1.4 * (1.0 - t);
+      } else {
+        cutsceneActive = false;
+        isSpectatorControlsLocked = false;
+        lensOverlay.style.display = 'none';
+        barTop.style.transform = 'translateY(-100%)';
+        barBottom.style.transform = 'translateY(100%)';
+        spectatorUi.style.display = 'flex';
+      }
+    }
+
+    // ==========================================
+    // 6. PC KEYBOARD (WASD / ARROWS) & ON-SCREEN CONTROLS
+    // ==========================================
+    const keysPressed = {};
+
+    window.addEventListener('keydown', (e) => {
+      if (document.activeElement && (document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'TEXTAREA')) return;
+      keysPressed[e.code] = true;
+    });
+
+    window.addEventListener('keyup', (e) => {
+      keysPressed[e.code] = false;
+    });
+
+    function applyMovementStep(deltaSec) {
+      if (isSpectatorControlsLocked) return;
+
+      let moveFwd = 0;
+      let moveRight = 0;
+
+      if (keysPressed['KeyW'] || keysPressed['ArrowUp']) moveFwd += 1;
+      if (keysPressed['KeyS'] || keysPressed['ArrowDown']) moveFwd -= 1;
+      if (keysPressed['KeyA'] || keysPressed['ArrowLeft']) moveRight -= 1;
+      if (keysPressed['KeyD'] || keysPressed['ArrowRight']) moveRight += 1;
+
+      if (dpadActiveDirs.has('FORWARD')) moveFwd += 1;
+      if (dpadActiveDirs.has('BACK')) moveFwd -= 1;
+      if (dpadActiveDirs.has('LEFT')) moveRight -= 1;
+      if (dpadActiveDirs.has('RIGHT')) moveRight += 1;
+
+      if (moveFwd === 0 && moveRight === 0) return;
+
+      const len = Math.hypot(moveFwd, moveRight);
+      const speed = 4.2;
+      const dist = (speed * deltaSec) / len;
+
+      const fwdX = -Math.sin(playerYaw);
+      const fwdZ = -Math.cos(playerYaw);
+      const rX = Math.cos(playerYaw);
+      const rZ = -Math.sin(playerYaw);
+
+      playerPos.x += (fwdX * moveFwd + rX * moveRight) * dist;
+      playerPos.z += (fwdZ * moveFwd + rZ * moveRight) * dist;
+
+      checkZoneAndElevatorTriggers();
+    }
+
+    const dpadActiveDirs = new Set();
+    function setupDpadButton(btnId, dir) {
+      const el = document.getElementById(btnId);
+      const start = (e) => {
+        unlockAudio();
+        e.preventDefault();
+        dpadActiveDirs.add(dir);
+        el.classList.add('pressed');
+      };
+      const stop = () => {
+        dpadActiveDirs.delete(dir);
+        el.classList.remove('pressed');
+      };
+
+      el.addEventListener('mousedown', start);
+      el.addEventListener('mouseup', stop);
+      el.addEventListener('mouseleave', stop);
+      el.addEventListener('touchstart', start, { passive: false });
+      el.addEventListener('touchend', stop, { passive: false });
+    }
+    setupDpadButton('dpad-fwd', 'FORWARD');
+    setupDpadButton('dpad-back', 'BACK');
+    setupDpadButton('dpad-left', 'LEFT');
+    setupDpadButton('dpad-right', 'RIGHT');
+
+    // ==========================================
+    // 7. INTERACTIVE VISIBLE-CURSOR LOOK PAD
+    // ==========================================
+    const lookPad = document.getElementById('look-pad');
+    const lookPadKnob = document.getElementById('look-pad-knob');
+    let isLooking = false;
+    let lookOriginX = 0;
+    let lookOriginY = 0;
+
+    function handleLookStart(clientX, clientY) {
+      unlockAudio();
+      isLooking = true;
+      lookOriginX = clientX;
+      lookOriginY = clientY;
+    }
+
+    function handleLookMove(clientX, clientY) {
+      if (!isLooking || isSpectatorControlsLocked) return;
+
+      const deltaX = clientX - lookOriginX;
+      const deltaY = clientY - lookOriginY;
+      lookOriginX = clientX;
+      lookOriginY = clientY;
+
+      playerYaw -= deltaX * 0.008;
+      playerPitch = Math.max(-0.6, Math.min(0.5, playerPitch - deltaY * 0.006));
+
+      const maxOffset = 22;
+      const knobX = Math.max(-maxOffset, Math.min(maxOffset, deltaX * 3));
+      const knobY = Math.max(-maxOffset, Math.min(maxOffset, deltaY * 3));
+      lookPadKnob.style.transform = `translate(${knobX}px, ${knobY}px)`;
+    }
+
+    function handleLookEnd() {
+      isLooking = false;
+      lookPadKnob.style.transform = `translate(0px, 0px)`;
+    }
+
+    lookPad.addEventListener('mousedown', (e) => handleLookStart(e.clientX, e.clientY));
+    window.addEventListener('mousemove', (e) => handleLookMove(e.clientX, e.clientY));
+    window.addEventListener('mouseup', handleLookEnd);
+
+    lookPad.addEventListener('touchstart', (e) => {
+      if (e.touches.length > 0) handleLookStart(e.touches[0].clientX, e.touches[0].clientY);
+    }, { passive: true });
+
+    window.addEventListener('touchmove', (e) => {
+      if (isLooking && e.touches.length > 0) handleLookMove(e.touches[0].clientX, e.touches[0].clientY);
+    }, { passive: true });
+
+    window.addEventListener('touchend', handleLookEnd);
+
+    // ==========================================
+    // 8. ZONE & ELEVATOR TRIGGERS
+    // ==========================================
+    function checkZoneAndElevatorTriggers() {
+      if (currentZone === "STREET" && playerPos.z < 4.0) {
+        currentZone = "FOYER"; locationPill.textContent = "LOCATION: GRAND FOYER";
+      } else if (currentZone === "FOYER" && playerPos.z > 4.5) {
+        currentZone = "STREET"; locationPill.textContent = "LOCATION: STREET CURBSIDE";
+      }
+
+      if (currentZone === "FOYER" && playerPos.x > 6.0 && Math.abs(playerPos.z - (-5.0)) < 2.0) {
+        interactionPrompt.style.display = 'block';
+        interactionPrompt.textContent = "🚿 RESTROOM: WASHING & DRYING HANDS...";
+        playTone(380, 'sine', 0.15, 0.03);
+      }
+      else if (currentZone === "FOYER" && playerPos.x < -5.5 && Math.abs(playerPos.z - (-5.0)) < 2.0) {
+        interactionPrompt.style.display = 'block';
+        interactionPrompt.textContent = "🍿 CONCESSIONS: FRESH POPCORN & COLD DRINKS READY!";
+      }
+      else if (currentZone === "FOYER" && Math.abs(playerPos.x) < 1.6 && playerPos.z < -10.5) {
+        interactionPrompt.style.display = 'block';
+        interactionPrompt.textContent = "TAKING LIFT TO STUDIO MEZZANINE...";
+        isSpectatorControlsLocked = true;
+        playTone(523, 'sine', 0.2, 0.04);
+
+        setTimeout(() => {
+          currentZone = "STUDIO"; locationPill.textContent = "LOCATION: LIVE STUDIO TABLE";
+          interactionPrompt.style.display = 'none';
+          playerPos.x = 0; playerPos.y = 8.41; playerPos.z = -4.5; playerYaw = 0;
+          isSpectatorControlsLocked = false;
+          playTone(659, 'sine', 0.2, 0.04);
+        }, 1200);
+      }
+      else if (currentZone === "STUDIO" && playerPos.z > -2.0) {
+        interactionPrompt.style.display = 'block';
+        interactionPrompt.textContent = "TAKING LIFT DOWN TO GRAND FOYER...";
+        isSpectatorControlsLocked = true;
+        playTone(659, 'sine', 0.2, 0.04);
+
+        setTimeout(() => {
+          currentZone = "FOYER"; locationPill.textContent = "LOCATION: GRAND FOYER";
+          interactionPrompt.style.display = 'none';
+          playerPos.x = 0; playerPos.y = 0.26; playerPos.z = -9.0; playerYaw = Math.PI;
+          isSpectatorControlsLocked = false;
+          playTone(523, 'sine', 0.2, 0.04);
+        }, 1200);
+      } else {
+        interactionPrompt.style.display = 'none';
+      }
+    }
+
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth / window.innerHeight; camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+
+    // --- 9. MAIN RENDER LOOP ---
+    let prevFrameTime = performance.now();
+    let prevBroadcastTime = 0;
+
+    function animate() {
+      requestAnimationFrame(animate);
+      const time = performance.now();
+      const deltaSec = Math.min((time - prevFrameTime) / 1000, 0.1);
+      prevFrameTime = time;
+
+      if (cutsceneActive) {
+        updateCutscene(time);
+      } else {
+        applyMovementStep(deltaSec);
+
+        myPlushie.position.set(playerPos.x, playerPos.y, playerPos.z);
+        myPlushie.rotation.y = playerYaw;
+
+        const camDist = 1.35; const camHeight = 0.85;
+        camera.position.set(
+          playerPos.x + Math.sin(playerYaw) * camDist,
+          playerPos.y + camHeight,
+          playerPos.z + Math.cos(playerYaw) * camDist
+        );
+        camera.lookAt(new THREE.Vector3(
+          playerPos.x - Math.sin(playerYaw) * 4.0,
+          playerPos.y + camHeight + playerPitch * 3.0,
+          playerPos.z - Math.cos(playerYaw) * 4.0
+        ));
+
+        if (time - prevBroadcastTime > 160) {
+          prevBroadcastTime = time;
+          broadcastSpectatorMovement();
+        }
+      }
+
+      renderGoodyFace(time);
+      renderBackstageScreens();
+
+      if (pawn1?.userData?.badgeMesh) pawn1.userData.badgeMesh.quaternion.copy(camera.quaternion);
+      if (pawn2?.userData?.badgeMesh) pawn2.userData.badgeMesh.quaternion.copy(camera.quaternion);
+
+      miniAudience.children.forEach((p) => {
+        p.position.y = p.userData.initialY + Math.sin(time * 0.006 + p.userData.phase) * 0.04;
+      });
+
+      renderer.render(scene, camera);
+    }
+    animate();
   </script>
 </body>
 </html>
