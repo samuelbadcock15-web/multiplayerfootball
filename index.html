@@ -17,37 +17,10 @@
       box-shadow: 0 0 8px #00f0ff; transition: transform 0.15s; z-index: 10;
     }
     #crosshair.hover-active { transform: translate(-50%, -50%) scale(2.2); background: #ff69b4; }
-    
-    /* PRODUCER PIN GATE MODAL */
-    #host-auth-gate {
-      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-      background: #06020f; display: flex; flex-direction: column;
-      justify-content: center; align-items: center; z-index: 200;
-    }
-    .auth-box {
-      background: #140727; border: 2.5px solid #00f0ff; border-radius: 18px;
-      padding: 30px 40px; box-shadow: 0 0 40px rgba(0, 240, 255, 0.35);
-      text-align: center; max-width: 380px; width: 90%;
-    }
-    .auth-title { color: #ffda66; font-size: 1.35rem; font-weight: 900; letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 6px; }
-    .auth-sub { color: #ebdcf9; font-size: 0.82rem; margin-bottom: 18px; line-height: 1.4; }
-    #host-pin-input {
-      width: 100%; box-sizing: border-box; padding: 12px; font-size: 2rem;
-      font-family: monospace; font-weight: 900; letter-spacing: 12px; text-align: center;
-      background: #070212; color: #39ff14; border: 2px solid #a29bfe;
-      border-radius: 10px; outline: none; margin-bottom: 16px;
-    }
-    #host-pin-input:focus { border-color: #39ff14; box-shadow: 0 0 12px rgba(57, 255, 20, 0.5); }
-    .btn-unlock-host {
-      width: 100%; padding: 12px; background: linear-gradient(180deg, #00f0ff, #0984e3);
-      border: none; border-radius: 10px; font-size: 1rem; font-weight: 900;
-      color: #06020f; text-transform: uppercase; cursor: pointer; letter-spacing: 1px;
-    }
-    .btn-unlock-host:hover { background: #39ff14; }
 
     #blocker {
       position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(8, 4, 16, 0.94); display: none; flex-direction: column;
+      background: rgba(8, 4, 16, 0.94); display: flex; flex-direction: column;
       justify-content: center; align-items: center; color: #fff; z-index: 100; text-align: center;
       overflow-y: auto; padding: 20px 0;
     }
@@ -103,7 +76,7 @@
       border-color: #a29bfe;
     }
     .btn-producer-choice:hover { background: #9b59b6; }
-    
+   
     #hud {
       position: absolute; top: 18px; left: 20px; background: rgba(22, 9, 44, 0.88);
       border: 2px solid #ff79b0; border-radius: 12px; padding: 12px 18px; color: #fff;
@@ -222,17 +195,9 @@
   </style>
 </head>
 <body>
-  <div id="host-auth-gate">
-    <div class="auth-box">
-      <div class="auth-title">Director Terminal</div>
-      <p class="auth-sub">Enter the Host Master PIN to gain broadcast control rights.</p>
-      <input type="password" id="host-pin-input" maxlength="4" placeholder="••••" inputmode="numeric" pattern="[0-9]*" autocomplete="off" autofocus />
-      <button class="btn-unlock-host" id="btn-submit-pin">Unlock Studio</button>
-    </div>
-  </div>
 
   <div id="crosshair"></div>
-  
+ 
   <div id="hud">
     <div class="hud-title" id="mode-title" style="color: #ffda66;">BEDROOM WORKSHOP</div>
     <div class="hud-sub" id="mode-sub">WebRTC Studio Host: ONLINE • FULL GAME LOOP READY</div>
@@ -252,7 +217,7 @@
     </div>
   </div>
 
-  <div id="blocker">
+  <div id="blocker" style="display: flex;">
     <div id="instructions-card">
       <h1>The Goody Tonight Show</h1>
       <p>Synchronized tiles & 20-minute race to the finish active!</p>
@@ -309,84 +274,14 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/PointerLockControls.js"></script>
   <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
-<script>
-    // Obfuscated Director PIN (7492) with Rate-Limiting Lockout
-    const SECURE_SIG = [135, 132, 137, 130];
-    let isHostAuthorized = false;
-    let failedAttempts = parseInt(sessionStorage.getItem("host_pin_fails") || "0", 10);
-    let lockoutUntil = parseInt(sessionStorage.getItem("host_pin_lockout") || "0", 10);
 
-    const hostAuthGate = document.getElementById('host-auth-gate');
-    const hostPinInput = document.getElementById('host-pin-input');
-    const btnSubmitPin = document.getElementById('btn-submit-pin');
+  <script>
+    let isHostAuthorized = true;
+
     const blockerEl = document.getElementById('blocker');
-
-    function checkLockoutState() {
-      const now = Date.now();
-      if (now < lockoutUntil) {
-        const remainingSecs = Math.ceil((lockoutUntil - now) / 1000);
-        hostPinInput.disabled = true;
-        btnSubmitPin.disabled = true;
-        btnSubmitPin.textContent = `LOCKED (${remainingSecs}s)`;
-        return true;
-      }
-      hostPinInput.disabled = false;
-      btnSubmitPin.disabled = false;
-      btnSubmitPin.textContent = "Unlock Studio";
-      return false;
-    }
-
-    checkLockoutState();
-
-    function checkHostPin() {
-      if (checkLockoutState()) return;
-
-      const entered = hostPinInput.value.trim();
-      if (!entered || entered.length !== 4) {
-        alert("ACCESS DENIED: Enter a 4-digit PIN.");
-        return;
-      }
-
-      const isValid = entered.length === SECURE_SIG.length &&
-        Array.from(entered).every((char, i) => (char.charCodeAt(0) + 80) === SECURE_SIG[i]);
-
-      if (isValid) {
-        sessionStorage.removeItem("host_pin_fails");
-        sessionStorage.removeItem("host_pin_lockout");
-        sessionStorage.setItem("goody_host_authenticated", "true");
-        unlockHostEnvironment();
-      } else {
-        failedAttempts++;
-        sessionStorage.setItem("host_pin_fails", failedAttempts.toString());
-        
-        if (failedAttempts >= 3) {
-          lockoutUntil = Date.now() + (3 * 60 * 1000);
-          sessionStorage.setItem("host_pin_lockout", lockoutUntil.toString());
-          alert("SECURITY ALERT: 3 failed attempts. Terminal locked for 3 minutes.");
-          checkLockoutState();
-          const timer = setInterval(() => {
-            if (!checkLockoutState()) {
-              clearInterval(timer);
-              failedAttempts = 0;
-              sessionStorage.setItem("host_pin_fails", "0");
-            }
-          }, 1000);
-        } else {
-          alert(`ACCESS DENIED: Invalid Director PIN. (${3 - failedAttempts} attempts remaining)`);
-        }
-        hostPinInput.value = "";
-        hostPinInput.focus();
-      }
-    }
-
-    btnSubmitPin.addEventListener('click', checkHostPin);
-    hostPinInput.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') checkHostPin();
-    });
 
     function unlockHostEnvironment() {
       isHostAuthorized = true;
-      hostAuthGate.style.display = 'none';
       blockerEl.style.display = 'flex';
       initAudio();
       initStudioWebRTC();
@@ -394,9 +289,7 @@
     }
 
     window.addEventListener('DOMContentLoaded', () => {
-      if (sessionStorage.getItem("goody_host_authenticated") === "true") {
-        unlockHostEnvironment();
-      }
+      unlockHostEnvironment();
     });
 
     const studioRoomCode = Math.floor(1000 + Math.random() * 9000).toString();
@@ -828,7 +721,7 @@
       renderStageQuestionBoard();
 
       const speech = `Welcome back to The Goody Tonight Show! Unfortunately, we have been unable to find a replacement contestant. But the show must go on! So ${remainingName}, we are placing the power in your hands! You have two choices: You can choose to go it alone as a solo race to see if you can reach tile 32 before the 20-minute timer expires—remember, if time runs out, nobody wins and the prize rolls over! Or, you can choose to go head-to-head with me, Goody! I will take over the board right where your opponent left off! ${remainingName}, make your choice now!`;
-      
+     
       speakGoody(speech, () => {
         connectedDataConns.forEach(c => {
           if (c.open) c.send({ type: "OFFER_CONTESTANT_CHOICE" });
@@ -1641,7 +1534,7 @@
         if (onComplete) onComplete();
         return;
       }
-      
+     
       window.speechSynthesis.cancel();
       goodyUtterance = new SpeechSynthesisUtterance(text);
       goodyUtterance.rate = 0.95;
@@ -1767,7 +1660,7 @@
         }
         hasPlayerRolledThisTurn = true;
         isPawnMoving = true;
-        
+       
         if (diceInterval) clearInterval(diceInterval);
         diceCountdown = 0;
 
@@ -1797,7 +1690,7 @@
         const mins = Math.max(0, Math.floor(matchTimerSeconds / 60)).toString().padStart(2, '0');
         const secs = Math.max(0, (matchTimerSeconds % 60)).toString().padStart(2, '0');
         const timeStr = `${mins}:${secs}`;
-        
+       
         gameClockValEl.textContent = timeStr;
         hostChatClockEl.textContent = timeStr;
         renderWallClockTexture(timeStr);
@@ -1940,7 +1833,7 @@
         const landedCountry = boardTileCoords[currentTileIdx].country;
         const qPool = COUNTRY_QUESTIONS[landedCountry] || COUNTRY_QUESTIONS["UK"];
         const rawQ = qPool[Math.floor(Math.random() * qPool.length)];
-        
+       
         activeQuestion = {
           country: landedCountry,
           text: rawQ.q,
@@ -2585,7 +2478,7 @@
       let fontSize = 48;
       if (cleanName.length > 8) fontSize = 36;
       if (cleanName.length > 12) fontSize = 28;
-      
+     
       ctx.font = `bold ${fontSize}px sans-serif`;
       ctx.fillText(cleanName, w / 2, h / 2 + 2);
 
@@ -3055,7 +2948,7 @@
       ctx.fillStyle = 'rgba(0,0,0,0.85)'; ctx.fillRect(x, y + height - 26, width, 26);
       ctx.fillStyle = isGoodyHostSlot ? '#00f0ff' : (isLive ? '#39ff14' : '#ffda66');
       ctx.font = 'bold 11px monospace'; ctx.textAlign = 'center';
-      
+     
       const tag = isGoodyHostSlot
         ? `[AI HOST: GOODY]`
         : `${isLive ? ' LIVE ' : ' CALL'} ${name.toUpperCase()} [${city.toUpperCase()}]`;
