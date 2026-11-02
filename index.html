@@ -2985,6 +2985,41 @@
     const studioBackScreenMesh = new THREE.Mesh(new THREE.PlaneGeometry(6.4, 2.8), new THREE.MeshBasicMaterial({ map: studioScreenTex }));
     studioBackScreenMesh.position.set(0, 3.4, -4.5); miniDiorama.add(studioBackScreenMesh);
 
+    // ==========================================
+    // ADDED: TWO STAGE PODIUMS IN FRONT OF SCREENS
+    // ==========================================
+    const podiumMat = new THREE.MeshStandardMaterial({ color: 0x1b0933, roughness: 0.4, metalness: 0.3 });
+    const podiumTrimMat = new THREE.MeshStandardMaterial({ color: 0x00f0ff, roughness: 0.2, metalness: 0.8 });
+
+    function createStagePodium(accentColorHex, x, z) {
+      const podGroup = new THREE.Group();
+      // Main pedestal body
+      const body = new THREE.Mesh(new THREE.CylinderGeometry(0.35, 0.42, 0.8, 16), podiumMat);
+      body.position.y = 0.40;
+      podGroup.add(body);
+
+      // Top glowing rim
+      const rim = new THREE.Mesh(new THREE.CylinderGeometry(0.37, 0.37, 0.06, 16), podiumTrimMat);
+      rim.position.y = 0.82;
+      podGroup.add(rim);
+
+      // Colored LED accent band
+      const ledMat = new THREE.MeshBasicMaterial({ color: accentColorHex });
+      const led = new THREE.Mesh(new THREE.CylinderGeometry(0.36, 0.36, 0.04, 16), ledMat);
+      led.position.y = 0.60;
+      podGroup.add(led);
+
+      podGroup.position.set(x, 0, z);
+      return podGroup;
+    }
+
+    // Podium 1 (Left - in front of Contestant 1 screen) & Podium 2 (Right - in front of Contestant 2 screen)
+    const podium1 = createStagePodium(0x0984e3, -1.8, -2.4);
+    const podium2 = createStagePodium(0xd63031, 1.8, -2.4);
+    miniDiorama.add(podium1);
+    miniDiorama.add(podium2);
+    // ==========================================
+
     const miniGoody = new THREE.Group();
     const silverMetalMat = new THREE.MeshStandardMaterial({
       color: 0xcccccc, metalness: 0.95, roughness: 0.15
