@@ -13,7 +13,7 @@
     .portal-box {
       background: #140727; border: 2.5px solid #00f0ff; border-radius: 18px;
       padding: 24px 32px; box-shadow: 0 0 40px rgba(0, 240, 255, 0.35);
-      text-align: center; max-width: 420px; width: 90%;
+      text-align: center; max-width: 420px; width: 90%; z-index: 10;
     }
     h2 { color: #ffda66; margin-top: 0; font-size: 1.4rem; letter-spacing: 1px; }
     p { color: #ebdcf9; font-size: 0.88rem; line-height: 1.4; margin: 8px 0; }
@@ -29,6 +29,7 @@
       color: #06020f; text-transform: uppercase; cursor: pointer; letter-spacing: 1px;
     }
     .btn-join:hover { background: #00f0ff; }
+    
     #live-stage {
       display: none; width: 100%; height: 100%; flex-direction: column; position: relative;
     }
@@ -36,25 +37,74 @@
       flex: 1; background: #000; display: flex; justify-content: center; align-items: center; position: relative;
     }
     video { width: 100%; height: 100%; object-fit: contain; }
+
+    /* HUD TOP BAR */
+    #client-hud {
+      position: absolute; top: 15px; left: 15px; background: rgba(18, 7, 38, 0.85);
+      border: 1.5px solid #ff79b0; border-radius: 10px; padding: 10px 14px;
+      font-family: monospace; font-size: 0.8rem; z-index: 25; pointer-events: none;
+    }
+    #match-clock { color: #00f0ff; font-weight: bold; margin-top: 3px; }
+
+    /* CHAT OVERLAY */
     #chat-overlay {
-      position: absolute; bottom: 10px; left: 10px; width: 320px; height: 180px;
-      background: rgba(10, 3, 20, 0.8); border: 1.5px solid #00f0ff; border-radius: 8px;
+      position: absolute; bottom: 15px; left: 15px; width: 340px; height: 200px;
+      background: rgba(10, 3, 20, 0.85); border: 1.5px solid #00f0ff; border-radius: 10px;
       display: flex; flex-direction: column; backdrop-filter: blur(4px); z-index: 20;
     }
     #chat-messages { flex: 1; overflow-y: auto; padding: 6px; font-size: 0.75rem; display: flex; flex-direction: column; gap: 4px; }
-    #chat-input-row { display: flex; padding: 4px; border-top: 1px solid #331555; }
-    #chat-input { flex: 1; margin: 0; padding: 6px; font-size: 0.75rem; text-align: left; }
-    #btn-send-chat { padding: 6px 12px; background: #00f0ff; border: none; font-weight: bold; cursor: pointer; border-radius: 4px; margin-left: 4px; color: #06020f; }
+    #chat-input-row { display: flex; padding: 4px; border-top: 1px solid #331555; background: #070212; border-bottom-left-radius: 10px; border-bottom-right-radius: 10px; }
+    #chat-input { flex: 1; margin: 0; padding: 6px; font-size: 0.75rem; text-align: left; background: transparent; border: none; color: #fff; outline: none; }
+    #btn-send-chat { padding: 6px 12px; background: #00f0ff; border: none; font-weight: bold; cursor: pointer; border-radius: 4px; margin-left: 4px; color: #06020f; font-size: 0.75rem; }
+    #btn-send-chat:hover { background: #39ff14; }
+
+    /* TRIVIA QUESTION & ACTION OVERLAY */
+    #interaction-overlay {
+      position: absolute; top: 20px; right: 20px; width: 360px;
+      background: rgba(18, 7, 38, 0.95); border: 2.5px solid #ffda66; border-radius: 14px;
+      padding: 16px; color: #fff; display: none; z-index: 30; box-shadow: 0 0 30px rgba(255, 218, 102, 0.3);
+    }
+    .q-title { font-family: monospace; font-size: 0.75rem; color: #ffda66; font-weight: bold; margin-bottom: 6px; display: flex; justify-content: space-between; }
+    .q-text { font-size: 0.9rem; font-weight: bold; margin-bottom: 12px; line-height: 1.4; }
+    .opt-btn {
+      width: 100%; text-align: left; background: #240f45; border: 1.5px solid #a29bfe; color: #fff;
+      padding: 8px 10px; border-radius: 6px; margin-bottom: 6px; cursor: pointer; font-size: 0.82rem;
+    }
+    .opt-btn:hover { background: #6c5ce7; border-color: #ffda66; }
+    .opt-btn.selected-correct { background: #00b894 !important; border-color: #55efc4 !important; }
+    .opt-btn.selected-wrong { background: #d63031 !important; border-color: #ff7675 !important; }
+
+    /* DICE ROLL ACTION PANEL */
+    #action-panel {
+      position: absolute; bottom: 25px; right: 20px; background: rgba(18, 7, 38, 0.92);
+      border: 2px solid #39ff14; border-radius: 12px; padding: 14px 20px; text-align: center;
+      display: none; z-index: 30; font-family: monospace;
+    }
+    .btn-action {
+      background: linear-gradient(180deg, #39ff14, #27ae60); border: none; padding: 10px 20px;
+      font-size: 0.9rem; font-weight: bold; color: #06020f; border-radius: 8px; cursor: pointer; text-transform: uppercase; margin-top: 6px;
+    }
+    .btn-action:hover { background: #00f0ff; }
+
+    /* MIC LIVE PILL */
+    #mic-pill {
+      position: absolute; top: 15px; left: 50%; transform: translateX(-50%);
+      background: rgba(214, 48, 49, 0.9); border: 2px solid #ff7675; color: #fff;
+      padding: 6px 16px; border-radius: 20px; font-family: monospace; font-size: 0.8rem;
+      font-weight: bold; display: none; z-index: 40; box-shadow: 0 0 15px rgba(255, 118, 117, 0.6);
+    }
   </style>
 </head>
 <body>
 
+  <div id="mic-pill">🎙️ MIC LIVE: THINKING OUT LOUD</div>
+
   <div class="portal-box" id="login-portal">
     <h2>The Goody Tonight Show</h2>
     <p>Join the studio audience or step into the hot seat as a contestant!</p>
-    <input type="text" id="input-name" placeholder="Your Name" maxlength="16" />
+    <input type="text" id="input-name" placeholder="Your Name / Handle" maxlength="16" />
     <input type="text" id="input-city" placeholder="Your City" maxlength="16" />
-    <input type="text" id="input-room" placeholder="Studio Room Code (4 digits)" maxlength="4" inputmode="numeric" />
+    <input type="text" id="input-room" placeholder="Studio Room Code (4 digits)" maxlength="4" inputmode="numeric" pattern="[0-9]*" />
     <select id="input-role">
       <option value="AUDIENCE">Join as Studio Audience / Spectator</option>
       <option value="goody-contestant-1">Contestant 1 (Podium 1)</option>
@@ -64,25 +114,45 @@
   </div>
 
   <div id="live-stage">
+    <div id="client-hud">
+      <div id="hud-room">ROOM: ----</div>
+      <div id="match-clock">SHOW CLOCK: 20:00</div>
+    </div>
+
     <div id="video-container">
       <video id="host-video" autoplay playsinline></video>
     </div>
+
     <div id="chat-overlay">
-      <div style="padding: 4px 8px; font-size: 0.7rem; color: #ffda66; font-family: monospace; border-bottom: 1px solid #331555;">LIVE STUDIO CHAT</div>
+      <div style="padding: 4px 8px; font-size: 0.7rem; color: #ffda66; font-family: monospace; border-bottom: 1px solid #331555; display: flex; justify-content: space-between;">
+        <span>LIVE STUDIO CHAT</span>
+        <span style="color:#39ff14;">● ON AIR</span>
+      </div>
       <div id="chat-messages"></div>
       <div id="chat-input-row">
         <input type="text" id="chat-input" placeholder="Say something to the studio..." maxlength="120" />
         <button id="btn-send-chat" onclick="sendChatMessage()">Send</button>
       </div>
     </div>
+
+    <div id="interaction-overlay">
+      <div class="q-title"><span id="q-country-lbl">TRIVIA QUESTION</span></div>
+      <div class="q-text" id="q-text-lbl">Loading question...</div>
+      <div id="q-options-box"></div>
+    </div>
+
+    <div id="action-panel">
+      <div id="action-title" style="color: #ffda66; font-size: 0.85rem; margin-bottom: 6px; font-weight: bold;">YOUR TURN TO ROLL!</div>
+      <button class="btn-action" id="btn-roll-dice" onclick="sendRollRequest()">Roll Dice Now</button>
+    </div>
   </div>
 
   <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
   <script>
-    const sessionToken = 'token_' + Math.random().toString(36).substr(2, 9);
+    const sessionToken = 'token_' + Math.random().toString(36).substring(2, 11);
     let hardwareId = localStorage.getItem('goody_hw_id');
     if (!hardwareId) {
-      hardwareId = 'hw_' + Math.random().toString(36).substr(2, 9);
+      hardwareId = 'hw_' + Math.random().toString(36).substring(2, 11);
       localStorage.setItem('goody_hw_id', hardwareId);
     }
 
@@ -91,13 +161,18 @@
     const hostVideo = document.getElementById('host-video');
     const chatMessages = document.getElementById('chat-messages');
     const chatInput = document.getElementById('chat-input');
+    const interactionOverlay = document.getElementById('interaction-overlay');
+    const actionPanel = document.getElementById('action-panel');
+    const micPill = document.getElementById('mic-pill');
 
     let clientPeer = null;
     let dataConn = null;
     let localStream = null;
+    let assignedSlot = null;
+    let myName = "Guest";
 
     document.getElementById('btn-connect').addEventListener('click', () => {
-      const name = document.getElementById('input-name').value.trim() || "Guest";
+      myName = document.getElementById('input-name').value.trim() || "Guest";
       const city = document.getElementById('input-city').value.trim() || "Earth";
       const roomCode = document.getElementById('input-room').value.trim();
       const role = document.getElementById('input-role').value;
@@ -109,15 +184,17 @@
 
       loginPortal.style.display = 'none';
       liveStage.style.display = 'flex';
+      document.getElementById('hud-room').textContent = `ROOM: ${roomCode}`;
 
       const studioId = "goody-studio-" + roomCode;
+      assignedSlot = role;
       clientPeer = new Peer();
 
-      clientPeer.on('open', (id) => {
+      clientPeer.on('open', () => {
         const metadata = {
           role: role === 'AUDIENCE' ? 'AUDIENCE' : 'CONTESTANT',
           contestant: role,
-          name: name,
+          name: myName,
           city: city,
           passcode: roomCode,
           sessionToken: sessionToken,
@@ -131,22 +208,32 @@
         });
 
         dataConn.on('data', (data) => {
-          if (data.type === 'AUTH_FAILED') {
-            alert("Authentication failed: " + data.message);
-            window.location.reload();
-          }
-          if (data.type === 'SLOT_TAKEN') {
+          if (data.type === 'AUTH_FAILED' || data.type === 'AUTH_SUCCESS') {
+            if (data.type === 'AUTH_FAILED') {
+              alert("Authentication failed: " + data.message);
+              window.location.reload();
+            }
+          } else if (data.type === 'SLOT_TAKEN') {
             alert(`Slot ${data.takenNum} (${data.slotName}) is already occupied! Try joining as Contestant ${data.altNum} (${data.altSlotName}) or as Audience.`);
             window.location.reload();
-          }
-          if (data.type === 'HOST_SPEAK') {
+          } else if (data.type === 'HOST_SPEAK') {
             appendSystemMessage(`[GOODY]: ${data.text}`);
-          }
-          if (data.type === 'AUDIENCE_CHAT_BROADCAST') {
+          } else if (data.type === 'AUDIENCE_CHAT_BROADCAST') {
             appendChatMessage(data.author, data.text);
-          }
-          if (data.type === 'HOST_EJECTED_PLAYER' || data.type === 'HOST_EJECTED_SPECTATOR') {
-            alert(data.message);
+          } else if (data.type === 'SYNC_MATCH_TIMER') {
+            document.getElementById('match-clock').textContent = `SHOW CLOCK: ${data.timeStr}`;
+          } else if (data.type === 'START_DICE_COUNTDOWN' || data.type === 'ENABLE_TURN_ROLL') {
+            actionPanel.style.display = 'block';
+          } else if (data.type === 'SHOW_QUESTION_LOCKED' || data.type === 'UNLOCK_QUESTION_INPUT') {
+            actionPanel.style.display = 'none';
+            presentQuestion(data.question || activeQuestionCache);
+          } else if (data.type === 'EVALUATION_RESULT') {
+            handleEvaluationResult(data);
+          } else if (data.type === 'SET_MIC_STATE') {
+            micPill.style.display = data.enabled ? 'block' : 'none';
+            if (data.promptText) micPill.textContent = data.promptText;
+          } else if (data.type === 'HOST_EJECTED_PLAYER' || data.type === 'HOST_EJECTED_SPECTATOR') {
+            alert(data.message || "You were disconnected by the director.");
             window.location.reload();
           }
         });
@@ -159,7 +246,7 @@
               hostVideo.srcObject = remoteStream;
             });
           }).catch(err => {
-            alert("Camera/Microphone access required for contestants.");
+            alert("Camera and Microphone access are required for contestants.");
             console.error(err);
           });
         } else {
@@ -171,20 +258,74 @@
       });
     });
 
+    let activeQuestionCache = null;
+    function presentQuestion(qObj) {
+      if (!qObj) return;
+      activeQuestionCache = qObj;
+      document.getElementById('q-country-lbl').textContent = (qObj.country || "TRIVIA").toUpperCase() + " QUESTION";
+      document.getElementById('q-text-lbl').textContent = qObj.q;
+
+      const box = document.getElementById('q-options-box');
+      box.innerHTML = "";
+      qObj.options.forEach((opt) => {
+        const btn = document.createElement('button');
+        btn.className = 'opt-btn';
+        btn.textContent = opt;
+        btn.onclick = () => submitAnswer(opt, btn);
+        box.appendChild(btn);
+      });
+      interactionOverlay.style.display = 'block';
+    }
+
+    function submitAnswer(chosenOption, btnElem) {
+      const buttons = document.querySelectorAll('.opt-btn');
+      buttons.forEach(b => b.disabled = true);
+      btnElem.style.background = '#6c5ce7';
+
+      if (dataConn && dataConn.open) {
+        dataConn.send({
+          type: 'PLAYER_ANSWERED',
+          contestant: assignedSlot,
+          chosenAnswer: chosenOption
+        });
+      }
+    }
+
+    function handleEvaluationResult(data) {
+      const buttons = document.querySelectorAll('.opt-btn');
+      buttons.forEach(b => {
+        if (b.textContent === data.chosenAnswer) {
+          b.className = data.isCorrect ? 'opt-btn selected-correct' : 'opt-btn selected-wrong';
+        }
+      });
+      setTimeout(() => {
+        interactionOverlay.style.display = 'none';
+      }, 2200);
+    }
+
+    function sendRollRequest() {
+      actionPanel.style.display = 'none';
+      if (dataConn && dataConn.open) {
+        dataConn.send({
+          type: 'REQUEST_ROLL',
+          contestant: assignedSlot
+        });
+      }
+    }
+
     function sendChatMessage() {
       const text = chatInput.value.trim();
       if (!text || !dataConn || !dataConn.open) return;
 
-      const author = document.getElementById('input-name').value.trim() || "Guest";
       dataConn.send({
         type: 'AUDIENCE_CHAT_MESSAGE',
-        author: author,
+        author: myName,
         text: text,
         sessionToken: sessionToken,
         hardwareId: hardwareId
       });
 
-      appendChatMessage(author, text);
+      appendChatMessage(myName, text);
       chatInput.value = '';
     }
 
