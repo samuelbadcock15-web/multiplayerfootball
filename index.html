@@ -36,7 +36,7 @@
 
     #crosshair.hover-active { transform: translate(-50%, -50%) scale(2.2); background: #ff69b4; }
 
-   
+    
 
     /* PRODUCER PIN GATE MODAL */
 
@@ -208,7 +208,7 @@
 
     .btn-producer-choice:hover { background: #9b59b6; }
 
-   
+    
 
     #hud {
 
@@ -454,7 +454,7 @@
 
       <p class="auth-sub">Enter the Host Master PIN to gain broadcast control rights.</p>
 
-      <input type="password" id="host-pin-input" maxlength="4" placeholder="3776" inputmode="numeric" pattern="[0-9]*" autocomplete="off" autofocus />
+      <input type="password" id="host-pin-input" maxlength="4" placeholder="••••" inputmode="numeric" pattern="[0-9]*" autocomplete="off" autofocus />
 
       <button class="btn-unlock-host" id="btn-submit-pin">Unlock Studio</button>
 
@@ -466,7 +466,7 @@
 
   <div id="crosshair"></div>
 
- 
+  
 
   <div id="hud">
 
@@ -615,12 +615,14 @@
 
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
   <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/PointerLockControls.js"></script>
+
   <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
 
-  <script>
-    // Master Director PIN (3776) with Rate-Limiting Lockout
-    const MASTER_DIRECTOR_PIN = "3776";
+<script>
+    // Obfuscated Director PIN (7492) with Rate-Limiting Lockout
+    const SECURE_SIG = [135, 132, 137, 130];
     let isHostAuthorized = false;
     let failedAttempts = parseInt(sessionStorage.getItem("host_pin_fails") || "0", 10);
     let lockoutUntil = parseInt(sessionStorage.getItem("host_pin_lockout") || "0", 10);
@@ -657,8 +659,9 @@
         return;
       }
 
-      // Direct comparison against your Master PIN
-      const isValid = (entered === MASTER_DIRECTOR_PIN);
+      // Mathematical verification: ASCII + 80
+      const isValid = entered.length === SECURE_SIG.length &&
+        Array.from(entered).every((char, i) => (char.charCodeAt(0) + 80) === SECURE_SIG[i]);
 
       if (isValid) {
         sessionStorage.removeItem("host_pin_fails");
@@ -668,7 +671,7 @@
       } else {
         failedAttempts++;
         sessionStorage.setItem("host_pin_fails", failedAttempts.toString());
-       
+        
         if (failedAttempts >= 3) {
           lockoutUntil = Date.now() + (3 * 60 * 1000);
           sessionStorage.setItem("host_pin_lockout", lockoutUntil.toString());
@@ -1584,7 +1587,7 @@
 
       const speech = `Welcome back to The Goody Tonight Show! Unfortunately, we have been unable to find a replacement contestant. But the show must go on! So ${remainingName}, we are placing the power in your hands! You have two choices: You can choose to go it alone as a solo race to see if you can reach tile 32 before the 20-minute timer expires—remember, if time runs out, nobody wins and the prize rolls over! Or, you can choose to go head-to-head with me, Goody! I will take over the board right where your opponent left off! ${remainingName}, make your choice now!`;
 
-     
+      
 
       speakGoody(speech, () => {
 
@@ -3216,7 +3219,7 @@
 
       }
 
-     
+      
 
       window.speechSynthesis.cancel();
 
@@ -3470,7 +3473,7 @@
 
         isPawnMoving = true;
 
-       
+        
 
         if (diceInterval) clearInterval(diceInterval);
 
@@ -3530,7 +3533,7 @@
 
         const timeStr = `${mins}:${secs}`;
 
-       
+        
 
         gameClockValEl.textContent = timeStr;
 
@@ -3816,7 +3819,7 @@
 
         const rawQ = qPool[Math.floor(Math.random() * qPool.length)];
 
-       
+        
 
         activeQuestion = {
 
@@ -5106,7 +5109,7 @@
 
       if (cleanName.length > 12) fontSize = 28;
 
-     
+      
 
       ctx.font = `bold ${fontSize}px sans-serif`;
 
@@ -6046,7 +6049,7 @@
 
       ctx.font = 'bold 11px monospace'; ctx.textAlign = 'center';
 
-     
+      
 
       const tag = isGoodyHostSlot
 
